@@ -1,532 +1,414 @@
 <meta charset="utf-8">
-<title>Mariners Supply Co.</title>
+<title>Mariners Supply</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
-  /* ============ TOKENS ============ */
+  /* ============ MARINER'S DNA — single committed dark theme (night at the port) ============ */
   :root {
-    /* Hull & Chart palette — grounded in ship's paint, nautical charts, a beacon light */
-    --hull:      #0B222E;   /* deep hull navy — ink */
-    --petrol:    #12384A;   /* ship's paint, secondary dark */
-    --chart:     #E7ECEC;   /* cool nautical chart paper — the ground */
-    --surface:   #FBFCFC;   /* card surface */
-    --surface-2: #F1F5F5;
-    --line:      #CBD6D6;
-    --line-soft: #DDE5E5;
-    --ink:       #0B222E;   /* body text on light */
-    --muted:     #5A6E76;   /* secondary text */
-    --faint:     #86979D;
-    --beacon:    #E7A23A;   /* THE accent — brass / buoy light */
-    --beacon-ink:#9A6C13;   /* accent legible as text on light */
-    --beacon-wash:#FaeFD8;
-    /* Semantic — genuine maritime code: port = red, starboard = green */
-    --port:      #BE3B2C;   /* red — hold / attention */
-    --starboard: #2C8A5B;   /* green — go / confirmed */
-    --port-wash: #F7E1DE;
-    --star-wash: #DCEEE4;
-    --shadow: 0 1px 2px rgba(11,34,46,.06), 0 8px 24px -12px rgba(11,34,46,.22);
+    --night:    #040D1A;   /* bg — exact match to marinersbar.com.br */
+    --night-2:  #071528;
+    --ink:      #EEF4F8;
+    --muted:    #9FB4C8;
+    --faint:    #5F7690;
+    --amber:    #FFB648;   /* neon — used with restraint */
+    --amber-hi: #FFD9A0;
+    --teal:     #2EE6C8;   /* operational status */
+    --wa:       #25D366;   /* WhatsApp CTA only */
+    --line:     rgba(238,244,248,.09);
+    --glass:    rgba(238,244,248,.035);
+    --glass-hi: rgba(238,244,248,.06);
   }
-  @media (prefers-color-scheme: dark) {
-    :root:not([data-theme="light"]) {
-      --hull:      #071820;
-      --petrol:    #0E2E3D;
-      --chart:     #081A22;   /* night at sea */
-      --surface:   #102A36;
-      --surface-2: #0C222C;
-      --line:      #204251;
-      --line-soft: #193643;
-      --ink:       #E6EDEC;
-      --muted:     #9DB2B7;
-      --faint:     #6E868D;
-      --beacon:    #F2B455;
-      --beacon-ink:#F6C877;
-      --beacon-wash:#2A2416;
-      --port:      #E36455;
-      --starboard: #4FB37E;
-      --port-wash: #3A211E;
-      --star-wash: #17342A;
-      --shadow: 0 1px 2px rgba(0,0,0,.3), 0 10px 30px -14px rgba(0,0,0,.6);
-    }
-  }
-  :root[data-theme="dark"] {
-    --hull:      #071820;
-    --petrol:    #0E2E3D;
-    --chart:     #081A22;
-    --surface:   #102A36;
-    --surface-2: #0C222C;
-    --line:      #204251;
-    --line-soft: #193643;
-    --ink:       #E6EDEC;
-    --muted:     #9DB2B7;
-    --faint:     #6E868D;
-    --beacon:    #F2B455;
-    --beacon-ink:#F6C877;
-    --beacon-wash:#2A2416;
-    --port:      #E36455;
-    --starboard: #4FB37E;
-    --port-wash: #3A211E;
-    --star-wash: #17342A;
-    --shadow: 0 1px 2px rgba(0,0,0,.3), 0 10px 30px -14px rgba(0,0,0,.6);
-  }
-
   * { box-sizing: border-box; }
-  html { -webkit-text-size-adjust: 100%; }
+  html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
   body {
-    margin: 0;
-    background: var(--chart);
-    color: var(--ink);
-    font-family: "Avenir Next", "Segoe UI", system-ui, -apple-system, Roboto, sans-serif;
-    font-size: 16px; line-height: 1.6;
-    -webkit-font-smoothing: antialiased;
+    margin: 0; background: var(--night); color: var(--ink);
+    font-family: Inter, system-ui, -apple-system, "Segoe UI", sans-serif;
+    font-size: 16px; line-height: 1.65; -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
   }
-  .wrap { max-width: 1000px; margin: 0 auto; padding: 0 24px; }
-  @media (max-width: 640px){ .wrap { padding: 0 18px; } }
-
+  .disp { font-family: "Bricolage Grotesque", Inter, system-ui, sans-serif; }
   .mono { font-family: ui-monospace, "SF Mono", "Cascadia Code", Menlo, Consolas, monospace; }
-  .disp { font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; }
-
-  h1,h2,h3,h4 { font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; }
+  .wrap { max-width: 1080px; margin: 0 auto; padding: 0 24px; }
+  @media (max-width: 640px){ .wrap { padding: 0 20px; } }
+  a { color: var(--teal); text-decoration: none; }
+  ::selection { background: rgba(255,182,72,.25); }
 
   /* ============ HERO ============ */
-  .hero {
-    position: relative; overflow: hidden;
+  .hero { position: relative; min-height: 88svh; display: flex; flex-direction: column; justify-content: center; overflow: hidden; }
+  .sky {
+    position: absolute; inset: 0; pointer-events: none;
     background:
-      radial-gradient(120% 130% at 88% -10%, rgba(231,162,58,.20), transparent 55%),
-      linear-gradient(180deg, var(--hull), var(--petrol));
-    color: #EAF1F1;
-    border-bottom: 3px solid var(--beacon);
+      radial-gradient(38% 30% at 78% 18%, rgba(255,217,160,.13), transparent 65%),
+      radial-gradient(60% 45% at 20% 110%, rgba(46,230,200,.05), transparent 60%),
+      linear-gradient(180deg, #030A14 0%, var(--night) 55%, #061224 100%);
   }
-  .hero .beam {
-    position: absolute; top: -30%; right: -5%; width: 60%; height: 160%;
-    background: radial-gradient(closest-side, rgba(231,162,58,.28), transparent 70%);
-    filter: blur(6px); pointer-events: none;
-    animation: pulse 6s ease-in-out infinite;
+  .moon {
+    position: absolute; top: 12%; right: 14%; width: 74px; height: 74px; border-radius: 50%;
+    background: radial-gradient(circle at 38% 35%, #FFF6E4, #F4DDB2 58%, #D9BC8C);
+    box-shadow: 0 0 50px 12px rgba(255,224,170,.18), 0 0 140px 50px rgba(255,224,170,.07);
+    pointer-events: none;
   }
-  @keyframes pulse { 0%,100%{ opacity:.55 } 50%{ opacity:1 } }
-  @media (prefers-reduced-motion: reduce){ .hero .beam { animation: none; } }
-  .hero-inner { position: relative; padding: 62px 0 54px; }
-  .eyebrow {
-    font-family: ui-monospace, Menlo, monospace; font-size: 11.5px;
-    letter-spacing: .22em; text-transform: uppercase; color: var(--beacon);
-    margin: 0 0 22px; display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+  @media (max-width: 640px){ .moon { width: 52px; height: 52px; right: 10%; top: 9%; } }
+  /* geometric port skyline — cranes, no fuss */
+  .cranes { position: absolute; left: 0; right: 0; bottom: 0; height: 130px; opacity: .5; pointer-events: none; }
+  .cranes svg { width: 100%; height: 100%; display: block; }
+  .water {
+    position: absolute; left: 0; right: 0; bottom: 0; height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(46,230,200,.35) 30%, rgba(255,182,72,.3) 70%, transparent);
   }
-  .eyebrow::before { content:""; width: 26px; height: 2px; background: var(--beacon); display:inline-block; }
-  .wordmark {
-    font-weight: 800; letter-spacing: .16em; text-transform: uppercase;
-    font-size: clamp(30px, 7vw, 58px); line-height: .98; margin: 0;
-    color: #F4F8F8; text-wrap: balance;
-  }
-  .wordmark .amp { color: var(--beacon); }
-  .tagline {
-    font-family: ui-monospace, Menlo, monospace; font-size: clamp(12px,2.4vw,14px);
-    letter-spacing: .12em; text-transform: uppercase; color: #A9C0C4; margin: 16px 0 0;
-  }
-  .thesis {
-    font-size: clamp(18px, 2.6vw, 22px); line-height: 1.5; max-width: 34em;
-    margin: 26px 0 0; color: #DCE7E7; text-wrap: pretty;
-  }
-  .thesis b { color: #fff; font-weight: 700; }
 
-  .kpiband { background: var(--line); border-top: 1px solid var(--line); }
-  .kpibar {
-    display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px;
-    background: var(--line);
+  .hero-inner { position: relative; padding: 96px 0 150px; }
+  .badge {
+    display: inline-flex; align-items: center; gap: 10px;
+    font-family: ui-monospace, Menlo, monospace; font-size: 11px; letter-spacing: .24em;
+    text-transform: uppercase; color: var(--amber);
+    margin: 0 0 26px;
   }
-  @media (max-width: 720px){ .kpibar { grid-template-columns: repeat(2,1fr);} }
-  .kpi { background: var(--surface); padding: 18px 20px; }
-  .kpi b {
-    display:block; font-family: ui-monospace, Menlo, monospace; font-weight:700;
-    font-size: clamp(20px,3vw,26px); color: var(--ink); font-variant-numeric: tabular-nums;
-    letter-spacing:-.01em;
+  .badge::before { content: ""; width: 28px; height: 1px; background: var(--amber); opacity: .7; }
+  .badge .by { color: var(--faint); letter-spacing: .18em; }
+
+  h1.wordmark {
+    font-family: "Bricolage Grotesque", Inter, sans-serif;
+    font-weight: 800; font-size: clamp(44px, 9vw, 96px); line-height: .96;
+    letter-spacing: .015em; text-transform: uppercase; margin: 0 0 22px; text-wrap: balance;
   }
-  .kpi span { display:block; font-size: 12.5px; color: var(--muted); line-height:1.35; margin-top:5px; }
-  .kpi em { color: var(--beacon-ink); font-style: normal; font-weight:600; }
+  .wordmark .w1 { color: var(--ink); }
+  .wordmark .w2 {
+    color: var(--amber-hi);
+    text-shadow: 0 0 6px rgba(255,182,72,.9), 0 0 18px rgba(255,182,72,.55),
+                 0 0 42px rgba(255,150,40,.4), 0 0 80px rgba(255,150,40,.25);
+  }
+  .tag-en {
+    font-family: "Bricolage Grotesque", Inter, sans-serif; font-weight: 500;
+    font-size: clamp(19px, 3vw, 26px); color: var(--ink); margin: 0 0 8px; letter-spacing: -.01em;
+  }
+  .tag-pt { font-size: clamp(14.5px, 2vw, 16.5px); color: var(--muted); margin: 0 0 34px; max-width: 36em; }
+
+  .cta-row { display: flex; gap: 14px; flex-wrap: wrap; align-items: center; }
+  .btn {
+    font-family: Inter, sans-serif; font-weight: 600; font-size: 15px;
+    border-radius: 999px; padding: 14px 26px; border: 1px solid transparent;
+    cursor: pointer; transition: transform .25s ease, box-shadow .25s ease, background .25s ease;
+    display: inline-flex; align-items: center; gap: 9px;
+  }
+  .btn.wa { background: var(--wa); color: #04240F; }
+  .btn.wa:hover { transform: translateY(-2px); box-shadow: 0 10px 30px -8px rgba(37,211,102,.45); }
+  .btn.ghost { background: transparent; color: var(--ink); border-color: rgba(238,244,248,.22); }
+  .btn.ghost:hover { border-color: var(--amber); color: var(--amber-hi); transform: translateY(-2px); }
+  .btn:focus-visible { outline: 2px solid var(--teal); outline-offset: 3px; }
+
+  .status {
+    display: inline-flex; align-items: center; gap: 9px; margin-top: 34px;
+    font-family: ui-monospace, Menlo, monospace; font-size: 12px; letter-spacing: .14em;
+    text-transform: uppercase; color: var(--teal);
+  }
+  .status .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--teal);
+    box-shadow: 0 0 10px rgba(46,230,200,.8); animation: pulse 2.4s ease-in-out infinite; }
+  @keyframes pulse { 0%,100%{ opacity:1 } 50%{ opacity:.35 } }
+
+  /* hero load choreography */
+  .rise { opacity: 0; transform: translateY(18px); animation: rise .8s cubic-bezier(.2,.7,.2,1) forwards; }
+  .d1{animation-delay:.05s} .d2{animation-delay:.18s} .d3{animation-delay:.32s} .d4{animation-delay:.46s} .d5{animation-delay:.6s}
+  @keyframes rise { to { opacity: 1; transform: none; } }
+  /* neon warms up once — subtle, not a christmas tree */
+  .w2 { animation: neonOn 1.6s ease-out .35s both; }
+  @keyframes neonOn {
+    0% { opacity: .25; text-shadow: none; }
+    58% { opacity: .55; text-shadow: 0 0 4px rgba(255,182,72,.4); }
+    64% { opacity: .3; }
+    72% { opacity: .9; }
+    100% { opacity: 1; }
+  }
+
+  /* ============ ARRIVALS TICKER ============ */
+  .board { border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); background: rgba(238,244,248,.02); overflow: hidden; }
+  .board-track { display: flex; width: max-content; animation: marquee 46s linear infinite; }
+  .board:hover .board-track { animation-play-state: paused; }
+  .board-set { display: flex; align-items: center; white-space: nowrap; padding: 13px 0; }
+  .board-set span {
+    font-family: ui-monospace, Menlo, monospace; font-size: 12.5px; letter-spacing: .1em;
+    text-transform: uppercase; color: var(--muted); font-variant-numeric: tabular-nums;
+  }
+  .board-set b { color: var(--ink); font-weight: 600; }
+  .board-set em { color: var(--amber); font-style: normal; }
+  .board-set .sep { color: var(--faint); margin: 0 26px; }
+  @keyframes marquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }
 
   /* ============ SECTIONS ============ */
-  section { padding: 56px 0; border-bottom: 1px solid var(--line-soft); }
-  section:last-of-type { border-bottom: 0; }
-  .mod {
-    font-family: ui-monospace, Menlo, monospace; font-size: 11.5px; letter-spacing:.18em;
-    text-transform: uppercase; color: var(--beacon-ink); margin: 0 0 10px;
+  section { padding: 92px 0; position: relative; }
+  .kicker {
+    font-family: ui-monospace, Menlo, monospace; font-size: 11px; letter-spacing: .22em;
+    text-transform: uppercase; color: var(--amber); margin: 0 0 14px;
   }
-  h2 { font-size: clamp(22px, 3.4vw, 30px); font-weight: 750; letter-spacing:-.015em;
-       margin: 0 0 8px; line-height:1.12; text-wrap: balance; }
-  .lead { font-size: 17.5px; color: var(--muted); max-width: 44em; margin: 0 0 8px; }
-  p { max-width: 46em; }
-  a { color: var(--beacon-ink); }
-
-  /* positioning callout */
-  .wedge {
-    display: grid; grid-template-columns: 1.2fr .8fr; gap: 22px; margin-top: 26px; align-items:start;
+  h2 {
+    font-family: "Bricolage Grotesque", Inter, sans-serif; font-weight: 700;
+    font-size: clamp(28px, 4.6vw, 44px); line-height: 1.06; letter-spacing: -.01em;
+    margin: 0 0 12px; text-wrap: balance;
   }
-  @media (max-width: 760px){ .wedge { grid-template-columns: 1fr; } }
-  .wedge .card { background: var(--surface); border:1px solid var(--line); border-radius: 12px;
-    padding: 22px 24px; box-shadow: var(--shadow); }
-  .wedge .card p:first-child { margin-top:0; } .wedge .card p:last-child { margin-bottom:0; }
-  .pull { border-left: 3px solid var(--beacon); padding-left: 16px; }
-  .pull b { color: var(--ink); }
+  .lead { color: var(--muted); font-size: 17px; max-width: 40em; margin: 0; }
 
-  /* ============ FEATURE MANIFEST ============ */
-  .manifest { display: grid; gap: 16px; margin-top: 28px; }
-  .feat {
-    background: var(--surface); border: 1px solid var(--line); border-radius: 12px;
-    padding: 22px 24px; box-shadow: var(--shadow); position: relative;
-    display: grid; grid-template-columns: 46px 1fr auto; gap: 18px; align-items: start;
+  /* scroll reveal */
+  .rv { opacity: 0; transform: translateY(26px); transition: opacity .7s ease, transform .7s cubic-bezier(.2,.7,.2,1); }
+  .rv.in { opacity: 1; transform: none; }
+
+  /* ============ SAILOR'S MIND TIMELINE ============ */
+  .mind { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; margin-top: 48px; }
+  @media (max-width: 860px){ .mind { grid-template-columns: 1fr; max-width: 520px; } }
+  .moment {
+    background: var(--glass); border: 1px solid var(--line); border-radius: 18px;
+    padding: 28px 26px; position: relative;
+    transition: transform .3s ease, border-color .3s ease, background .3s ease;
   }
-  @media (max-width: 640px){
-    .feat { grid-template-columns: 1fr; gap: 12px; padding: 20px; }
-    .feat .prio { justify-self: start; }
+  .moment:hover { transform: translateY(-5px); border-color: rgba(255,182,72,.35); background: var(--glass-hi); }
+  .moment .t {
+    font-family: ui-monospace, Menlo, monospace; font-size: 11.5px; letter-spacing: .18em;
+    color: var(--teal); text-transform: uppercase; display: block; margin-bottom: 16px;
   }
-  .feat .code {
-    font-family: ui-monospace, Menlo, monospace; font-weight:700; font-size: 13px;
-    color: var(--beacon-ink); writing-mode: vertical-rl; transform: rotate(180deg);
-    letter-spacing:.1em; align-self:stretch; padding-top:2px;
+  .moment .think {
+    font-family: "Bricolage Grotesque", Inter, sans-serif; font-weight: 500;
+    font-size: 21px; line-height: 1.3; color: var(--ink); margin: 0 0 14px; letter-spacing: -.005em;
   }
-  @media (max-width: 640px){ .feat .code { writing-mode: horizontal-tb; transform:none; } }
-  .feat h3 { margin:0 0 6px; font-size: 19px; font-weight: 700; letter-spacing:-.01em; }
-  .feat h3 .en { color: var(--faint); font-weight:600; font-size: 14px; letter-spacing:.02em; }
-  .feat .what { margin: 0 0 12px; color: var(--ink); font-size: 15.5px; }
-  .why {
-    display:flex; gap:10px; align-items:flex-start; font-size: 14px; color: var(--muted);
-    background: var(--surface-2); border-radius: 8px; padding: 11px 14px; margin: 0;
-    border: 1px solid var(--line-soft);
+  .moment .think::before { content: "“"; color: var(--amber); }
+  .moment .think::after { content: "”"; color: var(--amber); }
+  .moment p { font-size: 14.5px; color: var(--muted); margin: 0; }
+  .moment p b { color: var(--ink); font-weight: 600; }
+
+  /* ============ CATALOG ============ */
+  .cats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-top: 48px; }
+  @media (max-width: 1000px){ .cats { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 560px){ .cats { grid-template-columns: 1fr; } }
+  .cat {
+    background: var(--glass); border: 1px solid var(--line); border-radius: 18px;
+    padding: 26px 24px; display: flex; flex-direction: column; min-height: 240px;
+    transition: transform .3s ease, border-color .3s ease, box-shadow .3s ease;
   }
-  .why .tag {
-    font-family: ui-monospace, Menlo, monospace; font-size: 10.5px; letter-spacing:.1em;
-    text-transform: uppercase; color: var(--beacon-ink); font-weight:700; white-space:nowrap; padding-top:2px;
+  .cat:hover { transform: translateY(-5px); border-color: rgba(255,182,72,.4);
+    box-shadow: 0 18px 44px -18px rgba(255,150,40,.18); }
+  .cat .ico { font-size: 26px; margin-bottom: 16px; filter: saturate(.85); }
+  .cat h3 { font-family: "Bricolage Grotesque", Inter, sans-serif; font-weight: 700;
+    font-size: 19px; margin: 0 0 6px; letter-spacing: -.005em; }
+  .cat .en { font-family: ui-monospace, Menlo, monospace; font-size: 10.5px; letter-spacing: .16em;
+    text-transform: uppercase; color: var(--faint); display: block; margin-bottom: 12px; }
+  .cat p { font-size: 14px; color: var(--muted); margin: 0 0 18px; flex: 1; }
+  .cat .price { font-family: ui-monospace, Menlo, monospace; font-size: 14px; color: var(--amber-hi);
+    font-variant-numeric: tabular-nums; }
+  .cat .price small { color: var(--faint); font-size: 11.5px; margin-left: 6px; }
+  .cat.hero-cat { border-color: rgba(255,182,72,.35); background: linear-gradient(160deg, rgba(255,182,72,.07), var(--glass) 55%); }
+
+  .paylist {
+    margin-top: 34px; display: flex; align-items: center; gap: 18px; flex-wrap: wrap;
+    font-family: ui-monospace, Menlo, monospace; font-size: 12px; letter-spacing: .12em;
+    text-transform: uppercase; color: var(--faint);
   }
-  .why b { color: var(--ink); font-weight:700; }
-  .prio { white-space: nowrap; }
+  .paylist b { color: var(--muted); font-weight: 600; }
+  .paylist .no { color: var(--amber); }
 
-  .chip {
-    display:inline-block; font-family: ui-monospace, Menlo, monospace; font-size: 10.5px; font-weight:700;
-    letter-spacing:.08em; text-transform: uppercase; border-radius: 999px; padding: 4px 11px; border:1px solid transparent;
+  /* ============ TRUST ============ */
+  .trust { display: grid; grid-template-columns: 1.1fr .9fr; gap: 20px; margin-top: 48px; align-items: stretch; }
+  @media (max-width: 860px){ .trust { grid-template-columns: 1fr; } }
+  .panel { background: var(--glass); border: 1px solid var(--line); border-radius: 18px; padding: 30px 30px; }
+  .panel h3 { font-family: "Bricolage Grotesque", Inter, sans-serif; font-weight: 700; font-size: 21px; margin: 0 0 14px; }
+  .steps { margin: 0; padding: 0; list-style: none; counter-reset: s; }
+  .steps li { counter-increment: s; display: flex; gap: 16px; padding: 13px 0; border-bottom: 1px solid var(--line); font-size: 14.5px; color: var(--muted); }
+  .steps li:last-child { border-bottom: 0; }
+  .steps li::before {
+    content: counter(s, decimal-leading-zero);
+    font-family: ui-monospace, Menlo, monospace; font-size: 12px; color: var(--amber);
+    padding-top: 3px; letter-spacing: .05em;
   }
-  .chip.must { background: var(--beacon-wash); color: var(--beacon-ink); border-color: color-mix(in srgb, var(--beacon) 40%, transparent); }
-  .chip.should { background: var(--star-wash); color: var(--starboard); border-color: color-mix(in srgb, var(--starboard) 35%, transparent); }
-  .chip.could { background: var(--surface-2); color: var(--muted); border-color: var(--line); }
+  .steps b { color: var(--ink); font-weight: 600; }
+  .stats { display: grid; gap: 12px; }
+  .stat { background: rgba(238,244,248,.02); border: 1px solid var(--line); border-radius: 14px; padding: 16px 20px;
+    display: flex; align-items: baseline; gap: 16px; }
+  .stat b { font-family: "Bricolage Grotesque", Inter, sans-serif; font-weight: 800; font-size: 30px;
+    color: var(--amber-hi); font-variant-numeric: tabular-nums; min-width: 92px; }
+  .stat span { font-size: 13px; color: var(--muted); line-height: 1.45; }
 
-  /* ============ DESIGN SYSTEM ============ */
-  .ds-block { margin-top: 30px; }
-  .ds-label { font-family: ui-monospace, Menlo, monospace; font-size:11px; letter-spacing:.16em;
-    text-transform:uppercase; color: var(--faint); margin:0 0 14px; }
+  /* ============ FOOTER ============ */
+  footer { border-top: 1px solid var(--line); padding: 52px 0 64px; background: #030A14; }
+  .foot { display: flex; justify-content: space-between; gap: 28px; flex-wrap: wrap; align-items: flex-start; }
+  .foot .brand { font-family: "Bricolage Grotesque", Inter, sans-serif; font-weight: 800; letter-spacing: .04em;
+    text-transform: uppercase; font-size: 19px; }
+  .foot .brand .a { color: var(--amber); }
+  .foot p { font-size: 13px; color: var(--faint); max-width: 34em; margin: 10px 0 0; }
+  .flags { font-size: 17px; letter-spacing: 6px; margin-top: 14px; filter: saturate(.8); }
+  .foot .mono { font-size: 11px; letter-spacing: .16em; text-transform: uppercase; color: var(--faint); }
 
-  .names { display:grid; grid-template-columns: repeat(3,1fr); gap:12px; margin-top: 6px; }
-  @media (max-width:760px){ .names { grid-template-columns:1fr; } }
-  .name {
-    background: var(--surface); border:1px solid var(--line); border-radius:10px; padding:16px 18px;
+  @media (prefers-reduced-motion: reduce) {
+    .rise, .w2 { animation: none; opacity: 1; transform: none; }
+    .board-track { animation: none; }
+    .rv { opacity: 1; transform: none; transition: none; }
+    .status .dot { animation: none; }
+    * { transition: none !important; }
   }
-  .name.lead { border-color: var(--beacon); box-shadow: 0 0 0 1px var(--beacon) inset; }
-  .name .n { font-weight:800; text-transform:uppercase; letter-spacing:.08em; font-size:16px; }
-  .name .tt { font-size:13px; color: var(--muted); margin-top:6px; }
-  .name .badge { font-family:ui-monospace,Menlo,monospace; font-size:10px; letter-spacing:.12em; text-transform:uppercase;
-    color: var(--beacon-ink); }
-
-  .swatches { display:grid; grid-template-columns: repeat(4,1fr); gap:12px; }
-  @media (max-width:760px){ .swatches { grid-template-columns: repeat(2,1fr);} }
-  .sw { border:1px solid var(--line); border-radius:10px; overflow:hidden; background:var(--surface); }
-  .sw .chipclr { height:64px; }
-  .sw .meta { padding:10px 12px; }
-  .sw .meta b { display:block; font-size:13.5px; }
-  .sw .meta code { font-family:ui-monospace,Menlo,monospace; font-size:11.5px; color:var(--muted); }
-  .sw .role { font-size:11.5px; color:var(--faint); margin-top:2px; display:block; }
-
-  .type-spec > div { padding: 8px 0; border-bottom:1px dashed var(--line); }
-  .type-spec .t-display { font-weight:800; text-transform:uppercase; letter-spacing:.14em; font-size:26px; }
-  .type-spec .t-h2 { font-weight:750; font-size:22px; letter-spacing:-.01em; }
-  .type-spec .t-body { font-size:16px; color: var(--ink); }
-  .type-spec .t-mono { font-family:ui-monospace,Menlo,monospace; font-size:14px; color: var(--muted); letter-spacing:.02em; }
-  .type-spec small { font-family:ui-monospace,Menlo,monospace; font-size:10.5px; color:var(--faint); letter-spacing:.1em; text-transform:uppercase; float:right; }
-
-  .components { display:grid; grid-template-columns: 1fr 1fr; gap:16px; }
-  @media (max-width:760px){ .components { grid-template-columns:1fr; } }
-  .demo { background:var(--surface); border:1px solid var(--line); border-radius:12px; padding:20px; box-shadow:var(--shadow); }
-  .demo .ds-label { margin-bottom:14px; }
-
-  .btn { font-family:inherit; font-weight:700; font-size:14px; border-radius:8px; padding:11px 18px; border:1px solid transparent;
-    cursor:pointer; letter-spacing:.01em; }
-  .btn.primary { background: var(--beacon); color: #241802; }
-  .btn.ghost { background: transparent; color: var(--ink); border-color: var(--line); margin-left:8px; }
-  .btn:focus-visible { outline: 3px solid var(--beacon-ink); outline-offset:2px; }
-
-  .pill { display:inline-flex; align-items:center; gap:7px; font-family:ui-monospace,Menlo,monospace; font-size:12px;
-    font-weight:700; padding:5px 11px; border-radius:999px; letter-spacing:.04em; }
-  .pill::before { content:""; width:8px; height:8px; border-radius:50%; }
-  .pill.port { background:var(--port-wash); color:var(--port); } .pill.port::before{ background:var(--port); }
-  .pill.star { background:var(--star-wash); color:var(--starboard); } .pill.star::before{ background:var(--starboard); }
-  .pill.beacon { background:var(--beacon-wash); color:var(--beacon-ink);} .pill.beacon::before{ background:var(--beacon);}
-
-  /* product card demo */
-  .prod { border:1px solid var(--line); border-radius:12px; overflow:hidden; background:var(--surface); max-width: 260px; }
-  .prod .ph { height:120px; background:
-      repeating-linear-gradient(135deg, var(--surface-2), var(--surface-2) 10px, var(--chart) 10px, var(--chart) 20px);
-      display:flex; align-items:center; justify-content:center; color:var(--faint);
-      font-family:ui-monospace,Menlo,monospace; font-size:11px; letter-spacing:.1em; }
-  .prod .body { padding:14px 16px; }
-  .prod .cat { font-family:ui-monospace,Menlo,monospace; font-size:10px; letter-spacing:.14em; text-transform:uppercase; color:var(--beacon-ink); }
-  .prod .nm { font-weight:700; font-size:15px; margin:4px 0 2px; }
-  .prod .pr { font-family:ui-monospace,Menlo,monospace; font-weight:700; font-size:16px; }
-  .prod .pr small { color:var(--muted); font-weight:400; font-size:11px; }
-
-  /* order manifest row demo */
-  .ord { border:1px solid var(--line); border-radius:12px; overflow:hidden; }
-  .ord .row { display:grid; grid-template-columns: auto 1fr auto; gap:12px; align-items:center;
-    padding:12px 14px; border-bottom:1px solid var(--line-soft); font-size:13.5px; }
-  .ord .row:last-child { border-bottom:0; }
-  .ord .row .m { font-family:ui-monospace,Menlo,monospace; color:var(--muted); font-size:12px; }
-  .ord .head { background:var(--surface-2); font-family:ui-monospace,Menlo,monospace; font-size:10.5px;
-    letter-spacing:.12em; text-transform:uppercase; color:var(--faint); }
-
-  /* responsive proof */
-  .bp { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin-top:22px; }
-  @media (max-width:640px){ .bp { grid-template-columns:1fr; } }
-  .bp .b { background:var(--surface); border:1px solid var(--line); border-radius:10px; padding:16px 18px; }
-  .bp .b .mono { color:var(--beacon-ink); font-size:12px; font-weight:700; letter-spacing:.08em; }
-  .bp .b h4 { margin:8px 0 4px; font-size:15px; } .bp .b p { margin:0; font-size:13.5px; color:var(--muted); }
-
-  footer { background: var(--hull); color:#C7D5D6; padding: 40px 0 48px; }
-  footer .wrap { max-width:1000px; }
-  footer h4 { color:#EAF1F1; font-size:13px; letter-spacing:.14em; text-transform:uppercase;
-    font-family:ui-monospace,Menlo,monospace; margin:0 0 12px; }
-  footer ul { margin:0; padding-left:18px; font-size:13px; line-height:1.7; }
-  footer a { color: var(--beacon); }
-  footer .fine { margin-top:20px; font-size:12px; color:#8AA0A3; max-width:60em; }
 </style>
 
+<!-- ============ HERO ============ -->
 <header class="hero">
-  <div class="beam"></div>
-  <div class="wrap hero-inner">
-    <p class="eyebrow">Sistema de produto &amp; marca · v1 · Porto de Santos</p>
-    <h1 class="wordmark">Mariners Supply <span class="amp">Co.</span></h1>
-    <p class="tagline">// Entregue na prancha de embarque · Santos–Guarujá</p>
-    <p class="thesis">A loja do marítimo que <b>não tem tempo de descer</b>. Pedido antes de atracar, entrega na escada do navio, pagamento internacional no cartão. Sem táxi, sem fila, sem sair do convés.</p>
+  <div class="sky"></div>
+  <div class="moon"></div>
+  <div class="cranes" aria-hidden="true">
+    <svg viewBox="0 0 1200 130" preserveAspectRatio="xMidYMax slice" fill="none" stroke="#0E2135" stroke-width="3">
+      <line x1="80" y1="130" x2="80" y2="38"/><line x1="80" y1="38" x2="210" y2="38"/><line x1="120" y1="130" x2="120" y2="38"/><line x1="80" y1="70" x2="120" y2="38"/><line x1="185" y1="38" x2="185" y2="62"/>
+      <line x1="360" y1="130" x2="360" y2="22"/><line x1="360" y1="22" x2="520" y2="22"/><line x1="404" y1="130" x2="404" y2="22"/><line x1="360" y1="60" x2="404" y2="22"/><line x1="488" y1="22" x2="488" y2="52"/>
+      <line x1="700" y1="130" x2="700" y2="44"/><line x1="700" y1="44" x2="830" y2="44"/><line x1="738" y1="130" x2="738" y2="44"/><line x1="700" y1="74" x2="738" y2="44"/><line x1="805" y1="44" x2="805" y2="66"/>
+      <line x1="1000" y1="130" x2="1000" y2="30"/><line x1="1000" y1="30" x2="1150" y2="30"/><line x1="1042" y1="130" x2="1042" y2="30"/><line x1="1000" y1="64" x2="1042" y2="30"/><line x1="1120" y1="30" x2="1120" y2="56"/>
+      <rect x="150" y="108" width="150" height="22" fill="#0A1A2C" stroke="none"/>
+      <rect x="560" y="112" width="120" height="18" fill="#0A1A2C" stroke="none"/>
+      <rect x="860" y="106" width="110" height="24" fill="#0A1A2C" stroke="none"/>
+    </svg>
   </div>
-  <div class="kpiband">
-    <div class="wrap kpibar">
-    <div class="kpi"><b>25%</b><span>dos marítimos ficam o contrato <em>inteiro</em> sem pisar em terra</span></div>
-    <div class="kpi"><b>&lt;3h</b><span>é o tempo em terra de <em>47%</em> dos que conseguem descer</span></div>
-    <div class="kpi"><b>5.708</b><span>escalas em Santos em 2025 — <em>recorde</em> histórico</span></div>
-    <div class="kpi"><b>7,54</b><span>índice de felicidade do marítimo: internet é <em>"life-changing"</em></span></div>
+  <div class="water"></div>
+
+  <div class="wrap hero-inner">
+    <p class="badge rise d1">Paquetá · Porto de Santos <span class="by">— by Mariner's Bar</span></p>
+    <h1 class="wordmark rise d2"><span class="w1">Mariners</span> <span class="w2">Supply</span></h1>
+    <p class="tag-en rise d3">Ordered at sea. Delivered at the gangway.</p>
+    <p class="tag-pt rise d3">Você não tem tempo de descer — a gente sabe. Peça 3 dias antes de atracar e receba na escada do navio, com pagamento no cartão internacional.</p>
+    <div class="cta-row rise d4">
+      <button class="btn wa">Order on WhatsApp</button>
+      <button class="btn ghost">See the catalog ↓</button>
     </div>
+    <p class="status rise d5"><span class="dot"></span> Taking orders — next window · berth 39 · tomorrow 14:20</p>
   </div>
 </header>
 
+<!-- ============ ARRIVALS BOARD ============ -->
+<div class="board" aria-label="Próximas atracações">
+  <div class="board-track">
+    <div class="board-set">
+      <span><b>MSC LORENA</b> · ETA AUG 21 · 14:20 · BERTH 39 · <em>orders close in 26h</em><i class="sep">⚓</i></span>
+      <span><b>CMA CGM MELODY</b> · ETA AUG 23 · 08:00 · BERTH 33 · <em>orders open</em><i class="sep">⚓</i></span>
+      <span><b>MAERSK LOTA</b> · ETA AUG 24 · 19:40 · BERTH 37 · <em>orders open</em><i class="sep">⚓</i></span>
+      <span><b>NYK CONSTELLATION</b> · ETA AUG 25 · 06:10 · BERTH 35 · <em>orders open</em><i class="sep">⚓</i></span>
+    </div>
+    <div class="board-set" aria-hidden="true">
+      <span><b>MSC LORENA</b> · ETA AUG 21 · 14:20 · BERTH 39 · <em>orders close in 26h</em><i class="sep">⚓</i></span>
+      <span><b>CMA CGM MELODY</b> · ETA AUG 23 · 08:00 · BERTH 33 · <em>orders open</em><i class="sep">⚓</i></span>
+      <span><b>MAERSK LOTA</b> · ETA AUG 24 · 19:40 · BERTH 37 · <em>orders open</em><i class="sep">⚓</i></span>
+      <span><b>NYK CONSTELLATION</b> · ETA AUG 25 · 06:10 · BERTH 35 · <em>orders open</em><i class="sep">⚓</i></span>
+    </div>
+  </div>
+</div>
+
 <main>
-<section><div class="wrap">
-  <p class="mod">Mod 01 — Posicionamento</p>
-  <h2>Uma dor real, não um luxo</h2>
-  <p class="lead">O modelo de referência (Sunny, na Europa) prova que existe negócio em vender conveniência a tripulações. Mas o "porquê" não é preguiça do marítimo — é estrutural.</p>
-  <div class="wedge">
-    <div class="card">
-      <p class="pull"><b>A tripulação encolheu, as escalas encurtaram e o terminal fica longe de tudo.</b> O resultado é medido: um em cada quatro marítimos passa o contrato inteiro (média de 6,6 meses) sem nenhum desembarque, e a principal razão citada é <b>falta de tempo no porto (65%)</b>.</p>
-      <p>Quando a pessoa não pode ir até a loja, a loja vai até ela. Esse é o negócio inteiro em uma frase — e é o que a Sunny faz legalmente na Bélgica, Alemanha e Holanda.</p>
-    </div>
-    <div class="card">
-      <p class="ds-label" style="margin-bottom:10px">Nosso ativo injusto</p>
-      <p style="margin-top:0;font-size:15px">O <b>Mariners Bar</b> já é ponto de encontro e confiança das tripulações em Santos. Isso é canal de aquisição e reputação que nenhum ship chandler tradicional tem — eles falam com o navio (B2B); nós falamos com o <b>marinheiro</b> (B2C).</p>
+<!-- ============ SAILOR'S MIND ============ -->
+<section>
+  <div class="wrap">
+    <p class="kicker rv">Inside the sailor's mind · A mente do marinheiro</p>
+    <h2 class="rv">Três momentos. A gente aparece no segundo.</h2>
+    <p class="lead rv">O design inteiro segue a cabeça de quem está a bordo — não a nossa.</p>
+    <div class="mind">
+      <article class="moment rv">
+        <span class="t">T−3 days · at sea</span>
+        <p class="think">Three days to Santos. Short call again — no time ashore.</p>
+        <p>Ele abre o WhatsApp, monta o pedido em 5 minutos e paga <b>30% no cartão</b>. O pedido fica vinculado ao ETA do navio.</p>
+      </article>
+      <article class="moment rv">
+        <span class="t">T−0 · docking, berth 39</span>
+        <p class="think">Lines fast at 14:20. Someone's waiting at the gangway.</p>
+        <p>Nossa entrega já está na prancha quando o navio atraca: <b>foto de entrega</b>, saldo no cartão, zero dinheiro vivo. Ele não desce.</p>
+      </article>
+      <article class="moment rv">
+        <span class="t">T+30 min · on board</span>
+        <p class="think">Calling home.</p>
+        <p>O eSIM ativou sozinho ao atracar. A primeira coisa que todo marítimo faz no porto é <b>falar com a família</b> — e é a primeira coisa que a gente resolve.</p>
+      </article>
     </div>
   </div>
-</div></section>
+</section>
 
-<section><div class="wrap">
-  <p class="mod">Mod 02 — Features do MVP (v1)</p>
-  <h2>As primeiras features, na ordem certa</h2>
-  <p class="lead">Cada uma resolve uma dor documentada. A prioridade segue MoSCoW: <span class="chip must">Must</span> lança agora, <span class="chip should">Should</span> vem logo em seguida, <span class="chip could">Could</span> é fase 1.5.</p>
-
-  <div class="manifest">
-
-    <article class="feat">
-      <div class="code">SIM · 01</div>
-      <div>
-        <h3>Conectividade primeiro <span class="en">/ eSIM &amp; recarga de dados</span></h3>
-        <p class="what">Chip/eSIM Brasil e recarga de dados entregues <b>digitalmente</b> no instante em que o navio atraca. É o primeiro gesto de todo marítimo ao chegar: falar com a família.</p>
-        <p class="why"><span class="tag">Por quê</span><span>No Índice de Felicidade do Marítimo (Q2 2025, nota 7,54), o acesso à internet é descrito como <b>"life-changing"</b> — o principal fator para manter vínculo familiar e saúde mental. Margem alta, logística zero, e é a <b>isca de aquisição</b> perfeita.</span></p>
-      </div>
-      <div class="prio"><span class="chip must">Must</span></div>
-    </article>
-
-    <article class="feat">
-      <div class="code">ETA · 02</div>
-      <div>
-        <h3>Pedido casado com a chegada <span class="en">/ pre-order by ETA</span></h3>
-        <p class="what">O marítimo monta o carrinho e vincula ao ETA do navio. O pedido fica <b>pronto na atracação</b> — com 3 dias de antecedência e 30% de entrada, como no plano original.</p>
-        <p class="why"><span class="tag">Por quê</span><span>A janela é brutal: <b>47%</b> de quem desce fica menos de 3h em terra, e "falta de tempo no porto" é a barreira nº 1. Se não estiver pronto no momento exato da escala, a venda não acontece. O prazo de 3 dias ainda cobre as <b>48h</b> que o procedimento aduaneiro formal exige.</span></p>
-      </div>
-      <div class="prio"><span class="chip must">Must</span></div>
-    </article>
-
-    <article class="feat">
-      <div class="code">GWY · 03</div>
-      <div>
-        <h3>Entrega na prancha, não na cidade <span class="en">/ gangway delivery</span></h3>
-        <p class="what">A entrega é na escada de embarque (ou ao agente marítimo). O cliente <b>não precisa sair do navio</b> — que é justamente o que ele não consegue fazer.</p>
-        <p class="why"><span class="tag">Por quê</span><span>Falta de shore leave é a preocupação <b>nº 1</b> dos marítimos e o índice de desembarque despencou desde a pandemia. Entregar a bordo elimina a necessidade que a tripulação não consegue satisfazer. É o núcleo da proposta de valor.</span></p>
-      </div>
-      <div class="prio"><span class="chip must">Must</span></div>
-    </article>
-
-    <article class="feat">
-      <div class="code">PAY · 04</div>
-      <div>
-        <h3>Pagamento internacional sem dinheiro vivo <span class="en">/ card &amp; link</span></h3>
-        <p class="what">Preço de referência em USD, cobrança em cartão internacional (Visa/Mastercard), link de pagamento ou PIX. <b>Zero dólar em espécie, zero câmbio próprio.</b></p>
-        <p class="why"><span class="tag">Por quê</span><span>A Sunny aceita Visa, Mastercard, PayPal, Apple/Google Pay. A tripulação recebe em USD e não tem tempo de sacar. E, juridicamente, câmbio próprio é crime (Lei 7.492/86) — a bandeira do cartão faz a conversão de forma <b>legal</b> e a margem vem do produto.</span></p>
-      </div>
-      <div class="prio"><span class="chip must">Must</span></div>
-    </article>
-
-    <article class="feat">
-      <div class="code">LNG · 05</div>
-      <div>
-        <h3>Inglês primeiro, tripulação multinacional <span class="en">/ crew-native UX</span></h3>
-        <p class="what">Interface em <b>inglês</b> (língua franca de bordo), com filipino, hindi, chinês e português. Categorias e ícones pensados para quem não fala português.</p>
-        <p class="why"><span class="tag">Por quê</span><span>A força de trabalho global é dominada por tripulantes filipinos, chineses, indianos e indonésios. Um app só em português exclui o cliente. Inglês-primeiro não é enfeite: é requisito de conversão.</span></p>
-      </div>
-      <div class="prio"><span class="chip should">Should</span></div>
-    </article>
-
-    <article class="feat">
-      <div class="code">MSG · 06</div>
-      <div>
-        <h3>Pedido nativo em WhatsApp <span class="en">/ chat-first ordering</span></h3>
-        <p class="what">Catálogo e pedido via WhatsApp Business, com link de pagamento no chat. Permite <b>lançar o MVP sem app</b> e funciona em conexão fraca.</p>
-        <p class="why"><span class="tag">Por quê</span><span>É como as tripulações já se comunicam, roda em qualquer sinal e derruba a fricção do primeiro pedido. Valida demanda e recompra <b>antes</b> de investir em app nativo — o caminho enxuto para o piloto.</span></p>
-      </div>
-      <div class="prio"><span class="chip should">Should</span></div>
-    </article>
-
-    <article class="feat">
-      <div class="code">TRK · 07</div>
-      <div>
-        <h3>Status &amp; comprovante de entrega <span class="en">/ proof of delivery</span></h3>
-        <p class="what">Rastreio do pedido (recebido → separado → a caminho → entregue) com <b>foto na prancha</b>. Fecha a confiança de quem pagou 30% adiantado.</p>
-        <p class="why"><span class="tag">Por quê</span><span>Pagamento antecipado exige prova. Confirmação e foto de entrega reduzem disputa, sustentam o modelo de entrada e viram base para reputação e recompra.</span></p>
-      </div>
-      <div class="prio"><span class="chip could">Could</span></div>
-    </article>
-
-    <article class="feat">
-      <div class="code">CRW · 08</div>
-      <div>
-        <h3>Pedido coletivo por navio <span class="en">/ group order</span></h3>
-        <p class="what">Um tripulante consolida o pedido da tripulação inteira numa entrega só. <b>Ticket maior</b>, mesma logística.</p>
-        <p class="why"><span class="tag">Por quê</span><span>Provisão a bordo já funciona de forma coletiva. Um pedido por navio multiplica o ticket sem multiplicar entregas e alavanca o boca-a-boca dentro da mesma armadora.</span></p>
-      </div>
-      <div class="prio"><span class="chip could">Could</span></div>
-    </article>
-
+<!-- ============ CATALOG ============ -->
+<section style="padding-top: 20px;">
+  <div class="wrap">
+    <p class="kicker rv">The catalog · O catálogo</p>
+    <h2 class="rv">O essencial de bordo, sem sair do convés</h2>
+    <div class="cats">
+      <article class="cat hero-cat rv">
+        <div class="ico">📶</div>
+        <h3>Conectividade</h3>
+        <span class="en">Connectivity — first</span>
+        <p>eSIM Brasil ativado na atracação. 20 GB para ligar pra casa antes mesmo da amarração terminar.</p>
+        <span class="price">USD 18.00 <small>eSIM 20 GB · 30 days</small></span>
+      </article>
+      <article class="cat rv">
+        <div class="ico">🍫</div>
+        <h3>Conforto & Snacks</h3>
+        <span class="en">Comfort food</span>
+        <p>Chocolate, café, snacks, bebidas — o kit que faz a próxima perna de viagem passar mais rápido.</p>
+        <span class="price">USD 25–60 <small>per kit</small></span>
+      </article>
+      <article class="cat rv">
+        <div class="ico">🧴</div>
+        <h3>Cuidado pessoal</h3>
+        <span class="en">Personal care</span>
+        <p>Higiene, farmácia básica de bordo e aquilo que acabou no meio do Atlântico.</p>
+        <span class="price">USD 15–40 <small>per kit</small></span>
+      </article>
+      <article class="cat rv">
+        <div class="ico">🎧</div>
+        <h3>Eletrônicos</h3>
+        <span class="en">On request</span>
+        <p>Fones, caixas de som, carregadores — sob encomenda, com preço fechado antes de atracar.</p>
+        <span class="price">On quote <small>order 3 days ahead</small></span>
+      </article>
+    </div>
+    <p class="paylist rv"><b>Visa</b> · <b>Mastercard</b> · <b>Apple Pay</b> · <b>PIX</b> — <span class="no">no cash needed</span> · prices in USD, charged in BRL by your card</p>
   </div>
-</div></section>
+</section>
 
-<section><div class="wrap">
-  <p class="mod">Mod 03 — Design System</p>
-  <h2>Identidade de porto, não de startup genérica</h2>
-  <p class="lead">Tudo vem do mundo do porto: casco de navio, papel de carta náutica, e uma luz de baliza (o farol/boia) como único acento. Dado operacional — ETA, berço, preço — sempre em monoespaçada, como num diário de bordo.</p>
-
-  <!-- NAME -->
-  <div class="ds-block">
-    <p class="ds-label">Nome — âncora em "Mariners" (o bar)</p>
-    <div class="names">
-      <div class="name lead">
-        <span class="badge">Recomendado</span>
-        <div class="n">Mariners Supply Co.</div>
-        <div class="tt">"Supply" evoca o ship chandler clássico e o ato de provisionar. Funciona em inglês (a tripulação) e no Brasil.</div>
+<!-- ============ TRUST ============ -->
+<section style="padding-top: 20px;">
+  <div class="wrap">
+    <p class="kicker rv">How it works · Como funciona</p>
+    <h2 class="rv">Simples como pedir uma cerveja no Mariner's</h2>
+    <div class="trust">
+      <div class="panel rv">
+        <h3>Do mar até a prancha</h3>
+        <ol class="steps">
+          <li><span><b>Order at sea</b> — catálogo no WhatsApp, 3 dias antes do ETA. 30% de entrada no cartão.</span></li>
+          <li><span><b>We shop & pack</b> — compramos, separamos e casamos tudo com a janela de atracação.</span></li>
+          <li><span><b>Gangway delivery</b> — entrega na escada com foto-comprovante. Saldo no cartão na hora.</span></li>
+          <li><span><b>Sail on</b> — se o navio desviar, o valor vira crédito para a próxima escala. Sem burocracia.</span></li>
+        </ol>
       </div>
-      <div class="name">
-        <span class="badge">Alt. A</span>
-        <div class="n">Gangway by Mariners</div>
-        <div class="tt">Foca no diferencial: entrega na prancha. Mais moderno, menos "loja".</div>
-      </div>
-      <div class="name">
-        <span class="badge">Alt. B</span>
-        <div class="n">Mariners Provisions</div>
-        <div class="tt">Mais próximo do vocabulário marítimo de "provisões de bordo".</div>
+      <div class="stats rv">
+        <div class="stat"><b>25%</b><span>dos marítimos passam o contrato inteiro sem pisar em terra — a loja precisa ir até o navio</span></div>
+        <div class="stat"><b>&lt;3h</b><span>é o tempo em terra de quase metade dos que descem. Ninguém gasta isso em fila de loja</span></div>
+        <div class="stat"><b>5.708</b><span>escalas em Santos em 2025 — uma nova tripulação chegando a cada 90 minutos</span></div>
       </div>
     </div>
   </div>
-
-  <!-- COLOR -->
-  <div class="ds-block">
-    <p class="ds-label">Paleta — "Hull &amp; Chart"</p>
-    <div class="swatches">
-      <div class="sw"><div class="chipclr" style="background:#0B222E"></div><div class="meta"><b>Hull</b><code>#0B222E</code><span class="role">Casco / tinta / texto</span></div></div>
-      <div class="sw"><div class="chipclr" style="background:#12384A"></div><div class="meta"><b>Petrol</b><code>#12384A</code><span class="role">Superfície escura</span></div></div>
-      <div class="sw"><div class="chipclr" style="background:#E7ECEC;border-bottom:1px solid #CBD6D6"></div><div class="meta"><b>Chart</b><code>#E7ECEC</code><span class="role">Fundo / carta náutica</span></div></div>
-      <div class="sw"><div class="chipclr" style="background:#E7A23A"></div><div class="meta"><b>Beacon</b><code>#E7A23A</code><span class="role">Acento único / baliza</span></div></div>
-      <div class="sw"><div class="chipclr" style="background:#BE3B2C"></div><div class="meta"><b>Port</b><code>#BE3B2C</code><span class="role">Bombordo — atenção</span></div></div>
-      <div class="sw"><div class="chipclr" style="background:#2C8A5B"></div><div class="meta"><b>Starboard</b><code>#2C8A5B</code><span class="role">Boreste — confirmado</span></div></div>
-      <div class="sw"><div class="chipclr" style="background:#5A6E76"></div><div class="meta"><b>Muted</b><code>#5A6E76</code><span class="role">Texto secundário</span></div></div>
-      <div class="sw"><div class="chipclr" style="background:#FBFCFC;border-bottom:1px solid #CBD6D6"></div><div class="meta"><b>Surface</b><code>#FBFCFC</code><span class="role">Cartões</span></div></div>
-    </div>
-    <p style="font-size:13.5px;color:var(--muted);margin-top:14px">Vermelho e verde não são decorativos: seguem o código náutico real (<b style="color:var(--port)">bombordo = vermelho</b>, <b style="color:var(--starboard)">boreste = verde</b>) e só aparecem em <em>status</em>. O acento da marca é um só — a luz âmbar da baliza.</p>
-  </div>
-
-  <!-- TYPE -->
-  <div class="ds-block">
-    <p class="ds-label">Tipografia — 3 papéis</p>
-    <div class="type-spec">
-      <div><span class="t-display">Mariners Supply Co.</span><small>Display · 800 · uppercase · +tracking</small></div>
-      <div><span class="t-h2">Entrega na prancha de embarque</span><small>Título · 750</small></div>
-      <div><span class="t-body">Corpo de texto humanista, legível em telas pequenas e sob luz do convés.</span><small>Corpo · 400</small></div>
-      <div><span class="t-mono">ETA 14:20 · BERÇO 39 · USD 84.00 · #MSC-2291</span><small>Mono · dado de bordo</small></div>
-    </div>
-  </div>
-
-  <!-- COMPONENTS -->
-  <div class="ds-block">
-    <p class="ds-label">Componentes</p>
-    <div class="components">
-      <div class="demo">
-        <p class="ds-label">Botões &amp; status</p>
-        <button class="btn primary">Fazer pedido</button><button class="btn ghost">Ver catálogo</button>
-        <div style="margin-top:16px;display:flex;gap:8px;flex-wrap:wrap">
-          <span class="pill beacon">Aguardando ETA</span>
-          <span class="pill port">Pagamento pendente</span>
-          <span class="pill star">Entregue a bordo</span>
-        </div>
-      </div>
-      <div class="demo">
-        <p class="ds-label">Card de produto</p>
-        <div class="prod">
-          <div class="ph">PRODUTO</div>
-          <div class="body">
-            <div class="cat">Conectividade</div>
-            <div class="nm">eSIM Brasil · 20 GB / 30 dias</div>
-            <div class="pr">USD 18.00 <small>≈ R$ 95</small></div>
-          </div>
-        </div>
-      </div>
-      <div class="demo" style="grid-column:1/-1">
-        <p class="ds-label">Linha de manifesto — pedido</p>
-        <div class="ord">
-          <div class="row head"><span>Item</span><span>Navio · ETA</span><span>Status</span></div>
-          <div class="row"><span>eSIM 20GB + Snacks</span><span class="m">MSC LORENA · ETA 21 ago 14:20 · Berço 39</span><span class="pill star">A bordo</span></div>
-          <div class="row"><span>Fones JBL · encomenda</span><span class="m">CMA MELODY · ETA 23 ago 08:00 · Berço 33</span><span class="pill beacon">Separando</span></div>
-          <div class="row"><span>Kit higiene ×12</span><span class="m">EVER GIVEN · ETA 24 ago 19:40 · Berço 37</span><span class="pill port">Pgto. 70% pendente</span></div>
-        </div>
-      </div>
-    </div>
-  </div>
-</div></section>
-
-<section><div class="wrap">
-  <p class="mod">Mod 04 — Responsividade</p>
-  <h2>Uma tela, três contextos</h2>
-  <p class="lead">O marítimo pede pelo celular em conexão fraca; a operação em Santos gerencia por tablet ou web. O layout foi construído mobile-first e testado nos três.</p>
-  <div class="bp">
-    <div class="b"><span class="mono">≤ 640px · Mobile</span><h4>O cliente</h4><p>Coluna única, alvos de toque ≥ 44px, dado de bordo empilhado. É onde 90% dos pedidos nascem.</p></div>
-    <div class="b"><span class="mono">641–1024px · iPad</span><h4>A operação a bordo/porto</h4><p>Grades de 2 colunas, manifesto em cartões. Uso do agente na prancha e no galpão.</p></div>
-    <div class="b"><span class="mono">≥ 1025px · Web</span><h4>O back-office</h4><p>Layout de 1000px, tabelas de manifesto, visão de ETAs e recompra por armadora.</p></div>
-  </div>
-</div></section>
+</section>
 </main>
 
-<footer><div class="wrap">
-  <h4>Fontes que fundamentam as features</h4>
-  <ul>
-    <li><a href="https://www.missiontoseafarers.org/news/11918">Seafarers Happiness Index 2025</a> (Mission to Seafarers) — conectividade "life-changing"; shore leave é a preocupação nº 1.</li>
-    <li><a href="https://maritime-executive.com/article/study-seafarers-access-to-shore-leave-consistently-declined-since-pandemic">World Maritime University / ITF (2024)</a> — 25% sem desembarque no contrato; 47% ficam &lt;3h em terra; falta de tempo no porto = 65%.</li>
-    <li><a href="https://www.portodesantos.com.br/2026/01/15/porto-de-santos-confirma-recorde-anual-e-fecha-2025-com-1864-milhoes-de-toneladas-movimentadas/">Autoridade Portuária de Santos</a> — 5.708 escalas em 2025.</li>
-    <li>shop.sunny.eu — modelo de referência (e-commerce duty-free para marítimos, entrega a bordo, pagamento por cartão).</li>
-  </ul>
-  <p class="fine">Documento de trabalho — sistema de produto e marca v1. As decisões legais (marca "duty free", câmbio, acesso à zona primária) seguem a análise de viabilidade anterior: operar 100% formal desde o dia 1.</p>
-</div></footer>
+<!-- ============ FOOTER ============ -->
+<footer>
+  <div class="wrap foot">
+    <div>
+      <div class="brand">Mariners <span class="a">Supply</span></div>
+      <p>Nascido no balcão do Mariner's Bar — o ponto dos marítimos em Santos. All seamen under one roof; agora, também a bordo.</p>
+      <div class="flags" aria-label="Tripulações atendidas">🇵🇭 🇮🇳 🇬🇷 🇩🇪 🇳🇱 🇺🇦 🇬🇧 🇨🇳 🇧🇷</div>
+    </div>
+    <div>
+      <p class="mono">Paquetá · Santos · Brasil</p>
+      <p class="mono" style="margin-top:8px">EN · PT · Fil · हिन्दी · 中文</p>
+      <p class="mono" style="margin-top:8px">Concept v2 · design study</p>
+    </div>
+  </div>
+</footer>
+
+<script>
+  // scroll reveal — respects reduced motion
+  const mq = matchMedia('(prefers-reduced-motion: reduce)');
+  if (!mq.matches && 'IntersectionObserver' in window) {
+    const io = new IntersectionObserver((es) => {
+      es.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } });
+    }, { threshold: .12, rootMargin: '0px 0px -40px 0px' });
+    document.querySelectorAll('.rv').forEach(el => io.observe(el));
+  } else {
+    document.querySelectorAll('.rv').forEach(el => el.classList.add('in'));
+  }
+</script>
