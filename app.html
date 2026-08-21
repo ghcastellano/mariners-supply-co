@@ -263,6 +263,54 @@
   .step p { margin: 0; font-size: 12.5px; color: var(--faint); }
   .step.done h4 { color: var(--muted); }
 
+  /* ===== crew captain ===== */
+  .crew-hero { text-align:center; padding: 30px 22px 8px; }
+  .crew-hero .cap { font-size: 44px; }
+  .crew-hero h2 { font-family:"Bricolage Grotesque",Inter,sans-serif; font-weight:800; font-size:26px;
+    margin: 8px 0 6px; letter-spacing:-.01em; }
+  .crew-hero h2 b { color: var(--amber); }
+  .crew-hero p { color: var(--muted); font-size: 13.5px; margin: 0; }
+  .qrcard {
+    margin: 22px 16px; background: linear-gradient(160deg, rgba(255,182,72,.09), var(--card) 60%);
+    border: 1px solid rgba(255,182,72,.35); border-radius: 18px; padding: 22px;
+    display: grid; grid-template-columns: auto 1fr; gap: 18px; align-items: center;
+  }
+  .qr {
+    width: 104px; height: 104px; background: #EEF4F8; border-radius: 10px; padding: 9px;
+    display: grid; grid-template-columns: repeat(9, 1fr); grid-template-rows: repeat(9, 1fr); gap: 1.5px;
+  }
+  .qr i { background: #0B1B30; border-radius: 1px; }
+  .qr i.off { background: transparent; }
+  .qrcard .info .code { font-family: ui-monospace,Menlo,monospace; font-size: 16px; font-weight: 700;
+    color: var(--amber-hi); letter-spacing: .06em; }
+  .qrcard .info p { font-size: 12px; color: var(--muted); margin: 6px 0 12px; }
+  .share {
+    border: 0; border-radius: 10px; background: var(--wa); color: #04240F; font-weight: 700;
+    font-family: Inter,sans-serif; font-size: 13px; padding: 10px 16px; cursor: pointer;
+  }
+  .crew-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 0 16px 8px; }
+  .cstat { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 15px 17px; }
+  .cstat b { display:block; font-family: ui-monospace,Menlo,monospace; font-size: 22px; color: var(--teal);
+    font-variant-numeric: tabular-nums; }
+  .cstat span { font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--faint); }
+  .tiers { margin: 14px 16px; }
+  .tier { display: grid; grid-template-columns: 34px 1fr auto; gap: 12px; align-items: center;
+    background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; margin-bottom: 8px; }
+  .tier.on { border-color: rgba(255,182,72,.45); }
+  .tier .em { font-size: 20px; text-align: center; }
+  .tier h4 { margin: 0; font-size: 13.5px; } .tier p { margin: 0; font-size: 11.5px; color: var(--faint); }
+  .tier .pct { font-family: ui-monospace,Menlo,monospace; font-size: 13px; color: var(--amber-hi); }
+  .crew-note { margin: 14px 18px 90px; font-size: 11.5px; color: var(--faint); line-height: 1.55; }
+  .crew-banner {
+    margin: 6px 16px 20px; background: linear-gradient(160deg, rgba(255,182,72,.1), var(--card) 65%);
+    border: 1px solid rgba(255,182,72,.3); border-radius: 14px; padding: 15px 17px;
+    display: flex; gap: 13px; align-items: center; cursor: pointer; transition: border-color .2s;
+  }
+  .crew-banner:hover { border-color: var(--amber); }
+  .crew-banner .em { font-size: 26px; }
+  .crew-banner h4 { margin: 0 0 2px; font-size: 14px; }
+  .crew-banner p { margin: 0; font-size: 12px; color: var(--muted); }
+
   @media (prefers-reduced-motion: reduce) {
     * { animation: none !important; transition: none !important; }
   }
@@ -299,9 +347,10 @@
       <div class="cats-tabs" id="tabs"></div>
       <div class="grid" id="grid"></div>
     </div>
-    <nav class="nav" aria-label="Navegação">
+    <nav class="nav" style="grid-template-columns:repeat(4,1fr)" aria-label="Navegação">
       <button class="on" data-nav="s-shop" onclick="go('s-shop')"><span class="i">⚓</span>Shop</button>
       <button data-nav="s-cart" onclick="go('s-cart')" style="position:relative"><span class="i">🛒</span>Cart<span class="badge" id="badge">0</span></button>
+      <button data-nav="s-crew" onclick="go('s-crew')"><span class="i">🧢</span>Captain</button>
       <button data-nav="s-track" onclick="go('s-track')"><span class="i">📦</span>Orders</button>
     </nav>
   </div>
@@ -349,10 +398,50 @@
       <button class="vessel-chip" onclick="go('s-ship')"><span class="dot"></span><span id="chipTxt3">—</span></button>
     </div>
     <div class="scroll" id="trackBody"></div>
-    <nav class="nav" aria-label="Navegação">
+    <nav class="nav" style="grid-template-columns:repeat(4,1fr)" aria-label="Navegação">
       <button data-nav="s-shop" onclick="go('s-shop')"><span class="i">⚓</span>Shop</button>
       <button data-nav="s-cart" onclick="go('s-cart')" style="position:relative"><span class="i">🛒</span>Cart<span class="badge" id="badge2">0</span></button>
+      <button data-nav="s-crew" onclick="go('s-crew')"><span class="i">🧢</span>Captain</button>
       <button class="on" data-nav="s-track" onclick="go('s-track')"><span class="i">📦</span>Orders</button>
+    </nav>
+  </div>
+
+  <!-- ========== SCREEN: CREW CAPTAIN ========== -->
+  <div class="screen" id="s-crew">
+    <div class="top">
+      <span class="logo">Mariners <b>Supply</b></span>
+      <button class="vessel-chip" onclick="go('s-ship')"><span class="dot"></span><span id="chipTxt4">—</span></button>
+    </div>
+    <div class="scroll">
+      <div class="crew-hero">
+        <div class="cap">🧢</div>
+        <h2>Be your ship's <b>Captain</b></h2>
+        <p>Your crew orders with your code — you earn <b>5% in credit</b> on every order. Forever.</p>
+      </div>
+      <div class="qrcard">
+        <div class="qr" id="qrBox" aria-label="QR code de indicação"></div>
+        <div class="info">
+          <div class="code" id="refCode">MS-ANDRES-39</div>
+          <p>No boné, no camarote, no grupo do navio — quem escanear compra no seu nome.</p>
+          <button class="share" onclick="shareCode()">Share on WhatsApp</button>
+        </div>
+      </div>
+      <div class="crew-stats">
+        <div class="cstat"><b id="cRef">7</b><span>orders via your code</span></div>
+        <div class="cstat"><b id="cCred">$23.90</b><span>credit earned</span></div>
+      </div>
+      <div class="tiers">
+        <div class="tier"><span class="em">⚓</span><div><h4>Deckhand</h4><p>0–4 orders</p></div><span class="pct">5%</span></div>
+        <div class="tier on"><span class="em">🧭</span><div><h4>Bosun — you are here</h4><p>5–14 orders</p></div><span class="pct">6%</span></div>
+        <div class="tier"><span class="em">🧢</span><div><h4>Captain</h4><p>15+ orders · cap do programa + brinde por escala</p></div><span class="pct">7%</span></div>
+      </div>
+      <p class="crew-note">Crédito vale em qualquer escala futura em Santos e não expira. Programa aberto e às claras — o comandante do navio sabe e aprova. Comissão é só para tripulantes; nunca para funcionários de terminal, agência ou autoridade.</p>
+    </div>
+    <nav class="nav" style="grid-template-columns:repeat(4,1fr)" aria-label="Navegação">
+      <button data-nav="s-shop" onclick="go('s-shop')"><span class="i">⚓</span>Shop</button>
+      <button data-nav="s-cart" onclick="go('s-cart')" style="position:relative"><span class="i">🛒</span>Cart<span class="badge" id="badge3">0</span></button>
+      <button class="on" data-nav="s-crew" onclick="go('s-crew')"><span class="i">🧢</span>Captain</button>
+      <button data-nav="s-track" onclick="go('s-track')"><span class="i">📦</span>Orders</button>
     </nav>
   </div>
 
@@ -425,7 +514,7 @@ function renderShips(){
 function pickShip(id){
   state.ship = SHIPS.find(s=>s.id===id);
   const short = state.ship.nm.split(' ').slice(-1)[0];
-  ['chipTxt','chipTxt2','chipTxt3'].forEach(c => $(c).textContent = short + ' · B' + state.ship.berth);
+  ['chipTxt','chipTxt2','chipTxt3','chipTxt4'].forEach(c => $(c).textContent = short + ' · B' + state.ship.berth);
   $('deadline').innerHTML = `⏱ ORDERS FOR <b>&nbsp;${state.ship.nm}&nbsp;</b> CLOSE IN ${hrs(orderCloseMs())}H — delivery at the gangway on docking`;
   go('s-shop');
 }
@@ -459,7 +548,7 @@ function addItem(id){
 }
 function syncBadge(bump){
   const n = count();
-  ['badge','badge2'].forEach(b => {
+  ['badge','badge2','badge3'].forEach(b => {
     const el = $(b); el.textContent = n;
     el.classList.toggle('show', n>0);
     if (bump){ el.classList.remove('bump'); void el.offsetWidth; el.classList.add('bump'); }
@@ -532,6 +621,11 @@ function renderTrack(){
       <p>Order <span class="mono">#${o.id}</span> · ${o.items.reduce((a,i)=>a+i.q,0)} items · ${usd(o.total)}</p>
       <p style="margin-top:4px">${o.ship.nm} · BERTH ${o.ship.berth} · gangway delivery on docking</p>
     </div>
+    <div class="crew-banner" onclick="go('s-crew')" role="button" tabindex="0">
+      <span class="em">🧢</span>
+      <div><h4>Your whole crew ordering = 5% credit for you</h4>
+      <p>Become the ship's Captain — share your code, earn on every order.</p></div>
+    </div>
     <div class="track">
       <div class="step done"><div class="n">✓</div><div><h4>Deposit received</h4><p>30% · ${usd(o.total*0.3)} — card</p></div></div>
       <div class="step now"><div class="n">●</div><div><h4>We shop & pack</h4><p>Buying fresh in Santos, matched to your ETA</p></div></div>
@@ -540,6 +634,28 @@ function renderTrack(){
     </div>`;
 }
 
+/* ================= CREW CAPTAIN ================= */
+function renderQR(){
+  // stylized QR placeholder (real QR generated server-side in production)
+  const seed = 'MSANDRES39';
+  let cells = '';
+  for (let i=0; i<81; i++){
+    const r = Math.floor(i/9), c = i%9;
+    const finder = (r<3&&c<3)||(r<3&&c>5)||(r>5&&c<3);
+    const on = finder ? !((r===1&&c===1)||(r===1&&c===7)||(r===7&&c===1)) === false || (r%3!==1||c%3!==1)
+      : ((seed.charCodeAt((r*9+c)%seed.length) + r*7 + c*13) % 3 !== 0);
+    cells += `<i class="${(finder ? !(r===1&&(c===1||c===7))&&!(r===7&&c===1) : on) ? '' : 'off'}"></i>`;
+  }
+  $('qrBox').innerHTML = cells;
+}
+function shareCode(){
+  const msg = 'Order from Mariners Supply with my code MS-ANDRES-39 — delivered at the gangway in Santos. app.marinerssupply.com/r/MS-ANDRES-39';
+  if (navigator.clipboard) navigator.clipboard.writeText(msg).catch(()=>{});
+  const btn = document.querySelector('.share');
+  btn.textContent = 'Copied! ✓';
+  setTimeout(()=>{ btn.textContent = 'Share on WhatsApp'; }, 1800);
+}
+
 /* ================= INIT ================= */
-renderShips(); renderTabs(); renderGrid(); syncBadge(false);
+renderShips(); renderTabs(); renderGrid(); syncBadge(false); renderQR();
 </script>
