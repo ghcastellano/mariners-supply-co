@@ -1,5 +1,7 @@
 # Mariners Supply — app MVP
 
+**🟢 No ar: <https://mariners-supply.vercel.app>**
+
 Loja de conveniência com **entrega na prancha de embarque** para tripulações em escala
 no **Porto de Santos**. Este repositório agora contém a **aplicação completa do MVP**
 (mobile-first), evoluída a partir dos protótipos de `prototype/`.
@@ -59,24 +61,28 @@ npm run dev
 Sem as variáveis o app builda e abre normalmente, mostrando um aviso de
 "backend not configured" — útil para validar o front isolado.
 
-## Provisionando o Supabase (1x)
+## Infra provisionada (estado atual)
 
-1. Crie um projeto (região `sa-east-1`) em [supabase.com](https://supabase.com) —
-   ou peça para o Claude criar via MCP quando houver vaga no plano.
-2. Aplique as migrações na ordem, via SQL Editor ou CLI
-   (`supabase db push`): `supabase/migrations/20260822000001_init.sql` e
-   `..._seed.sql`.
-3. Copie **Project URL** e **anon/publishable key** para `.env.local` (e para as
-   env vars da Vercel).
+- **Supabase:** projeto `mariners-supply` (`cuaocjxofaizefzcxlyc`, região `sa-east-1`),
+  com as 3 migrações de `supabase/migrations/` aplicadas (schema+RLS, seed, hardening).
+  As chaves públicas estão commitadas em `.env.production` (a publishable key roda no
+  navegador por design; a segurança vem da RLS).
+- **Vercel:** projeto `mariners-supply` linkado a este repositório — **push no `master`
+  faz deploy de produção automático**; branches geram preview.
+- Dashboard do banco: <https://supabase.com/dashboard/project/cuaocjxofaizefzcxlyc>
 
-### Auth — configuração no Dashboard
+### Auth — configuração no Dashboard (passo manual)
 
-Em **Authentication → URL Configuration**:
+Em [Authentication → URL Configuration](https://supabase.com/dashboard/project/cuaocjxofaizefzcxlyc/auth/url-configuration):
 
-- **Site URL:** a URL de produção (ex.: `https://mariners-supply.vercel.app`)
+- **Site URL:** `https://mariners-supply.vercel.app`
 - **Redirect URLs:**
+  - `https://mariners-supply.vercel.app/**`
+  - `https://*-gustavos-projects-287c5dd3.vercel.app/**` (previews)
   - `http://localhost:3000/**`
-  - `https://SEU-DOMINIO/**`
+
+Sem isso, os links dos emails de confirmação/recuperação caem no Site URL padrão
+(`localhost:3000`) em vez do domínio de produção.
 
 Em **Authentication → Providers**:
 
@@ -85,17 +91,10 @@ Em **Authentication → Providers**:
   SMTP próprio em *Authentication → Emails → SMTP*.
 - **Google:** crie um OAuth Client (Web) no
   [Google Cloud Console](https://console.cloud.google.com/apis/credentials) com
-  redirect URI `https://SEU-PROJETO.supabase.co/auth/v1/callback`, e cole
-  Client ID/Secret no provider Google do Supabase. Sem isso o botão
-  "Continue with Google" avisa que o método ainda não está habilitado (email continua
-  funcionando).
-
-## Deploy na Vercel
-
-1. Importe o repositório na Vercel (framework: Next.js, sem config extra).
-2. Defina `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`
-   (e opcionalmente `NEXT_PUBLIC_SITE_URL`, `NEXT_PUBLIC_USD_BRL_RATE`).
-3. Atualize a Site URL/Redirect URLs no Supabase com o domínio final.
+  redirect URI `https://cuaocjxofaizefzcxlyc.supabase.co/auth/v1/callback`, e cole
+  Client ID/Secret no [provider Google](https://supabase.com/dashboard/project/cuaocjxofaizefzcxlyc/auth/providers).
+  Sem isso o botão "Continue with Google" avisa que o método ainda não está habilitado
+  (email continua funcionando).
 
 ## O que fica para depois do MVP (roadmap curto)
 
