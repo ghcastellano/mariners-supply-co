@@ -1,0 +1,183 @@
+import { notFound, redirect } from "next/navigation";
+import TopBar from "@/components/TopBar";
+import BottomNav from "@/components/BottomNav";
+import { createClient } from "@/lib/supabase/server";
+import { hoursUntil, usd } from "@/lib/format";
+import { PAYMENT_LABEL, STATUS_LABEL, STATUS_PILL, type OrderStatus, type PaymentMethod } from "@/lib/types";
+
+export const dynamic = "force-dynamic";
+
+type Row = {
+  id: string;
+  code: string;
+  status: OrderStatus;
+  payment_method: PaymentMethod | null;
+  subtotal_usd: number;
+  deposit_usd: number;
+  balance_usd: number;
+  created_at: string;
+  ships: { name: string; berth: string | null; eta: string } | null;
+  order_items: { name: string; emoji: string | null; unit_price_usd: number; qty: number }[];
+};
+
+// awaiting_deposit → passo 0 ativo; deposit_paid/preparing → passo 1; at_gangway → 2; delivered → tudo feito
+const STEP_NOW: Partial<Record<OrderStatus, number>> = {
+  awaiting_deposit: 0,
+  deposit_paid: 1,
+  preparing: 1,
+  at_gangway: 2,
+  delivered: 4,
+};
+
+export default async function OrderDetailPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ code: string }>;
+  searchParams: Promise<{ placed?: string }>;
+}) {
+  const { code } = await params;
+  const { placed } = await searchParams;
+
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) redirect(`/login?next=/orders/${code}`);
+
+  const { data } = await supabase
+    .from("orders")
+    .select(
+      "id, code, status, payment_method, subtotal_usd, deposit_usd, balance_usd, created_at, ships(name, berth, eta), order_items(name, emoji, unit_price_usd, qty)"
+    )
+    .eq("code", code.toUpperCase())
+    .maybeSingle();
+
+  const o = data as unknown as Row | null;
+  if (!o) notFound();
+
+  const itemCount = o.order_items.reduce((a, i) => a + i.qty, 0);
+  const stepNow = STEP_NOW[o.status];
+
+  const steps = [
+    {
+      t: "Deposit received",
+      p: `30% · ${usd(Number(o.deposit_usd))}${o.payment_method ? " — " + PAYMENT_LABEL[o.payment_method] : ""}`,
+    },
+    { t: "We shop & pack", p: "Buying fresh in Santos, matched to your ETA" },
+    { t: "At the gangway", p: "Waiting when lines are fast · photo proof" },
+    { t: "Delivered on board", p: `Balance ${usd(Number(o.balance_usd))} by card at delivery` },
+  ];
+
+  return (
+    <>
+      <TopBar title={`Order #${o.code}`} backHref="/orders" />
+      <main className="pb-nav">
+        {placed ? (
+          <div className="okwrap">
+            <div className="okring">✓</div>
+            <h2>Order confirmed, sailor.</h2>
+            <p>
+              Order <span className="mono">#{o.code}</span> · {itemCount} items ·{" "}
+              {usd(Number(o.subtotal_usd))}
+            </p>
+            {o.ships && (
+              <p style={{ marginTop: 4 }}>
+                {o.ships.name} · BERTH {o.ships.berth ?? "—"} · gangway delivery on docking
+              </p>
+            )}
+          </div>
+        ) : (
+          <div className="hero-mini">
+            <p className="kicker">
+              {o.ships
+                ? `${o.ships.name} · BERTH ${o.ships.berth ?? "—"} · ETA IN ${hoursUntil(o.ships.eta)}H`
+                : "—"}
+            </p>
+            <h2>
+              #{o.code}{" "}
+              <span className={`pill ${STATUS_PILL[o.status]}`} style={{ verticalAlign: "middle" }}>
+                {STATUS_LABEL[o.status]}
+              </span>
+            </h2>
+            <p>
+              {itemCount} items · {usd(Number(o.subtotal_usd))}
+            </p>
+          </div>
+        )}
+
+        {o.status === "awaiting_deposit" && (
+          <div className="stack" style={{ marginTop: 10 }}>
+            <p className="note">
+              Deposit of <b>{usd(Number(o.deposit_usd))}</b> pending — we&apos;ll send your secure
+              payment link shortly (usually within the hour). Your gangway window is reserved
+              meanwhile.
+            </p>
+          </div>
+        )}
+        {o.status === "credited" && (
+          <div className="stack" style={{ marginTop: 10 }}>
+            <p className="note">
+              Ship diverted from Santos — your deposit became full credit for the next call. No
+              bureaucracy, it&apos;s waiting for you.
+            </p>
+          </div>
+        )}
+        {o.status === "cancelled" && (
+          <div className="stack" style={{ marginTop: 10 }}>
+            <p className="alert">This order was cancelled. Anything wrong? Talk to us at the bar.</p>
+          </div>
+        )}
+
+        {stepNow !== undefined && (
+          <div className="track">
+            {steps.map((s, k) => (
+              <div key={s.t} className={`step ${k < stepNow ? "done" : k === stepNow ? "now" : ""}`}>
+                <div className="n">{k < stepNow ? "✓" : k === stepNow ? "●" : k + 1}</div>
+                <div>
+                  <h4>{s.t}</h4>
+                  <p>{s.p}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        <div className="cart-list">
+          {o.order_items.map((i, k) => (
+            <div className="ci" key={k}>
+              <div className="em">{i.emoji ?? "📦"}</div>
+              <div>
+                <div className="nm">{i.name}</div>
+                <div className="pr">
+                  {usd(Number(i.unit_price_usd))} × {i.qty}
+                </div>
+              </div>
+              <b className="mono">{usd(Number(i.unit_price_usd) * i.qty)}</b>
+            </div>
+          ))}
+        </div>
+
+        <div className="summary">
+          <div className="r">
+            <span>Subtotal</span>
+            <b>{usd(Number(o.subtotal_usd))}</b>
+          </div>
+          <div className="r">
+            <span>Gangway delivery</span>
+            <b>USD 0.00</b>
+          </div>
+          <div className="r total">
+            <span>Deposit (30%)</span>
+            <b>{usd(Number(o.deposit_usd))}</b>
+          </div>
+          <div className="r">
+            <span>Balance at the gangway</span>
+            <b>{usd(Number(o.balance_usd))}</b>
+          </div>
+        </div>
+      </main>
+      <BottomNav />
+    </>
+  );
+}
