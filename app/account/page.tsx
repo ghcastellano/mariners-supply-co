@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import TopBar from "@/components/TopBar";
 import BottomNav from "@/components/BottomNav";
 import { createClient } from "@/lib/supabase/server";
+import { CONTACT_EMAIL } from "@/lib/env";
 import { signOut } from "./actions";
 import type { Profile } from "@/lib/types";
 
@@ -58,8 +59,11 @@ export default async function AccountPage() {
             </button>
           </form>
           <p className="finehint">
-            Questions about an order? Find us at Mariner&apos;s Bar or ping the WhatsApp on your
-            order confirmation.
+            Questions about an order? Write{" "}
+            <a className="alink" href={`mailto:${CONTACT_EMAIL}`}>
+              {CONTACT_EMAIL}
+            </a>{" "}
+            or find us at Mariner&apos;s Bar.
           </p>
         </div>
       </main>

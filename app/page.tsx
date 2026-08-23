@@ -2,7 +2,7 @@ import Link from "next/link";
 import TopBar from "@/components/TopBar";
 import ShipPicker from "@/components/ShipPicker";
 import { createClient } from "@/lib/supabase/server";
-import { supabaseConfigured } from "@/lib/env";
+import { CONTACT_EMAIL, supabaseConfigured } from "@/lib/env";
 import type { Ship } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
@@ -55,6 +55,7 @@ export default async function Home() {
 
       <footer className="foot">
         <p className="tag">Gangway delivery · pre-order by ETA · card payment</p>
+        <a href={`mailto:${CONTACT_EMAIL}`}>✉️ {CONTACT_EMAIL}</a>
         <Link href="/login">Crew access — sign in / create account</Link>
         <Link href="/admin">Staff access</Link>
       </footer>
