@@ -86,9 +86,14 @@ Sem isso, os links dos emails de confirmação/recuperação caem no Site URL pa
 
 Em **Authentication → Providers**:
 
-- **Email:** já vem com confirmação obrigatória ligada (o app usa `/auth/confirm`).
-  O SMTP padrão do Supabase é limitado (±2 emails/h) — para produção configure um
-  SMTP próprio em *Authentication → Emails → SMTP*.
+- **Email:** já vem com confirmação obrigatória ligada. `/auth/confirm` aceita os dois
+  formatos de link (`?code=` do template padrão e `?token_hash=` de template
+  customizado). O SMTP padrão do Supabase é limitado (±2 emails/h) — para produção
+  configure um SMTP próprio em *Authentication → Emails → SMTP*. Com SMTP ativo, os
+  templates com a marca (links por `token_hash`, que funcionam mesmo abrindo o email
+  em outro navegador) estão prontos em `supabase/templates/email-templates.json` —
+  é aplicar via Management API (`PATCH /v1/projects/{ref}/config/auth`) ou colar no
+  dashboard.
 - **Google:** crie um OAuth Client (Web) no
   [Google Cloud Console](https://console.cloud.google.com/apis/credentials) com
   redirect URI `https://cuaocjxofaizefzcxlyc.supabase.co/auth/v1/callback`, e cole
