@@ -3,12 +3,20 @@ import "./globals.css";
 import { CartProvider } from "@/lib/cart";
 
 export const metadata: Metadata = {
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? "https://mariners-supply.vercel.app"),
   title: {
     default: "Mariners Supply",
     template: "%s · Mariners Supply",
   },
   description:
     "Pre-order supplies before docking — delivered at the gangway. Porto de Santos, by Mariner's Bar.",
+  openGraph: {
+    siteName: "Mariners Supply",
+    title: "Mariners Supply — gangway delivery at Porto de Santos",
+    description:
+      "Your order rides with your vessel's ETA. Pre-order before docking, pay a 30% deposit, receive at the gangway.",
+    type: "website",
+  },
   appleWebApp: {
     capable: true,
     title: "Mariners",
@@ -29,8 +37,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en">
       <body>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <CartProvider>
           <div className="shell">{children}</div>
         </CartProvider>

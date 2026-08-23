@@ -62,6 +62,8 @@ export default async function AdminLayout({ children }: { children: React.ReactN
 
   return (
     <>
+      {/* marcador p/ o CSS alargar o shell do painel em telas grandes */}
+      <span className="admin-wide" hidden />
       <TopBar title="Mariners Ops" backHref="/" chip={false} />
       <AdminTabs />
       {children}

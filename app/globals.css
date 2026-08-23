@@ -11,7 +11,7 @@
    3. Barras fixas respeitam env(safe-area-inset-bottom).
    ============================================================ */
 
-@import url("https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700;12..96,800&family=Inter:wght@400;500;600;700&display=swap");
+@import "./fonts.css";
 
 :root {
   --night:   #040D1A;
@@ -21,7 +21,7 @@
   --card-hi: #0F2340;
   --ink:     #EEF4F8;
   --muted:   #9FB4C8;
-  --faint:   #5F7690;
+  --faint:   #7A8FA8; /* ≥4.5:1 sobre card/night — AA */
   --amber:   #FFB648;
   --amber-hi:#FFD9A0;
   --amber-ink:#241802;
@@ -33,6 +33,12 @@
   --font-disp: "Bricolage Grotesque", Inter, system-ui, sans-serif;
   --font-body: Inter, system-ui, -apple-system, "Segoe UI", sans-serif;
   --font-mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  --shell-w: 430px;
+}
+
+/* tablet: coluna um pouco mais generosa */
+@media (min-width: 768px) {
+  :root { --shell-w: 500px; }
 }
 
 * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -69,7 +75,7 @@ button { font-family: inherit; }
 .shell {
   position: relative;
   width: 100%;
-  max-width: 430px;
+  max-width: var(--shell-w);
   margin: 0 auto;
   min-height: 100dvh;
   background: var(--night);
@@ -203,7 +209,7 @@ button { font-family: inherit; }
 /* ===== bottom nav (fixa, centrada, com safe area) ===== */
 .nav {
   position: fixed; bottom: 0; left: 0; right: 0; z-index: 30;
-  margin: 0 auto; width: 100%; max-width: 430px;
+  margin: 0 auto; width: 100%; max-width: var(--shell-w);
   display: grid; grid-template-columns: repeat(4, 1fr);
   background: rgba(6,16,30,.92);
   backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
@@ -259,7 +265,7 @@ button { font-family: inherit; }
 /* ===== CTA dock (fixo, centrado, com safe area) ===== */
 .cta-dock {
   position: fixed; left: 0; right: 0; bottom: 0; z-index: 30;
-  margin: 0 auto; width: 100%; max-width: 430px;
+  margin: 0 auto; width: 100%; max-width: var(--shell-w);
   padding: 14px 16px calc(16px + env(safe-area-inset-bottom));
   background: linear-gradient(180deg, transparent, rgba(1,6,13,.9) 34%);
   pointer-events: none;
@@ -437,6 +443,17 @@ button { font-family: inherit; }
 .foot .tag { font-family: var(--font-mono); font-size: 10px; letter-spacing: .2em; text-transform: uppercase; color: var(--faint); }
 .foot a { color: var(--muted); font-size: 12.5px; }
 .foot a:hover { color: var(--amber-hi); }
+
+/* ===== admin em telas grandes: painel largo ===== */
+@media (min-width: 960px) {
+  .shell:has(.admin-wide) { max-width: 960px; }
+  .shell:has(.admin-wide) .kpis { grid-template-columns: repeat(4, 1fr); }
+  .shell:has(.admin-wide) .cart-list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: start;
+  }
+  .shell:has(.admin-wide) .adm-form { max-width: 560px; }
+}
 
 /* ===== util ===== */
 .spin {
