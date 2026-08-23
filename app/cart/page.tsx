@@ -1,8 +1,10 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import TopBar from "@/components/TopBar";
+import BottomNav from "@/components/BottomNav";
 import { useCart } from "@/lib/cart";
 import { createClient } from "@/lib/supabase/client";
 import { supabaseConfigured } from "@/lib/env";
@@ -44,7 +46,7 @@ export default function CartPage() {
   return (
     <>
       <TopBar title="Your order" backHref="/shop" />
-      <main className="pb-dock">
+      <main className="pb-both">
         {products === null || !ready ? (
           <div className="spin" aria-label="Loading" />
         ) : count === 0 ? (
@@ -53,6 +55,11 @@ export default function CartPage() {
             Your kit is empty, sailor.
             <br />
             Everything you order rides with your ship&apos;s ETA.
+            <p style={{ marginTop: 18 }}>
+              <Link className="alink" href="/shop">
+                ⚓ Browse the catalog →
+              </Link>
+            </p>
           </div>
         ) : (
           <>
@@ -113,12 +120,15 @@ export default function CartPage() {
           </>
         )}
       </main>
-      <div className="cta-dock">
-        <button className="cta" disabled={!canCheckout} onClick={() => router.push("/checkout")}>
-          <span>Continue to deposit</span>
-          <span className="mono">{usd(deposit)}</span>
-        </button>
-      </div>
+      {ready && count > 0 && (
+        <div className="cta-dock above-nav">
+          <button className="cta" disabled={!canCheckout} onClick={() => router.push("/checkout")}>
+            <span>Continue to deposit</span>
+            <span className="mono">{usd(deposit)}</span>
+          </button>
+        </div>
+      )}
+      <BottomNav />
     </>
   );
 }
