@@ -43,7 +43,14 @@
 
 * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 
-html { background: var(--abyss); -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+html {
+  background: var(--abyss);
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  /* teclado, controles nativos e autofill escuros em TODOS os browsers
+     do iOS (Safari, Chrome, Edge — todos WebKit por baixo) */
+  color-scheme: dark;
+}
 html, body { padding: 0; margin: 0; }
 body { overflow-x: clip; }
 
@@ -307,6 +314,16 @@ button { font-family: inherit; }
 }
 .field input:focus, .input:focus, .field select:focus, .field textarea:focus {
   outline: 2px solid var(--teal); outline-offset: 1px; border-color: transparent;
+}
+/* autofill do WebKit (iCloud/Google Password no iOS): sem flash branco */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus {
+  -webkit-box-shadow: 0 0 0 1000px var(--card) inset;
+  box-shadow: 0 0 0 1000px var(--card) inset;
+  -webkit-text-fill-color: var(--ink);
+  caret-color: var(--ink);
+  transition: background-color 99999s ease-out;
 }
 .btn {
   border: 0; border-radius: 13px; padding: 14px 16px; cursor: pointer;

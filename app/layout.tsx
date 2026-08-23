@@ -28,6 +28,7 @@ export const metadata: Metadata = {
 // fazem o app pintar o viewport inteiro, sem faixa clara sobrando.
 export const viewport: Viewport = {
   themeColor: "#01060D",
+  colorScheme: "dark",
   width: "device-width",
   initialScale: 1,
   viewportFit: "cover",
