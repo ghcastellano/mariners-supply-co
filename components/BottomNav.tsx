@@ -7,6 +7,7 @@ import { useCart } from "@/lib/cart";
 const TABS = [
   { href: "/shop", label: "Shop", icon: "⚓" },
   { href: "/cart", label: "Cart", icon: "🛒" },
+  { href: "/captain", label: "Captain", icon: "🧢" },
   { href: "/orders", label: "Orders", icon: "📦" },
   { href: "/account", label: "Account", icon: "👤" },
 ];

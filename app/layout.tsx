@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { CartProvider } from "@/lib/cart";
+import ReferralClaim from "@/components/ReferralClaim";
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? "https://mariners-supply.vercel.app"),
@@ -41,6 +42,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <CartProvider>
           <div className="shell">{children}</div>
         </CartProvider>
+        <ReferralClaim />
       </body>
     </html>
   );
