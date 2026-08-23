@@ -43,8 +43,9 @@
 
 * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 
-html { background: var(--abyss); }
+html { background: var(--abyss); -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
 html, body { padding: 0; margin: 0; }
+body { overflow-x: clip; }
 
 body {
   background: var(--abyss);
@@ -291,8 +292,11 @@ button { font-family: inherit; }
 }
 .input, .field input, .field select, .field textarea {
   width: 100%; background: var(--card); border: 1px solid var(--line-hi); border-radius: 12px;
-  color: var(--ink); font-family: var(--font-mono); font-size: 14px; padding: 13px 14px;
+  color: var(--ink); font-family: var(--font-mono); padding: 12px 14px;
   appearance: none;
+  /* 16px é obrigatório: fonte menor faz o iOS Safari dar zoom automático
+     ao focar o campo — e o zoom fica preso na navegação, "cortando" a tela */
+  font-size: 16px;
 }
 .field input:focus, .input:focus, .field select:focus, .field textarea:focus {
   outline: 2px solid var(--teal); outline-offset: 1px; border-color: transparent;
