@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useCart, type CartShip } from "@/lib/cart";
 import { hoursUntil, orderCloseAt } from "@/lib/format";
-import type { Ship } from "@/lib/types";
+import { delayLabel, type Ship } from "@/lib/types";
 
 export default function ShipPicker({ ships }: { ships: Ship[] }) {
   const router = useRouter();
@@ -44,6 +44,7 @@ export default function ShipPicker({ ships }: { ships: Ship[] }) {
             <span className="nm">{s.name}</span>
             <span className="meta">
               ETA IN {etaH}H{s.berth ? ` · BERTH ${s.berth}` : ""}
+              {delayLabel(s) && <b className="delay-tag">{delayLabel(s)}</b>}
             </span>
             <span className="win">
               <span className={cls}>

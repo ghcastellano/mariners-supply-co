@@ -19,8 +19,10 @@ test("depósito de 30% bate com o protótipo (36 → 10.80 / 25.20)", () => {
 });
 
 test("hoursUntil nunca é negativo e arredonda", () => {
-  const in90m = new Date(Date.now() + 90 * 60e3).toISOString();
-  assert.equal(fmt.hoursUntil(in90m), 2);
+  // 100min = 1.67h → 2. Evita o limite exato de .5, que oscilaria com
+  // os milissegundos de execução do próprio teste.
+  const in100m = new Date(Date.now() + 100 * 60e3).toISOString();
+  assert.equal(fmt.hoursUntil(in100m), 2);
   const past = new Date(Date.now() - 3600e3).toISOString();
   assert.equal(fmt.hoursUntil(past), 0);
 });

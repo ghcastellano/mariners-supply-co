@@ -5,6 +5,18 @@ export type Ship = {
   eta: string;
   cutoff_hours: number;
   active: boolean;
+  delay_hours?: number | null;
+  previous_eta?: string | null;
+  eta_source?: string | null;
+  ata?: string | null;
+};
+
+/** Atraso só é notícia para o cliente a partir de 2h. */
+export const delayLabel = (s: { delay_hours?: number | null }) => {
+  const h = Number(s.delay_hours ?? 0);
+  if (h >= 2) return `DELAYED +${Math.round(h)}H`;
+  if (h <= -2) return `EARLY ${Math.abs(Math.round(h))}H`;
+  return null;
 };
 
 export type Product = {

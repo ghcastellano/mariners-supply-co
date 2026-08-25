@@ -16,7 +16,7 @@ export default async function Home() {
       const supabase = await createClient();
       const { data, error } = await supabase
         .from("ships")
-        .select("id, name, berth, eta, cutoff_hours, active")
+        .select("id, name, berth, eta, cutoff_hours, active, delay_hours, previous_eta, eta_source, ata")
         .eq("active", true)
         .gt("eta", new Date(Date.now() - 12 * 3600e3).toISOString())
         .order("eta", { ascending: true });

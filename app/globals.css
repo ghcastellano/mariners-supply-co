@@ -557,3 +557,11 @@ input:-webkit-autofill:focus {
 .tier .pct { font-family: var(--font-mono); font-size: 13px; color: var(--amber-hi); }
 
 .crew-note { margin: 14px 18px 20px; font-size: 11.5px; color: var(--faint); line-height: 1.55; }
+
+/* ===== atraso de navio (sync do line-up do porto) ===== */
+.delay-tag {
+  display: inline-block; margin-left: 8px; padding: 2px 7px; border-radius: 999px;
+  background: rgba(255,182,72,.14); border: 1px solid rgba(255,182,72,.45);
+  color: var(--amber-hi); font-family: var(--font-mono); font-size: 9.5px;
+  letter-spacing: .1em; font-weight: 700; vertical-align: middle;
+}
