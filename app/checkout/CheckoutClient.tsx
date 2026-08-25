@@ -110,7 +110,7 @@ export default function CheckoutClient({
               <div className="r">
                 <span>Delivery window</span>
                 <b>
-                  {ship ? `BERTH ${ship.berth ?? "—"} · ETA ${hoursUntil(ship.eta)}H` : "—"}
+                  {ship ? `BERTH ${ship.berth ?? "—"} · DOCKS IN ${hoursUntil(ship.eta)}H` : "—"}
                 </b>
               </div>
               <div className="r">

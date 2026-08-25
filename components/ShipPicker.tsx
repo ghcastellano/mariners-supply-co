@@ -43,7 +43,7 @@ export default function ShipPicker({ ships }: { ships: Ship[] }) {
           <button key={s.id} className="ship" onClick={() => pick(s)} disabled={!open}>
             <span className="nm">{s.name}</span>
             <span className="meta">
-              ETA IN {etaH}H{s.berth ? ` · BERTH ${s.berth}` : ""}
+              DOCKS IN {etaH}H{s.berth ? ` · BERTH ${s.berth}` : ""}
               {delayLabel(s) && <b className="delay-tag">{delayLabel(s)}</b>}
             </span>
             <span className="win">

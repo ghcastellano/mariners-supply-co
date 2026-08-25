@@ -24,6 +24,9 @@ export type LineupRow = {
   agency?: string | null;
 };
 
+/** Janela de logística: 3 dias entre o fechamento e a atracação. */
+export const DEFAULT_CUTOFF_HOURS = 72;
+
 export const LINEUP_SOURCES = [
   "https://intranet.portodesantos.com.br/Navios/Navios4.asp",
   "https://vports.com.br/navios-esperados/",

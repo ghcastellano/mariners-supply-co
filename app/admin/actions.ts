@@ -60,7 +60,7 @@ export async function saveShip(formData: FormData) {
   const name = String(formData.get("name") ?? "").trim().toUpperCase();
   const berth = String(formData.get("berth") ?? "").trim();
   const etaLocal = String(formData.get("eta") ?? "");
-  const cutoff = Math.max(1, Math.min(240, Number(formData.get("cutoff_hours") ?? 26)));
+  const cutoff = Math.max(1, Math.min(240, Number(formData.get("cutoff_hours") ?? 72)));
   const active = formData.get("active") === "on";
   if (!name || !etaLocal) return;
 

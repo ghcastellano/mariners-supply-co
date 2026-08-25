@@ -21,13 +21,13 @@ function ShipForm({ ship }: { ship?: Ship }) {
           <input name="berth" defaultValue={ship?.berth ?? ""} placeholder="39" />
         </div>
         <div className="field">
-          <label>Cutoff (h before ETA)</label>
+          <label>Cutoff — h antes do ETA (72 = 3 dias)</label>
           <input
             name="cutoff_hours"
             type="number"
             min={1}
             max={240}
-            defaultValue={ship?.cutoff_hours ?? 26}
+            defaultValue={ship?.cutoff_hours ?? 72}
           />
         </div>
       </div>
