@@ -6,7 +6,7 @@ import TopBar from "@/components/TopBar";
 import { useCart } from "@/lib/cart";
 import { createClient } from "@/lib/supabase/client";
 import { brl, DEPOSIT_PCT, hoursUntil, usd } from "@/lib/format";
-import { PAYMENT_LABEL, type PaymentMethod, type Product } from "@/lib/types";
+import type { Product } from "@/lib/types";
 import { placeOrder } from "./actions";
 
 export default function CheckoutClient({
@@ -19,7 +19,8 @@ export default function CheckoutClient({
   const router = useRouter();
   const { ship, items, count, ready, clear } = useCart();
   const [products, setProducts] = useState<Product[] | null>(null);
-  const [payment, setPayment] = useState<PaymentMethod>("card");
+  const [creditBalance, setCreditBalance] = useState(0);
+  const [useCredit, setUseCredit] = useState(true);
   const [contactName, setContactName] = useState(defaultName);
   const [whatsapp, setWhatsapp] = useState("");
   const [note, setNote] = useState("");
@@ -33,6 +34,9 @@ export default function CheckoutClient({
       .from("products")
       .select("id, name, description, emoji, category, price_usd, active, sort_order")
       .then(({ data }) => setProducts((data ?? []) as Product[]));
+    supabase
+      .rpc("my_credit_balance")
+      .then(({ data }) => setCreditBalance(Math.max(0, Number(data ?? 0))));
   }, []);
 
   useEffect(() => {
@@ -49,6 +53,9 @@ export default function CheckoutClient({
   }, [products, items]);
 
   const deposit = subtotal * DEPOSIT_PCT;
+  const creditApplied = useCredit ? Math.min(creditBalance, deposit) : 0;
+  const payNow = Math.max(0, deposit - creditApplied);
+  const coveredByCredit = creditApplied > 0 && payNow <= 0.009;
 
   function submit() {
     if (!ship) return;
@@ -56,7 +63,7 @@ export default function CheckoutClient({
     startTransition(async () => {
       const res = await placeOrder({
         shipId: ship.id,
-        payment,
+        applyCredit: useCredit && creditBalance > 0,
         contactName,
         contactWhatsapp: whatsapp,
         note,
@@ -68,7 +75,12 @@ export default function CheckoutClient({
       }
       setPlaced(true);
       clear();
-      router.push(`/orders/${res.code}?placed=1`);
+      if (res.payUrl) {
+        // página segura do Stripe (cartão · Apple Pay · Google Pay · PIX)
+        window.location.assign(res.payUrl);
+        return;
+      }
+      router.push(`/orders/${res.code}?placed=1${res.paid ? "&paid=1" : ""}`);
     });
   }
 
@@ -90,48 +102,49 @@ export default function CheckoutClient({
               <div className="r">
                 <span>Delivery window</span>
                 <b>
-                  {ship
-                    ? `BERTH ${ship.berth ?? "—"} · ETA ${hoursUntil(ship.eta)}H`
-                    : "—"}
+                  {ship ? `BERTH ${ship.berth ?? "—"} · ETA ${hoursUntil(ship.eta)}H` : "—"}
                 </b>
               </div>
-              <div className="r total">
-                <span>Deposit now (30%)</span>
+              <div className="r">
+                <span>Deposit (30%)</span>
                 <b>{usd(deposit)}</b>
+              </div>
+              {creditApplied > 0 && (
+                <div className="r">
+                  <span>🧢 Captain credit</span>
+                  <b style={{ color: "var(--teal)" }}>−{usd(creditApplied)}</b>
+                </div>
+              )}
+              <div className="r total">
+                <span>Pay now</span>
+                <b>{usd(payNow)}</b>
               </div>
               <div className="r">
                 <span>Balance at the gangway</span>
                 <b>{usd(subtotal - deposit)}</b>
               </div>
               <p className="hint">
-                Charged in BRL (≈ {brl(deposit)}) by your card&apos;s own FX — transparent, no house
-                spread.
+                {coveredByCredit
+                  ? "Your Captain credit covers the whole deposit — nothing to pay now."
+                  : `≈ ${brl(payNow)} no cartão agora. Se o navio desviar de Santos, o depósito vira crédito integral para a próxima escala — sem burocracia.`}
               </p>
             </div>
 
-            <p className="subhead">How will you pay the deposit?</p>
-            <div className="stack">
-              <div className="paybox">
-                {(Object.keys(PAYMENT_LABEL) as PaymentMethod[]).map((m) => (
-                  <label key={m} className="payopt">
-                    <input
-                      type="radio"
-                      name="pm"
-                      checked={payment === m}
-                      onChange={() => setPayment(m)}
-                    />
-                    <span>
-                      <b>{PAYMENT_LABEL[m]}</b>
-                      <span className="sub">
-                        {m === "card" && "Visa · Mastercard · Amex — charged in BRL by your issuer"}
-                        {m === "wallet" && "One tap, on-ship friendly"}
-                        {m === "pix" && "For BRL accounts"}
-                      </span>
-                    </span>
-                  </label>
-                ))}
+            {creditBalance > 0 && (
+              <div className="stack">
+                <label className="payopt">
+                  <input
+                    type="checkbox"
+                    checked={useCredit}
+                    onChange={(e) => setUseCredit(e.target.checked)}
+                  />
+                  <span>
+                    <b>Use my Captain credit ({usd(creditBalance)})</b>
+                    <span className="sub">Earned from your crew&apos;s orders — never expires</span>
+                  </span>
+                </label>
               </div>
-            </div>
+            )}
 
             <p className="subhead">Delivery contact</p>
             <div className="stack">
@@ -165,9 +178,10 @@ export default function CheckoutClient({
               </div>
               {err && <p className="alert">{err}</p>}
               <p className="finehint">
-                Signed in as <span className="mono">{email}</span>. After confirming, we send your
-                secure payment link for the {Math.round(DEPOSIT_PCT * 100)}% deposit — the balance
-                is paid at the gangway on delivery.
+                Signed in as <span className="mono">{email}</span>.{" "}
+                {coveredByCredit
+                  ? "Confirming places your order instantly."
+                  : "Next: our secure payment page — card, Apple Pay, Google Pay or PIX. The balance is paid at the gangway on delivery."}
               </p>
             </div>
           </>
@@ -175,8 +189,14 @@ export default function CheckoutClient({
       </main>
       <div className="cta-dock">
         <button className="cta" onClick={submit} disabled={pending || !ready || count === 0}>
-          <span>{pending ? "Placing order…" : "Confirm order"}</span>
-          <span className="mono">{usd(deposit)}</span>
+          <span>
+            {pending
+              ? "Placing order…"
+              : coveredByCredit
+                ? "Confirm order"
+                : "Confirm & pay deposit"}
+          </span>
+          <span className="mono">{usd(payNow)}</span>
         </button>
       </div>
     </>

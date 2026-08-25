@@ -1,6 +1,7 @@
 import { notFound, redirect } from "next/navigation";
 import TopBar from "@/components/TopBar";
 import BottomNav from "@/components/BottomNav";
+import PayNowButton from "@/components/PayNowButton";
 import { createClient } from "@/lib/supabase/server";
 import { hoursUntil, usd } from "@/lib/format";
 import { PAYMENT_LABEL, STATUS_LABEL, STATUS_PILL, type OrderStatus, type PaymentMethod } from "@/lib/types";
@@ -13,6 +14,7 @@ type Row = {
   status: OrderStatus;
   payment_method: PaymentMethod | null;
   subtotal_usd: number;
+  credit_applied_usd: number;
   deposit_usd: number;
   balance_usd: number;
   created_at: string;
@@ -34,10 +36,10 @@ export default async function OrderDetailPage({
   searchParams,
 }: {
   params: Promise<{ code: string }>;
-  searchParams: Promise<{ placed?: string }>;
+  searchParams: Promise<{ placed?: string; paid?: string }>;
 }) {
   const { code } = await params;
-  const { placed } = await searchParams;
+  const { placed, paid } = await searchParams;
 
   const supabase = await createClient();
   const {
@@ -48,7 +50,7 @@ export default async function OrderDetailPage({
   const { data } = await supabase
     .from("orders")
     .select(
-      "id, code, status, payment_method, subtotal_usd, deposit_usd, balance_usd, created_at, ships(name, berth, eta), order_items(name, emoji, unit_price_usd, qty)"
+      "id, code, status, payment_method, subtotal_usd, deposit_usd, balance_usd, credit_applied_usd, created_at, ships(name, berth, eta), order_items(name, emoji, unit_price_usd, qty)"
     )
     .eq("code", code.toUpperCase())
     .maybeSingle();
@@ -57,6 +59,7 @@ export default async function OrderDetailPage({
   if (!o) notFound();
 
   const itemCount = o.order_items.reduce((a, i) => a + i.qty, 0);
+  const dueNow = Math.max(0, Number(o.deposit_usd) - Number(o.credit_applied_usd));
   const stepNow = STEP_NOW[o.status];
 
   const steps = [
@@ -106,15 +109,20 @@ export default async function OrderDetailPage({
           </div>
         )}
 
-        {o.status === "awaiting_deposit" && (
+        {o.status === "awaiting_deposit" && paid ? (
           <div className="stack" style={{ marginTop: 10 }}>
             <p className="note">
-              Deposit of <b>{usd(Number(o.deposit_usd))}</b> pending — we&apos;ll send your secure
-              payment link shortly (usually within the hour). Your gangway window is reserved
-              meanwhile.
+              💳 Payment approved — your order updates in a few seconds. Pull down to refresh.
             </p>
           </div>
-        )}
+        ) : o.status === "awaiting_deposit" ? (
+          <div className="stack" style={{ marginTop: 10 }}>
+            <p className="note">
+              Deposit of <b>{usd(dueNow)}</b> pending — your gangway window is reserved meanwhile.
+            </p>
+            <PayNowButton code={o.code} amount={usd(dueNow)} />
+          </div>
+        ) : null}
         {o.status === "credited" && (
           <div className="stack" style={{ marginTop: 10 }}>
             <p className="note">
@@ -171,6 +179,12 @@ export default async function OrderDetailPage({
             <span>Deposit (30%)</span>
             <b>{usd(Number(o.deposit_usd))}</b>
           </div>
+          {Number(o.credit_applied_usd) > 0 && (
+            <div className="r">
+              <span>🧢 Captain credit applied</span>
+              <b style={{ color: "var(--teal)" }}>−{usd(Number(o.credit_applied_usd))}</b>
+            </div>
+          )}
           <div className="r">
             <span>Balance at the gangway</span>
             <b>{usd(Number(o.balance_usd))}</b>
