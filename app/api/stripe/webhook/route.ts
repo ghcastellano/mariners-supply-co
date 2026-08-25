@@ -10,6 +10,11 @@ export async function POST(request: Request) {
   const secretKey = process.env.STRIPE_SECRET_KEY;
   const signingSecret = process.env.STRIPE_WEBHOOK_SECRET;
   if (!secretKey || !signingSecret) {
+    // 503 DE PROPÓSITO — o oposto do cron. Aqui devolver 200 faria o
+    // Stripe marcar o evento como entregue e a confirmação de pagamento
+    // se perderia para sempre: o cliente pagaria e o pedido ficaria
+    // "aguardando depósito". Com 5xx o Stripe reentrega por até 3 dias,
+    // dando tempo de corrigir a configuração sem perder dinheiro.
     return Response.json({ error: "not configured" }, { status: 503 });
   }
 

@@ -21,7 +21,13 @@ export const maxDuration = 60;
  */
 export async function GET(request: Request) {
   const secret = process.env.CRON_SECRET;
-  if (!secret) return Response.json({ error: "not configured" }, { status: 503 });
+  // Falta de configuração NÃO é falha de servidor: devolver 5xx aqui faz
+  // o monitoramento gritar durante a janela de propagação de env var,
+  // e não há nada que o cliente possa reexecutar. 200 + ok:false mantém
+  // o alarme limpo e o motivo explícito no corpo.
+  if (!secret) {
+    return Response.json({ ok: false, reason: "CRON_SECRET ausente no ambiente" });
+  }
 
   const auth = request.headers.get("authorization");
   const url = new URL(request.url);
