@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import TopBar from "@/components/TopBar";
+import PhoneInput from "@/components/PhoneInput";
 import { useCart } from "@/lib/cart";
 import { createClient } from "@/lib/supabase/client";
 import { brl, DEPOSIT_PCT, hoursUntil, usd } from "@/lib/format";
@@ -56,9 +57,16 @@ export default function CheckoutClient({
   const creditApplied = useCredit ? Math.min(creditBalance, deposit) : 0;
   const payNow = Math.max(0, deposit - creditApplied);
   const coveredByCredit = creditApplied > 0 && payNow <= 0.009;
+  // WhatsApp é o único canal que alcança quem já embarcou — sem ele
+  // um pedido não retirado vira prejuízo sem forma de resolver.
+  const canSubmit = ready && count > 0 && whatsapp.length > 0 && contactName.trim().length > 1;
 
   function submit() {
     if (!ship) return;
+    if (!whatsapp) {
+      setErr("Add your WhatsApp — it's how we reach you if you're not at the gangway.");
+      return;
+    }
     setErr(null);
     startTransition(async () => {
       const res = await placeOrder({
@@ -126,7 +134,7 @@ export default function CheckoutClient({
               <p className="hint">
                 {coveredByCredit
                   ? "Your Captain credit covers the whole deposit — nothing to pay now."
-                  : `≈ ${brl(payNow)} no cartão agora. Se o navio desviar de Santos, o depósito vira crédito integral para a próxima escala — sem burocracia.`}
+                  : `≈ ${brl(payNow)} charged now — your bank does the conversion, no house spread. If your ship skips Santos, the deposit becomes full credit for your next call. No paperwork.`}
               </p>
             </div>
 
@@ -157,16 +165,7 @@ export default function CheckoutClient({
                   placeholder="Who receives the kit"
                 />
               </div>
-              <div className="field">
-                <label htmlFor="wa">WhatsApp (optional)</label>
-                <input
-                  id="wa"
-                  inputMode="tel"
-                  value={whatsapp}
-                  onChange={(e) => setWhatsapp(e.target.value)}
-                  placeholder="+55 13 9…"
-                />
-              </div>
+              <PhoneInput value={whatsapp} onChange={setWhatsapp} required />
               <div className="field">
                 <label htmlFor="note">Note (optional)</label>
                 <input
@@ -188,7 +187,7 @@ export default function CheckoutClient({
         )}
       </main>
       <div className="cta-dock">
-        <button className="cta" onClick={submit} disabled={pending || !ready || count === 0}>
+        <button className="cta" onClick={submit} disabled={pending || !canSubmit}>
           <span>
             {pending
               ? "Placing order…"

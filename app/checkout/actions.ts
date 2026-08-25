@@ -78,6 +78,13 @@ export async function placeOrder(input: PlaceOrderInput): Promise<PlaceOrderResu
   } = await supabase.auth.getUser();
   if (!user) return { ok: false, error: "You need to sign in to place an order." };
 
+  // WhatsApp é obrigatório: é o único canal que alcança um tripulante
+  // que já embarcou. Validado no servidor, não só na tela.
+  const wa = (input.contactWhatsapp ?? "").replace(/[^\d+]/g, "");
+  if (!/^\+\d{8,15}$/.test(wa)) {
+    return { ok: false, error: "A valid WhatsApp number is required." };
+  }
+
   const items = (input.items ?? []).filter(
     (i) => typeof i.id === "string" && Number.isInteger(i.qty) && i.qty > 0 && i.qty <= 99
   );
@@ -126,7 +133,7 @@ export async function placeOrder(input: PlaceOrderInput): Promise<PlaceOrderResu
         deposit_usd: deposit,
         balance_usd: balance,
         contact_name: input.contactName?.slice(0, 120) || null,
-        contact_whatsapp: input.contactWhatsapp?.slice(0, 40) || null,
+        contact_whatsapp: wa,
         note: input.note?.slice(0, 500) || null,
       })
       .select("id, code")

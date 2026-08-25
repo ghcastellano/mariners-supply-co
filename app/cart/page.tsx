@@ -101,8 +101,9 @@ export default function CartPage() {
                 <b>{usd(subtotal - deposit)}</b>
               </div>
               <p className="hint">
-                ≈ {brl(deposit)} no cartão agora. Se o navio desviar de Santos, o depósito vira
-                crédito integral para a próxima escala — sem burocracia.
+                ≈ {brl(deposit)} charged now — your bank does the conversion, no house spread. If
+                your ship skips Santos, the deposit becomes full credit for your next call. No
+                paperwork.
               </p>
             </div>
             {!ship && (

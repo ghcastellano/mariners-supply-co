@@ -67,7 +67,7 @@ export default async function CaptainPage() {
           <div className="qr" dangerouslySetInnerHTML={{ __html: qr }} />
           <div className="info">
             <div className="code">{code}</div>
-            <p>No boné, no camarote, no grupo do navio — quem escanear compra no seu nome.</p>
+            <p>On your cap, in the mess room, in the ship&apos;s group — whoever scans it orders in your name.</p>
             <ShareCode code={code} link={link} />
           </div>
         </div>
@@ -103,12 +103,11 @@ export default async function CaptainPage() {
         </div>
 
         <p className="crew-note">
-          O crédito é lançado quando o depósito do pedido indicado é confirmado, vale em qualquer
-          escala futura em Santos e não expira. Programa aberto e às claras — o comandante do navio
-          sabe e aprova. Comissão é só para tripulantes; nunca para funcionários de terminal,
-          agência ou autoridade.{" "}
+          Credit lands as soon as the deposit on a referred order clears, works on any future call
+          at Santos and never expires. Open and above board — the master knows and approves.
+          Commission is for crew only; never for terminal staff, agency or authorities.{" "}
           <Link className="alink" href="/orders">
-            Ver meus pedidos →
+            See my orders →
           </Link>
         </p>
       </main>

@@ -643,3 +643,24 @@ input:-webkit-autofill:focus {
   .stage-inner > *:nth-child(5) { animation-delay: .24s; }
   @keyframes stageIn { from { opacity: 0; transform: translateY(10px); } }
 }
+
+/* ===== telefone com seletor de país ===== */
+.phone-row { display: grid; grid-template-columns: 118px 1fr; gap: 8px; }
+.phone-country {
+  background: var(--card); border: 1px solid var(--line-hi); border-radius: 12px;
+  color: var(--ink); font-size: 16px; padding: 12px 8px; appearance: none;
+  font-family: var(--font-body);
+}
+.phone-number {
+  display: flex; align-items: center; gap: 6px;
+  background: var(--card); border: 1px solid var(--line-hi); border-radius: 12px;
+  padding: 0 12px;
+}
+.phone-number:focus-within { outline: 2px solid var(--teal); outline-offset: 1px; border-color: transparent; }
+.phone-dial {
+  font-family: var(--font-mono); font-size: 15px; color: var(--muted); flex: none;
+}
+.phone-number input {
+  flex: 1; min-width: 0; background: none; border: 0; outline: none;
+  color: var(--ink); font-family: var(--font-mono); font-size: 16px; padding: 12px 0;
+}
