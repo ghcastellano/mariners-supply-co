@@ -42,6 +42,8 @@ export type ProductCard = {
   primary_image_path: string | null;
   badge: "promo" | "new" | "outlet" | null;
   sku: string | null;
+  /** Variante mais barata ativa — é o que o botão da grade adiciona. */
+  default_variant_id: string | null;
   cursor: string;
 };
 

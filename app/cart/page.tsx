@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import TopBar from "@/components/TopBar";
@@ -8,53 +9,87 @@ import BottomNav from "@/components/BottomNav";
 import { useCart } from "@/lib/cart";
 import { createClient } from "@/lib/supabase/client";
 import { supabaseConfigured } from "@/lib/env";
-import { brl, DEPOSIT_PCT, hoursUntil, orderCloseAt, usd } from "@/lib/format";
-import type { Product } from "@/lib/types";
+import { imageUrl } from "@/lib/catalog";
+import { brl, splitOrder, usd } from "@/lib/money";
+
+type Line = {
+  id: string;
+  sku: string;
+  option_label: string | null;
+  price_cents: number;
+  compare_at_cents: number | null;
+  stock_qty: number;
+  track_stock: boolean;
+  image_path: string | null;
+  active: boolean;
+  products: {
+    name: string;
+    slug: string;
+    primary_image_path: string | null;
+    active: boolean;
+  } | null;
+};
 
 export default function CartPage() {
   const router = useRouter();
-  const { ship, items, change, count, ready } = useCart();
-  const [products, setProducts] = useState<Product[] | null>(null);
+  const { items, change, count, ready } = useCart();
+  const [lines, setLines] = useState<Line[] | null>(null);
+
+  const ids = useMemo(() => Object.keys(items), [items]);
 
   useEffect(() => {
-    if (!supabaseConfigured) {
-      setProducts([]);
+    if (!ready) return;
+    if (!supabaseConfigured || ids.length === 0) {
+      setLines([]);
       return;
     }
+    // Busca só as variantes do carrinho. Puxar o catálogo inteiro para
+    // achar 3 linhas funciona com 12 SKUs e mata a página com 2 mil.
     const supabase = createClient();
     supabase
-      .from("products")
-      .select("id, name, description, emoji, category, price_usd, active, sort_order")
-      .then(({ data }) => setProducts((data ?? []) as Product[]));
-  }, []);
+      .from("product_variants")
+      .select(
+        `id, sku, option_label, price_cents, compare_at_cents, stock_qty,
+         track_stock, image_path, active,
+         products!inner(name, slug, primary_image_path, active)`
+      )
+      .in("id", ids)
+      .then(({ data }) => setLines((data ?? []) as unknown as Line[]));
+  }, [ready, ids.join(",")]);
 
-  const lines = useMemo(() => {
-    if (!products) return [];
-    return Object.entries(items)
-      .map(([id, q]) => {
-        const p = products.find((x) => x.id === id);
-        return p ? { ...p, q } : null;
-      })
-      .filter(Boolean) as (Product & { q: number })[];
-  }, [products, items]);
+  const rows = useMemo(
+    () =>
+      (lines ?? [])
+        .filter((l) => l.active && l.products?.active)
+        .map((l) => ({ ...l, qty: items[l.id] ?? 0 }))
+        .filter((l) => l.qty > 0),
+    [lines, items]
+  );
 
-  const subtotal = lines.reduce((s, l) => s + Number(l.price_usd) * l.q, 0);
-  const deposit = subtotal * DEPOSIT_PCT;
-  const windowOpen = ship ? hoursUntil(orderCloseAt(ship.eta, ship.cutoff_hours)) > 0 : false;
-  const canCheckout = ready && count > 0 && !!ship && windowOpen;
+  // Item que saiu do ar entre a adição e agora: some da conta, mas o
+  // cliente precisa saber por que — sumir calado é pior que avisar.
+  const dropped = useMemo(
+    () => (lines === null ? 0 : ids.length - rows.length),
+    [lines, ids.length, rows.length]
+  );
+
+  const subtotal = rows.reduce((s, l) => s + l.price_cents * l.qty, 0);
+  const saved = rows.reduce(
+    (s, l) => s + (l.compare_at_cents ? (l.compare_at_cents - l.price_cents) * l.qty : 0),
+    0
+  );
+  const split = splitOrder(subtotal);
 
   return (
     <>
       <TopBar title="Your order" backHref="/shop" />
       <main className="pb-both">
-        {products === null || !ready ? (
+        {lines === null || !ready ? (
           <div className="spin" aria-label="Loading" />
-        ) : count === 0 ? (
+        ) : count === 0 || rows.length === 0 ? (
           <div className="empty">
             <div className="i">🛒</div>
             Your kit is empty, sailor.
-            <br />
-            Everything you order rides with your ship&apos;s ETA.
             <p style={{ marginTop: 18 }}>
               <Link className="alink" href="/shop">
                 ⚓ Browse the catalog →
@@ -63,69 +98,87 @@ export default function CartPage() {
           </div>
         ) : (
           <>
+            {dropped > 0 && (
+              <div className="stack" style={{ paddingTop: 12 }}>
+                <p className="alert">
+                  {dropped} item{dropped === 1 ? "" : "s"} left the catalog since you added
+                  {dropped === 1 ? " it" : " them"} — removed from your order.
+                </p>
+              </div>
+            )}
+
             <div className="cart-list">
-              {lines.map((l) => (
-                <div className="ci" key={l.id}>
-                  <div className="em">{l.emoji}</div>
-                  <div>
-                    <div className="nm">{l.name}</div>
-                    <div className="pr">{usd(Number(l.price_usd))} each</div>
+              {rows.map((l) => {
+                const src = imageUrl(l.image_path ?? l.products?.primary_image_path);
+                const low = l.track_stock && l.stock_qty > 0 && l.stock_qty < l.qty;
+                return (
+                  <div className="ci" key={l.id}>
+                    <Link href={`/p/${l.products?.slug}`} className="ci-thumb" prefetch={false}>
+                      {src ? (
+                        <Image src={src} alt="" fill sizes="52px" style={{ objectFit: "contain" }} />
+                      ) : (
+                        <span aria-hidden>📦</span>
+                      )}
+                    </Link>
+                    <div>
+                      <div className="nm">{l.products?.name}</div>
+                      {l.option_label && <div className="pr">{l.option_label}</div>}
+                      <div className="pr mono">
+                        {l.compare_at_cents && <s>{usd(l.compare_at_cents)}</s>}{" "}
+                        {usd(l.price_cents)} each
+                      </div>
+                      <div className="sku mono">SKU {l.sku}</div>
+                      {low && <div className="pr" style={{ color: "var(--amber)" }}>
+                        Only {l.stock_qty} left
+                      </div>}
+                    </div>
+                    <div className="qty">
+                      <button onClick={() => change(l.id, -1)} aria-label="Less">−</button>
+                      <b>{l.qty}</b>
+                      <button onClick={() => change(l.id, 1)} aria-label="More">+</button>
+                    </div>
                   </div>
-                  <div className="qty">
-                    <button onClick={() => change(l.id, -1)} aria-label="Less">
-                      −
-                    </button>
-                    <b>{l.q}</b>
-                    <button onClick={() => change(l.id, 1)} aria-label="More">
-                      +
-                    </button>
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
+
             <div className="summary">
               <div className="r">
                 <span>Subtotal</span>
                 <b>{usd(subtotal)}</b>
               </div>
+              {saved > 0 && (
+                <div className="r">
+                  <span>You save</span>
+                  <b style={{ color: "var(--teal)" }}>−{usd(saved)}</b>
+                </div>
+              )}
               <div className="r">
-                <span>Gangway delivery — {ship ? ship.name : "select ship"}</span>
-                <b>USD 0.00</b>
+                <span>Delivery on board</span>
+                <b style={{ color: "var(--teal)" }}>Free</b>
               </div>
               <div className="r total">
                 <span>Deposit now (30%)</span>
-                <b>{usd(deposit)}</b>
+                <b>{usd(split.deposit)}</b>
               </div>
               <div className="r">
                 <span>Balance at the gangway</span>
-                <b>{usd(subtotal - deposit)}</b>
+                <b>{usd(split.balance)}</b>
               </div>
               <p className="hint">
-                ≈ {brl(deposit)} charged now — your bank does the conversion, no house spread. If
-                your ship skips Santos, the deposit becomes full credit for your next call. No
-                paperwork.
+                ≈ {brl(split.deposit)} charged now — your bank does the conversion, no house
+                spread. If your ship skips Santos, the deposit becomes full credit for your next
+                call. No paperwork.
               </p>
             </div>
-            {!ship && (
-              <div className="stack">
-                <p className="alert">Pick your ship first so we can match your delivery window.</p>
-              </div>
-            )}
-            {ship && !windowOpen && (
-              <div className="stack">
-                <p className="alert">
-                  Orders for {ship.name} are closed. Pick another vessel on the home screen.
-                </p>
-              </div>
-            )}
           </>
         )}
       </main>
-      {ready && count > 0 && (
+      {ready && rows.length > 0 && (
         <div className="cta-dock above-nav">
-          <button className="cta" disabled={!canCheckout} onClick={() => router.push("/checkout")}>
+          <button className="cta" onClick={() => router.push("/checkout")}>
             <span>Continue to deposit</span>
-            <span className="mono">{usd(deposit)}</span>
+            <span className="mono">{usd(split.deposit)}</span>
           </button>
         </div>
       )}

@@ -699,3 +699,245 @@ input:-webkit-autofill:focus {
   object-fit: cover; background: var(--abyss);
   border-top: 1px solid var(--line);
 }
+
+/* ===== catálogo v2 ===== */
+/* Grade de 2 colunas no celular. O concorrente usa 1 e gasta uma tela
+   por produto; com milhares de SKUs isso é rolagem infinita à toa. */
+.pgrid {
+  display: grid; grid-template-columns: repeat(2, 1fr);
+  gap: 10px; padding: 12px 14px 4px;
+}
+@media (min-width: 560px) { .pgrid { grid-template-columns: repeat(3, 1fr); gap: 12px; } }
+@media (min-width: 900px) { .pgrid { grid-template-columns: repeat(4, 1fr); } }
+
+.pcard {
+  display: flex; flex-direction: column;
+  background: var(--card); border: 1px solid var(--line);
+  border-radius: 14px; overflow: hidden;
+  transition: border-color .16s, transform .16s;
+}
+.pcard:hover { border-color: var(--line-hi); transform: translateY(-2px); }
+.pcard.out { opacity: .62; }
+
+.pcard-media {
+  position: relative; display: block; aspect-ratio: 1 / 1;
+  /* Foto de produto vem recortada em fundo branco pelo fornecedor:
+     manter o branco é o que faz o produto parecer produto. */
+  background: #F4F7FA; line-height: 0;
+}
+.pcard-img { object-fit: contain; padding: 8px; }
+.pcard-noimg {
+  position: absolute; inset: 0; display: grid; place-items: center;
+  font-size: 34px; opacity: .35;
+}
+
+.pbadge {
+  position: absolute; top: 7px; left: 7px; z-index: 2;
+  font-family: var(--font-mono); font-size: 9.5px; letter-spacing: .1em;
+  text-transform: uppercase; font-weight: 700;
+  padding: 4px 8px; border-radius: 999px; color: var(--amber-ink);
+}
+.pbadge.promo  { background: var(--amber); }
+.pbadge.new    { background: var(--teal); }
+.pbadge.outlet { background: #C9D6E4; }
+
+.poff {
+  position: absolute; top: 7px; right: 7px; z-index: 2;
+  font-family: var(--font-mono); font-size: 10.5px; font-weight: 700;
+  padding: 4px 7px; border-radius: 8px;
+  background: var(--danger); color: #fff;
+}
+.pout {
+  position: absolute; inset: auto 0 0 0; z-index: 2;
+  background: rgba(1,6,13,.82); color: var(--muted);
+  font-size: 10.5px; letter-spacing: .12em; text-transform: uppercase;
+  text-align: center; padding: 5px 0; font-family: var(--font-mono);
+}
+
+.pcard-body { display: flex; flex-direction: column; gap: 5px; padding: 10px 11px 11px; flex: 1; }
+.pbrand {
+  font-family: var(--font-mono); font-size: 9.5px; letter-spacing: .14em;
+  text-transform: uppercase; color: var(--faint);
+}
+.pname {
+  color: var(--ink); font-size: 13px; font-weight: 600; line-height: 1.28;
+  text-decoration: none;
+  /* Duas linhas fixas para os cards da mesma fileira terminarem
+     alinhados — grade desalinhada parece defeito. */
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+  overflow: hidden; min-height: 2.56em;
+}
+.pname:hover { color: var(--amber-hi); }
+
+.pprice { margin-top: auto; padding-top: 4px; display: flex; flex-direction: column; gap: 1px; }
+.pprice .was {
+  font-family: var(--font-mono); font-size: 11px; color: var(--faint);
+  text-decoration-thickness: 1px;
+}
+.pprice .now { font-family: var(--font-mono); font-size: 16px; color: var(--ink); font-weight: 700; }
+.pprice .from { font-style: normal; font-size: 11px; color: var(--faint); font-weight: 500; }
+
+.padd {
+  margin-top: 8px; width: 100%; border: 0; border-radius: 10px;
+  background: var(--amber); color: var(--amber-ink);
+  font-family: var(--font-body); font-size: 12.5px; font-weight: 700;
+  padding: 9px 8px; cursor: pointer; transition: filter .15s, background .15s;
+}
+.padd:hover { filter: brightness(1.06); }
+.padd.in { background: var(--teal); }
+.padd.ghost { background: transparent; border: 1px solid var(--line-hi); color: var(--ink); }
+.padd:disabled { background: transparent; border: 1px solid var(--line); color: var(--faint); cursor: not-allowed; }
+
+/* ===== grade de categorias ===== */
+.catgrid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 9px; padding: 4px 14px 10px; }
+@media (min-width: 560px) { .catgrid { grid-template-columns: repeat(3, 1fr); } }
+.catcard {
+  display: flex; align-items: center; gap: 10px;
+  background: var(--card); border: 1px solid var(--line); border-radius: 13px;
+  padding: 13px 12px; text-decoration: none; color: var(--ink);
+  transition: border-color .16s, background .16s;
+}
+.catcard:hover { border-color: rgba(255,182,72,.45); background: var(--card-hi); }
+.catcard .ic { font-size: 20px; line-height: 1; flex: none; }
+.catcard .tx { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
+.catcard .nm { font-size: 13px; font-weight: 600; line-height: 1.2; }
+.catcard .ct { font-family: var(--font-mono); font-size: 10px; color: var(--faint); }
+
+/* ===== barra de filtro/ordenação ===== */
+.listbar {
+  display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+  padding: 10px 14px 2px;
+}
+.listbar .count { font-family: var(--font-mono); font-size: 11px; color: var(--faint); margin-right: auto; }
+.sortsel {
+  background: var(--card); border: 1px solid var(--line-hi); border-radius: 10px;
+  color: var(--ink); font-size: 13px; padding: 7px 10px; font-family: var(--font-body);
+}
+
+/* ===== busca ===== */
+.searchwrap { padding: 10px 14px 2px; }
+.searchbox {
+  display: flex; align-items: center; gap: 8px;
+  background: var(--card); border: 1px solid var(--line-hi); border-radius: 12px;
+  padding: 0 12px;
+}
+.searchbox:focus-within { outline: 2px solid var(--teal); outline-offset: 1px; border-color: transparent; }
+.searchbox input {
+  flex: 1; min-width: 0; background: none; border: 0; outline: none; color: var(--ink);
+  font-size: 16px; /* 16px impede o zoom automático do iOS ao focar */
+  padding: 12px 0; font-family: var(--font-body);
+}
+.searchbox button { background: none; border: 0; color: var(--amber); font-size: 17px; cursor: pointer; padding: 4px; }
+
+/* ===== ficha do produto ===== */
+.pdp-hero {
+  position: relative; aspect-ratio: 1 / 1; background: #F4F7FA;
+  margin: 12px 14px 0; border-radius: 16px; overflow: hidden; line-height: 0;
+}
+.pdp-img { object-fit: contain; padding: 18px; }
+.pdp-noimg { position: absolute; inset: 0; display: grid; place-items: center; font-size: 52px; opacity: .3; }
+
+.pdp-thumbs {
+  display: flex; gap: 8px; padding: 10px 14px 0; overflow-x: auto;
+  scrollbar-width: none; -webkit-overflow-scrolling: touch;
+}
+.pdp-thumbs::-webkit-scrollbar { display: none; }
+.pdp-thumb {
+  position: relative; flex: none; width: 58px; height: 58px; padding: 4px;
+  background: #F4F7FA; border: 2px solid transparent; border-radius: 10px;
+  cursor: pointer; overflow: hidden;
+}
+.pdp-thumb.on { border-color: var(--amber); }
+
+.pdp-head { padding: 14px 16px 0; }
+.pdp-head h1 {
+  font-family: var(--font-disp); font-weight: 800; font-size: 23px;
+  line-height: 1.15; margin: 4px 0 0; letter-spacing: -.01em; color: var(--ink);
+}
+.pdp-head .lead { color: var(--muted); font-size: 14px; line-height: 1.5; margin: 7px 0 0; }
+
+.pdp-buy {
+  margin: 14px 16px 0; background: var(--card); border: 1px solid var(--line);
+  border-radius: 16px; padding: 15px 16px;
+}
+.stockline {
+  display: flex; align-items: center; gap: 7px;
+  font-size: 12.5px; color: var(--teal); font-weight: 600; margin-bottom: 12px;
+}
+.stockline i { width: 8px; height: 8px; border-radius: 50%; background: var(--teal); flex: none; }
+.stockline.out { color: var(--faint); }
+.stockline.out i { background: var(--faint); }
+
+.pdp-facts { margin: 0 0 14px; display: flex; flex-direction: column; }
+.pdp-facts > div {
+  display: flex; justify-content: space-between; gap: 12px;
+  padding: 8px 0; border-top: 1px solid var(--line);
+}
+.pdp-facts > div:first-child { border-top: 0; padding-top: 0; }
+.pdp-facts dt { color: var(--faint); font-size: 12.5px; margin: 0; }
+.pdp-facts dd { color: var(--ink); font-size: 12.5px; margin: 0; text-align: right; }
+
+.pdp-price { display: flex; flex-direction: column; align-items: flex-end; gap: 1px; margin: 4px 0 12px; }
+.pdp-price .was { font-family: var(--font-mono); font-size: 13px; color: var(--faint); }
+.pdp-price .now { font-family: var(--font-mono); font-size: 26px; font-weight: 700; color: var(--ink); }
+.pdp-price .alt { font-size: 11px; color: var(--faint); }
+
+.pdp-actions { display: flex; gap: 10px; align-items: stretch; }
+.pdp-actions .btn { flex: 1; margin: 0; }
+.qty {
+  display: flex; align-items: center; gap: 2px; flex: none;
+  border: 1px solid var(--line-hi); border-radius: 13px; background: var(--night);
+}
+.qty button {
+  width: 38px; height: 46px; background: none; border: 0; color: var(--ink);
+  font-size: 19px; cursor: pointer;
+}
+.qty span { min-width: 26px; text-align: center; font-size: 15px; color: var(--ink); }
+
+.pdp-block { margin: 18px 16px 0; }
+.pdp-block h3 {
+  font-family: var(--font-disp); font-size: 16px; font-weight: 700;
+  color: var(--ink); margin: 0 0 9px;
+}
+.pdp-text { color: var(--muted); font-size: 14px; line-height: 1.6; margin: 0; }
+.specs { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 7px; }
+.specs li {
+  position: relative; padding-left: 16px; color: var(--muted);
+  font-size: 13.5px; line-height: 1.5;
+}
+.specs li::before {
+  content: "•"; position: absolute; left: 2px; top: -1px;
+  color: var(--amber); font-size: 15px;
+}
+
+/* Barra fixa de compra: a ficha é longa e ninguém deveria rolar de
+   volta ao topo para comprar. Respeita a área segura do iPhone. */
+.buydock {
+  position: fixed; left: 50%; transform: translateX(-50%); bottom: 0; z-index: 60;
+  width: 100%; max-width: var(--shell-w);
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 14px calc(10px + env(safe-area-inset-bottom));
+  background: rgba(4,13,26,.94); backdrop-filter: blur(12px);
+  border-top: 1px solid var(--line-hi);
+}
+.buydock .thumb {
+  position: relative; width: 44px; height: 44px; flex: none;
+  background: #F4F7FA; border-radius: 9px; overflow: hidden;
+}
+.buydock .txt { display: flex; flex-direction: column; min-width: 0; flex: 1; }
+.buydock .nm {
+  color: var(--ink); font-size: 12.5px; font-weight: 600;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.buydock .pr { color: var(--amber); font-size: 14px; font-weight: 700; }
+.buydock .btn { margin: 0; flex: none; width: auto; padding: 11px 20px; }
+.pb-dock { padding-bottom: 96px; }
+
+/* miniatura real no lugar do emoji na linha do carrinho */
+.ci-thumb {
+  position: relative; width: 50px; height: 50px; flex: none;
+  background: #F4F7FA; border-radius: 10px; overflow: hidden;
+  display: grid; place-items: center; font-size: 22px; text-decoration: none;
+}
+.ci .sku { font-size: 10px; color: var(--faint); letter-spacing: .06em; margin-top: 2px; }
+.ci .pr s { color: var(--faint); margin-right: 4px; }

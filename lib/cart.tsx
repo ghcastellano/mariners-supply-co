@@ -13,17 +13,21 @@ export type CartShip = {
 type CartState = {
   ready: boolean;
   ship: CartShip | null;
-  items: Record<string, number>; // product_id -> qty
+  items: Record<string, number>; // variant_id -> qty
   setShip: (ship: CartShip | null) => void;
-  add: (productId: string) => void;
-  change: (productId: string, delta: number) => void;
+  add: (variantId: string, qty?: number) => void;
+  change: (variantId: string, delta: number) => void;
   clear: () => void;
   count: number;
 };
 
 const CartContext = createContext<CartState | null>(null);
 
-const LS_KEY = "ms.cart.v1";
+// v2: as chaves passaram de produto para variante — é a variante que
+// tem preço e estoque. Carrinho antigo é descartado em vez de migrado:
+// os ids não se traduzem, e ressuscitar um carrinho errado é pior que
+// um carrinho vazio.
+const LS_KEY = "ms.cart.v2";
 
 type Persisted = { ship: CartShip | null; items: Record<string, number> };
 
@@ -57,8 +61,8 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
   const setShip = useCallback((s: CartShip | null) => setShipState(s), []);
 
-  const add = useCallback((id: string) => {
-    setItems((prev) => ({ ...prev, [id]: (prev[id] ?? 0) + 1 }));
+  const add = useCallback((id: string, qty = 1) => {
+    setItems((prev) => ({ ...prev, [id]: (prev[id] ?? 0) + Math.max(1, qty) }));
   }, []);
 
   const change = useCallback((id: string, delta: number) => {

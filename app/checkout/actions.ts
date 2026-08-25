@@ -4,10 +4,12 @@ import { headers } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
 import { getStripe, stripeConfigured } from "@/lib/stripe";
 import { SITE_URL, USD_BRL_RATE } from "@/lib/env";
-import { DEPOSIT_PCT, orderWindowOpen, usd } from "@/lib/format";
+import { usd } from "@/lib/format";
+import { splitOrder } from "@/lib/money";
 
 export type PlaceOrderInput = {
-  shipId: string;
+  /** Opcional: a grade do porto manda na promessa, não o navio. */
+  shipId?: string | null;
   applyCredit: boolean;
   contactName: string;
   contactWhatsapp: string;
@@ -90,35 +92,69 @@ export async function placeOrder(input: PlaceOrderInput): Promise<PlaceOrderResu
   );
   if (items.length === 0) return { ok: false, error: "Your kit is empty." };
 
-  const { data: ship } = await supabase
-    .from("ships")
-    .select("id, name, eta, cutoff_hours, active")
-    .eq("id", input.shipId)
-    .single();
-  if (!ship || !ship.active) return { ok: false, error: "Vessel not found — pick your ship again." };
-  if (!orderWindowOpen(ship.eta, ship.cutoff_hours))
-    return { ok: false, error: `Orders for ${ship.name} are closed.` };
+  // Navio virou opcional: quem manda na promessa de entrega é a grade
+  // do porto, que vale para qualquer navio que atracar lá. O navio
+  // continua entrando no pedido quando existe — é ele que a equipe
+  // procura na prancha.
+  let ship: { id: string; name: string } | null = null;
+  if (input.shipId) {
+    const { data } = await supabase
+      .from("ships")
+      .select("id, name, active")
+      .eq("id", input.shipId)
+      .maybeSingle();
+    if (data) ship = { id: data.id, name: data.name };
+  }
 
+  // Preço e estoque moram na VARIANTE. O carrinho manda ids de
+  // variante; o produto entra pelo join só para nome e foto.
   const ids = items.map((i) => i.id);
-  const { data: products, error: prodErr } = await supabase
-    .from("products")
-    .select("id, name, emoji, price_usd, active")
+  const { data: variants, error: prodErr } = await supabase
+    .from("product_variants")
+    .select(
+      `id, sku, option_label, price_cents, stock_qty, track_stock, active, image_path,
+       products!inner(id, name, emoji, slug, active, primary_image_path)`
+    )
     .in("id", ids);
   if (prodErr) return { ok: false, error: "Couldn't validate the catalog — try again." };
 
-  const byId = new Map((products ?? []).map((p) => [p.id, p]));
+  type Row = {
+    id: string; sku: string; option_label: string | null;
+    price_cents: number; stock_qty: number; track_stock: boolean;
+    active: boolean; image_path: string | null;
+    products: { id: string; name: string; emoji: string | null;
+                slug: string; active: boolean; primary_image_path: string | null };
+  };
+  const byId = new Map(((variants ?? []) as unknown as Row[]).map((v) => [v.id, v]));
+
   for (const i of items) {
-    const p = byId.get(i.id);
-    if (!p || !p.active)
+    const v = byId.get(i.id);
+    if (!v || !v.active || !v.products?.active)
       return { ok: false, error: "An item in your kit is no longer available — review your cart." };
+    // Estoque conferido no servidor: entre adicionar e fechar podem ter
+    // passado dias, e prometer o que não existe é o pior jeito de
+    // descobrir que acabou.
+    if (v.track_stock && v.stock_qty < i.qty)
+      return {
+        ok: false,
+        error: `${v.products.name} — only ${v.stock_qty} left. Adjust your cart.`,
+      };
   }
 
-  // Preços SEMPRE do banco — nunca do cliente.
-  const subtotal = round2(
-    items.reduce((s, i) => s + Number(byId.get(i.id)!.price_usd) * i.qty, 0)
-  );
-  const deposit = round2(subtotal * DEPOSIT_PCT);
-  const balance = round2(subtotal - deposit);
+  // Preços SEMPRE do banco, nunca do cliente. Em centavos inteiros.
+  const subtotalCents = items.reduce((s, i) => s + byId.get(i.id)!.price_cents * i.qty, 0);
+  const split = splitOrder(subtotalCents);
+  const subtotal = round2(subtotalCents / 100);
+  const deposit = round2(split.deposit / 100);
+  const balance = round2(split.balance / 100);
+
+  // Porto: por ora, o de entrega a bordo. Quando o perfil passar a
+  // guardar o porto do tripulante, ele entra aqui.
+  const { data: port } = await supabase
+    .from("ports")
+    .select("id")
+    .eq("slug", "santos")
+    .maybeSingle();
 
   for (let attempt = 0; attempt < 5; attempt++) {
     const code = "MS-" + Math.floor(1000 + Math.random() * 9000);
@@ -127,11 +163,16 @@ export async function placeOrder(input: PlaceOrderInput): Promise<PlaceOrderResu
       .insert({
         code,
         user_id: user.id,
-        ship_id: ship.id,
+        ship_id: ship?.id ?? null,
+        port_id: port?.id ?? null,
         status: "awaiting_deposit",
         subtotal_usd: subtotal,
         deposit_usd: deposit,
         balance_usd: balance,
+        subtotal_cents: subtotalCents,
+        deposit_cents: split.deposit,
+        balance_cents: split.balance,
+        vessel_name: ship?.name ?? null,
         contact_name: input.contactName?.slice(0, 120) || null,
         contact_whatsapp: wa,
         note: input.note?.slice(0, 500) || null,
@@ -145,13 +186,17 @@ export async function placeOrder(input: PlaceOrderInput): Promise<PlaceOrderResu
     }
 
     const rows = items.map((i) => {
-      const p = byId.get(i.id)!;
+      const v = byId.get(i.id)!;
       return {
         order_id: order.id,
-        product_id: p.id,
-        name: p.name,
-        emoji: p.emoji,
-        unit_price_usd: Number(p.price_usd),
+        product_id: v.products.id,
+        variant_id: v.id,
+        sku: v.sku,
+        name: v.option_label ? `${v.products.name} — ${v.option_label}` : v.products.name,
+        emoji: v.products.emoji,
+        image_path: v.image_path ?? v.products.primary_image_path,
+        unit_price_usd: round2(v.price_cents / 100),
+        unit_price_cents: v.price_cents,
         qty: i.qty,
       };
     });
@@ -182,7 +227,7 @@ export async function placeOrder(input: PlaceOrderInput): Promise<PlaceOrderResu
           {
             orderId: order.id,
             code: order.code,
-            shipName: ship.name,
+            shipName: ship?.name ?? "your vessel",
             amountUsd: dueNow,
             balanceUsd: balance,
             email: user.email ?? undefined,
