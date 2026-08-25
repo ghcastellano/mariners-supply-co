@@ -111,11 +111,14 @@ export const BADGE_LABEL: Record<string, string> = {
   outlet: "Outlet",
 };
 
+/** Nó da árvore — recursivo de verdade, não só um nível. */
+export type CategoryNode = Category & { children: CategoryNode[] };
+
 /** Monta a árvore a partir da lista plana — uma passada, sem recursão em consulta. */
-export function buildTree(rows: Category[]) {
-  const byId = new Map<string, Category & { children: Category[] }>();
+export function buildTree(rows: Category[]): CategoryNode[] {
+  const byId = new Map<string, CategoryNode>();
   for (const c of rows) byId.set(c.id, { ...c, children: [] });
-  const roots: (Category & { children: Category[] })[] = [];
+  const roots: CategoryNode[] = [];
   for (const c of byId.values()) {
     if (c.parent_id && byId.has(c.parent_id)) byId.get(c.parent_id)!.children.push(c);
     else roots.push(c);

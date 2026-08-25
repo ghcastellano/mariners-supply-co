@@ -1,0 +1,153 @@
+"use client";
+
+import Link from "next/link";
+import { useEffect, useMemo, useRef, useState } from "react";
+import type { CategoryNode } from "@/lib/catalog";
+
+/**
+ * Drawer de categorias, no fluxo do Sunny: drill-down, não acordeão.
+ *
+ * A diferença importa. Acordeão empurra a lista para baixo e obriga a
+ * rolar para achar onde estava; drill-down troca a tela inteira e o
+ * "voltar" devolve exatamente ao ponto anterior. A tripulação já
+ * aprendeu esse gesto no site deles — mudar custaria mais do que
+ * qualquer ganho de tela.
+ *
+ * [otim] O que acrescentamos sem mexer no gesto: foco preso enquanto
+ * aberto, fechar no Esc e aria-modal. No deles o foco escapa para a
+ * página atrás, o que deixa quem navega por teclado perdido.
+ */
+export default function CategoryDrawer({
+  open,
+  onClose,
+  tree,
+  cartCount,
+}: {
+  open: boolean;
+  onClose: () => void;
+  tree: CategoryNode[];
+  cartCount: number;
+}) {
+  const [stack, setStack] = useState<CategoryNode[]>([]);
+  const panel = useRef<HTMLDivElement>(null);
+  const current = stack[stack.length - 1] ?? null;
+  const list = current ? current.children : tree;
+
+  // Reabrir sempre começa na raiz: ninguém espera voltar no meio de
+  // uma árvore que fechou faz meia hora.
+  useEffect(() => {
+    if (!open) setStack([]);
+  }, [open]);
+
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        e.preventDefault();
+        onClose();
+        return;
+      }
+      if (e.key !== "Tab" || !panel.current) return;
+      const focusable = panel.current.querySelectorAll<HTMLElement>(
+        'a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])'
+      );
+      if (focusable.length === 0) return;
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault();
+        first.focus();
+      }
+    };
+    document.addEventListener("keydown", onKey);
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    panel.current?.querySelector<HTMLElement>("button, a")?.focus();
+    return () => {
+      document.removeEventListener("keydown", onKey);
+      document.body.style.overflow = prevOverflow;
+    };
+  }, [open, onClose]);
+
+  const title = useMemo(() => current?.name ?? null, [current]);
+  if (!open) return null;
+
+  return (
+    <>
+      <button className="drawer-ovl" aria-label="Close menu" onClick={onClose} />
+      <div
+        className="drawer"
+        ref={panel}
+        role="dialog"
+        aria-modal="true"
+        aria-label={title ? `${title} categories` : "Categories"}
+      >
+        <div className="drawer-top">
+          <Link href="/" className="sunlogo" onClick={onClose}>
+            Mariners <b>Supply</b>
+          </Link>
+          <button className="drawer-x" onClick={onClose} aria-label="Close">
+            ✕
+          </button>
+        </div>
+
+        <div className="drawer-list">
+          {current && (
+            <>
+              <button
+                className="drawer-back"
+                onClick={() => setStack((s) => s.slice(0, -1))}
+              >
+                ‹ {current.name}
+              </button>
+              <Link className="drawer-item" href={`/c/${current.slug}`} onClick={onClose}>
+                <span className="nm">See all {current.name}</span>
+              </Link>
+            </>
+          )}
+
+          {list.map((c) =>
+            c.children.length > 0 ? (
+              <button key={c.id} className="drawer-item" onClick={() => setStack((s) => [...s, c])}>
+                {c.icon && <span className="ic" aria-hidden>{c.icon}</span>}
+                <span className="nm">{c.name}</span>
+                <span className="chev" aria-hidden>›</span>
+              </button>
+            ) : (
+              <Link key={c.id} className="drawer-item" href={`/c/${c.slug}`} onClick={onClose}>
+                {c.icon && <span className="ic" aria-hidden>{c.icon}</span>}
+                <span className="nm">{c.name}</span>
+              </Link>
+            )
+          )}
+
+          {!current && (
+            <>
+              <Link className="drawer-item" href="/orders" onClick={onClose}>
+                <span className="ic" aria-hidden>📦</span>
+                <span className="nm">My Orders</span>
+              </Link>
+              <Link className="drawer-item" href="/captain" onClick={onClose}>
+                <span className="ic" aria-hidden>🧢</span>
+                <span className="nm">Captain rewards</span>
+              </Link>
+              <Link className="drawer-item" href="/account" onClick={onClose}>
+                <span className="ic" aria-hidden>👤</span>
+                <span className="nm">My Account</span>
+              </Link>
+            </>
+          )}
+        </div>
+
+        <div className="drawer-foot">
+          <Link className="btn" href="/cart" onClick={onClose}>
+            🛒 Shopping Cart{cartCount > 0 ? ` · ${cartCount}` : ""}
+          </Link>
+        </div>
+      </div>
+    </>
+  );
+}

@@ -1,24 +1,24 @@
 import Image from "next/image";
 import Link from "next/link";
 import AddToCart from "./AddToCart";
+import WishButton from "./WishButton";
 import { BADGE_LABEL, imageUrl, type ProductCard as Card } from "@/lib/catalog";
 import { discountPercent, usd } from "@/lib/money";
 
 /**
- * Card da grade.
+ * Card da grade, na anatomia do Sunny: foto em fundo branco, selo
+ * circular no canto, nome em MAIÚSCULAS centralizado, preço anterior
+ * riscado acima do atual, botão largo "Add to Cart" e o coração de
+ * wishlist ao lado.
  *
- * Duas diferenças deliberadas em relação ao card do concorrente, que
- * ocupa quase uma tela inteira por produto no celular:
+ * Uma coluna no celular, como o deles. Cheguei a fazer duas por
+ * densidade, mas a navegação já está validada com a mesma tripulação:
+ * mudar o que a pessoa já sabe usar custa mais do que a rolagem
+ * economizada. A densidade volta por outro caminho — desempenho.
  *
- * 1. Grade de duas colunas. Quem navega um catálogo de milhares de
- *    itens no wifi do navio precisa ver mais por rolagem, não uma
- *    vitrine bonita e vazia.
- * 2. O preço anterior fica ACIMA do atual, riscado e discreto, com a
- *    porcentagem em selo. Preço grande embaixo é o que a pessoa lê
- *    primeiro; o riscado é contexto, não protagonista.
- *
- * É Server Component: só o botão de adicionar é cliente. Uma grade de
- * 24 cards não manda 24 componentes interativos para o navegador.
+ * [otim] É Server Component: só o botão e o coração viram JavaScript.
+ * Uma grade de 24 cards não manda 24 componentes interativos para o
+ * navegador, que é o que pesa no Magento deles.
  */
 export default function ProductCardView({
   p,
@@ -70,13 +70,16 @@ export default function ProductCardView({
           </b>
         </div>
 
-        <AddToCart
-          variantId={p.default_variant_id}
-          slug={p.slug}
-          name={p.name}
-          variantCount={p.variant_count}
-          soldOut={soldOut}
-        />
+        <div className="paddrow">
+          <AddToCart
+            variantId={p.default_variant_id}
+            slug={p.slug}
+            name={p.name}
+            variantCount={p.variant_count}
+            soldOut={soldOut}
+          />
+          <WishButton productId={p.id} name={p.name} />
+        </div>
       </div>
     </article>
   );
