@@ -6,7 +6,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import TopBar from "@/components/TopBar";
 import GoogleButton from "@/components/GoogleButton";
 import { createClient } from "@/lib/supabase/client";
-import { safeNext } from "@/lib/format";
+import { PASSWORD_MIN, safeNext } from "@/lib/format";
 
 function SignupInner() {
   const router = useRouter();
@@ -22,8 +22,8 @@ function SignupInner() {
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
-    if (password.length < 6) {
-      setErr("Password needs at least 6 characters.");
+    if (password.length < PASSWORD_MIN) {
+      setErr(`Password needs at least ${PASSWORD_MIN} characters.`);
       return;
     }
     setBusy(true);
@@ -114,11 +114,11 @@ function SignupInner() {
                     id="password"
                     type="password"
                     required
-                    minLength={6}
+                    minLength={PASSWORD_MIN}
                     autoComplete="new-password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    placeholder="min. 6 characters"
+                    placeholder={`min. ${PASSWORD_MIN} characters`}
                   />
                 </div>
                 {err && <p className="alert">{err}</p>}

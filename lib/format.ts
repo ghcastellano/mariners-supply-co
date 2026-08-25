@@ -19,6 +19,9 @@ export const shortShipName = (name: string) => name.trim().split(/\s+/).slice(-1
 
 export const DEPOSIT_PCT = 0.3;
 
+/** Mínimo de senha — precisa bater com password_min_length no Supabase Auth. */
+export const PASSWORD_MIN = 8;
+
 /** Sanitiza o parâmetro ?next= — só caminhos internos. */
 export const safeNext = (v: string | null | undefined, fallback = "/shop") =>
   v && v.startsWith("/") && !v.startsWith("//") ? v : fallback;

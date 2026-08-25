@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import TopBar from "@/components/TopBar";
 import { createClient } from "@/lib/supabase/client";
+import { PASSWORD_MIN } from "@/lib/format";
 
 export default function ResetPasswordPage() {
   const router = useRouter();
@@ -22,8 +23,8 @@ export default function ResetPasswordPage() {
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
-    if (pw1.length < 6) {
-      setErr("Password needs at least 6 characters.");
+    if (pw1.length < PASSWORD_MIN) {
+      setErr(`Password needs at least ${PASSWORD_MIN} characters.`);
       return;
     }
     if (pw1 !== pw2) {
@@ -53,7 +54,7 @@ export default function ResetPasswordPage() {
         <div className="hero-mini">
           <p className="kicker">Reset</p>
           <h2>Set a new password.</h2>
-          <p>Fresh line, fresh knot. Minimum 6 characters.</p>
+          <p>{`Fresh line, fresh knot. Minimum ${PASSWORD_MIN} characters.`}</p>
         </div>
         <div className="stack">
           {hasSession === null ? (
@@ -78,7 +79,7 @@ export default function ResetPasswordPage() {
                   id="pw1"
                   type="password"
                   required
-                  minLength={6}
+                  minLength={PASSWORD_MIN}
                   autoComplete="new-password"
                   value={pw1}
                   onChange={(e) => setPw1(e.target.value)}
@@ -90,7 +91,7 @@ export default function ResetPasswordPage() {
                   id="pw2"
                   type="password"
                   required
-                  minLength={6}
+                  minLength={PASSWORD_MIN}
                   autoComplete="new-password"
                   value={pw2}
                   onChange={(e) => setPw2(e.target.value)}
