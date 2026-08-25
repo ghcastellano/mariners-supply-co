@@ -110,3 +110,17 @@ export async function saveProduct(formData: FormData) {
 
   revalidatePath("/admin/products");
 }
+
+/** Publica ou esconde um navio do line-up com um toque (fila de curadoria). */
+export async function toggleShipActive(formData: FormData) {
+  const supabase = await adminClient();
+  if (!supabase) return;
+
+  const id = String(formData.get("id") ?? "");
+  const active = formData.get("active") === "1";
+  if (!id) return;
+
+  await supabase.from("ships").update({ active }).eq("id", id);
+  revalidatePath("/admin/ships");
+  revalidatePath("/");
+}

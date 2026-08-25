@@ -565,3 +565,11 @@ input:-webkit-autofill:focus {
   color: var(--amber-hi); font-family: var(--font-mono); font-size: 9.5px;
   letter-spacing: .1em; font-weight: 700; vertical-align: middle;
 }
+
+.queue-row {
+  background: var(--card); border: 1px solid var(--line); border-radius: 14px;
+  padding: 12px 15px; display: grid; grid-template-columns: 1fr auto;
+  gap: 12px; align-items: center;
+}
+.queue-row .nm { font-weight: 600; font-size: 13.5px; }
+.queue-row .meta { font-family: var(--font-mono); font-size: 11px; color: var(--muted); }
