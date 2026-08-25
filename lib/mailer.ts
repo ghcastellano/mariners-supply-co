@@ -108,5 +108,21 @@ export async function sendOrderEmail(
   if (!result.sent) {
     await rpc.rpc("release_order_email", args);
   }
+
+  // E-mail que falha calado é o pior modo de falha aqui: o pedido
+  // segue certo e ninguém descobre que o marinheiro nunca soube.
+  // O log vai para o runtime da Vercel — sem endereço, que é dado
+  // do cliente e não tem por que ficar em log.
+  console.log(
+    JSON.stringify({
+      at: "order_email",
+      kind,
+      order: orderId,
+      sent: result.sent,
+      ...(result.skipped ? { skipped: result.skipped } : {}),
+      ...(result.error ? { error: result.error } : {}),
+    })
+  );
+
   return result;
 }
