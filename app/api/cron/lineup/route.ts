@@ -71,14 +71,31 @@ export async function GET(request: Request) {
   }
 
   const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-  const summary = { created: 0, eta_changed: 0, unchanged: 0, failed: 0 };
+  const summary = { created: 0, eta_changed: 0, new_voyage: 0, unchanged: 0, failed: 0 };
   const changes: Array<Record<string, unknown>> = [];
 
-  // Janela útil: só o que chega nos próximos 21 dias
+  // Janela útil: da última meia-noite operacional até 21 dias à frente.
+  // A lista da CODESP carrega registros históricos (achamos escalas de
+  // 2022) — sem piso, eles entrariam como navios "esperados".
+  const floor = Date.now() - 12 * 3600e3;
   const horizon = Date.now() + 21 * 24 * 3600e3;
 
+  // Um navio aparece várias vezes na lista (escalas diferentes). Só a
+  // PRÓXIMA escala interessa: senão a segunda ocorrência sobrescreve a
+  // primeira e vira um "atraso" que não existe.
+  const nextCall = new Map<string, (typeof rows)[number]>();
   for (const r of rows) {
-    if (new Date(r.eta).getTime() > horizon) continue;
+    const t = new Date(r.eta).getTime();
+    if (t < floor || t > horizon) continue;
+    const prev = nextCall.get(r.name);
+    if (!prev || new Date(prev.eta).getTime() > t) nextCall.set(r.name, r);
+  }
+
+  const upcoming = [...nextCall.values()].sort(
+    (a, b) => new Date(a.eta).getTime() - new Date(b.eta).getTime()
+  );
+
+  for (const r of upcoming) {
     const { data, error } = await supabase.rpc("sync_ship_eta", {
       p_name: r.name,
       p_eta: r.eta,
@@ -91,11 +108,19 @@ export async function GET(request: Request) {
     const action = (data as { action?: string } | null)?.action;
     if (error || !data) summary.failed++;
     else if (action === "created") summary.created++;
+    else if (action === "new_voyage") summary.new_voyage++;
     else if (action === "eta_changed") {
       summary.eta_changed++;
       changes.push(data as Record<string, unknown>);
     } else summary.unchanged++;
   }
 
-  return Response.json({ ok: true, source: usedSource, seen: rows.length, ...summary, changes });
+  return Response.json({
+    ok: true,
+    source: usedSource,
+    seen: rows.length,
+    inWindow: upcoming.length,
+    ...summary,
+    changes,
+  });
 }
