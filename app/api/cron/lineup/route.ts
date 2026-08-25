@@ -37,7 +37,7 @@ export async function GET(request: Request) {
 
   for (const source of LINEUP_SOURCES) {
     const res = await fetchLineupHtml(source);
-    const parsed = res.ok ? parseLineup(res.html) : { rows: [], note: "fetch falhou" };
+    const parsed = res.ok ? parseLineup(res.html, source) : { rows: [], note: "fetch falhou" };
     attempts.push({
       source,
       status: res.status,

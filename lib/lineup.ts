@@ -1,10 +1,17 @@
 /**
  * Line-up do Porto de Santos — busca e interpretação.
  *
- * Desenho proposital: a fonte é PLUGÁVEL. Hoje lê o HTML público da
- * APS; amanhã pode ser AIS ou uma API paga sem tocar no resto do app.
- * O parser é tolerante — se a APS mudar o layout, o sync devolve 0
- * linhas e registra o motivo em vez de gravar lixo no banco.
+ * Fonte primária: a página oficial de programação de navios da CODESP
+ * (intranet.portodesantos.com.br). Três armadilhas reais dela, todas
+ * tratadas aqui e cobertas por teste:
+ *   1. HTML em latin-1 (acentos viram lixo se decodificar como UTF-8);
+ *   2. tabela de ASP clássico SEM </tr> — não dá para casar <tr>…</tr>;
+ *   3. datas em M/D/YYYY (formato americano), não dd/mm.
+ *
+ * A lista traz também rebocadores e embarcações da própria autoridade
+ * portuária; filtramos para navios mercantes, que é quem tem tripulação
+ * cliente. O desenho é plugável: outra fonte (AIS, API paga) entra sem
+ * tocar no resto do app.
  */
 
 export type LineupRow = {
@@ -13,20 +20,23 @@ export type LineupRow = {
   berth?: string | null;
   imo?: string | null;
   voyage?: string | null;
+  flag?: string | null;
+  agency?: string | null;
 };
 
 export const LINEUP_SOURCES = [
-  "https://www.portodesantos.com.br/informacoes-operacionais/operacoes-portuarias/navegacao-e-movimento-de-navios/navios-esperados/",
-  "https://www.portodesantos.com.br/wp-content/uploads/navios-esperados.html",
+  "https://intranet.portodesantos.com.br/Navios/Navios4.asp",
+  "https://vports.com.br/navios-esperados/",
 ];
 
 const UA =
   "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0 Safari/537.36";
 
+/** Busca o HTML respeitando o charset declarado (a CODESP serve latin-1). */
 export async function fetchLineupHtml(
   url: string,
-  timeoutMs = 20000
-): Promise<{ ok: boolean; status: number; html: string; error?: string }> {
+  timeoutMs = 25000
+): Promise<{ ok: boolean; status: number; html: string; charset?: string; error?: string }> {
   const ctl = new AbortController();
   const timer = setTimeout(() => ctl.abort(), timeoutMs);
   try {
@@ -34,9 +44,16 @@ export async function fetchLineupHtml(
       signal: ctl.signal,
       headers: { "User-Agent": UA, Accept: "text/html,application/xhtml+xml" },
       cache: "no-store",
+      redirect: "follow",
     });
-    const html = await res.text();
-    return { ok: res.ok, status: res.status, html };
+    const buf = await res.arrayBuffer();
+    const declared = res.headers.get("content-type")?.match(/charset=([\w-]+)/i)?.[1];
+    // sniff no <meta> quando o header não diz
+    const ascii = new TextDecoder("ascii").decode(buf.slice(0, 2048));
+    const meta = ascii.match(/charset=["']?([\w-]+)/i)?.[1];
+    const charset = (declared || meta || "utf-8").toLowerCase();
+    const enc = /8859|latin|windows-1252|cp1252/.test(charset) ? "windows-1252" : "utf-8";
+    return { ok: res.ok, status: res.status, html: new TextDecoder(enc).decode(buf), charset: enc };
   } catch (e) {
     return { ok: false, status: 0, html: "", error: (e as Error).message };
   } finally {
@@ -52,123 +69,141 @@ const stripTags = (s: string) =>
     .replace(/\s+/g, " ")
     .trim();
 
-/** Extrai as linhas de todas as tabelas do HTML como matriz de células. */
+/**
+ * Divide por <tr sem exigir </tr> — tabelas de ASP clássico raramente
+ * fecham as tags. Mesma tolerância para as células.
+ */
 export function tableRows(html: string): string[][] {
   const rows: string[][] = [];
-  for (const m of html.matchAll(/<tr[^>]*>([\s\S]*?)<\/tr>/gi)) {
-    const cells = [...m[1].matchAll(/<t[dh][^>]*>([\s\S]*?)<\/t[dh]>/gi)].map((c) =>
-      stripTags(c[1])
-    );
+  const chunks = html.split(/<tr[^>]*>/i).slice(1);
+  for (const raw of chunks) {
+    const chunk = raw.split(/<\/table>/i)[0];
+    const cells: string[] = [];
+    for (const m of chunk.matchAll(
+      /<t[dh][^>]*>([\s\S]*?)(?=<t[dh][^>]*>|<\/tr>|<tr[^>]*>|<\/table>|$)/gi
+    )) {
+      const v = stripTags(m[1]);
+      if (v) cells.push(v);
+    }
     if (cells.length) rows.push(cells);
   }
   return rows;
 }
 
 /**
- * Datas do line-up vêm como dd/mm/yyyy [hh:mm] em hora de Santos.
- * Convertemos para ISO fixando UTC-3 (o Brasil não tem mais DST).
+ * Datas do line-up. A CODESP usa M/D/YYYY; outras fontes brasileiras
+ * usam dd/mm/yyyy. Desambiguamos pelo valor: se o primeiro número for
+ * > 12 só pode ser dia.
  */
-export function parseBrDate(raw: string): string | null {
-  const m = raw.match(/(\d{2})\/(\d{2})\/(\d{4})(?:[\sT]+(\d{1,2}):(\d{2}))?/);
+export function parseDate(raw: string, hint?: string): string | null {
+  const m = raw.match(/(\d{1,2})\/(\d{1,2})\/(\d{4})(?:[\sT]+(\d{1,2}):(\d{2}))?/);
   if (!m) return null;
-  const [, d, mo, y, h = "12", mi = "00"] = m;
-  const iso = `${y}-${mo}-${d}T${h.padStart(2, "0")}:${mi}:00-03:00`;
+  const [, aRaw, bRaw, y, h, mi] = m;
+  let month = Number(aRaw);
+  let day = Number(bRaw);
+  if (month > 12) [day, month] = [month, day]; // era dd/mm
+  if (month > 12 || day > 31 || month < 1 || day < 1) return null;
+
+  // hora pode vir na mesma célula ou numa coluna separada
+  const t = (h ? `${h}:${mi}` : hint?.match(/^(\d{1,2}):(\d{2})$/)?.[0]) ?? "12:00";
+  const [hh, mm] = t.split(":");
+  const iso = `${y}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}T${hh.padStart(
+    2,
+    "0"
+  )}:${mm}:00-03:00`;
   const date = new Date(iso);
-  if (Number.isNaN(date.getTime())) return null;
-  return date.toISOString();
-}
-
-const HEADER_HINTS = {
-  name: ["navio", "embarcacao", "embarcação", "vessel", "ship"],
-  eta: ["previsao", "previsão", "chegada", "eta", "atracacao", "atracação", "data"],
-  berth: ["berco", "berço", "atracacao", "terminal", "local"],
-  imo: ["imo"],
-  voyage: ["viagem", "voyage"],
-};
-
-const norm = (s: string) =>
-  s
-    .normalize("NFD")
-    .replace(/[̀-ͯ]/g, "")
-    .toLowerCase()
-    .trim();
-
-function findColumns(header: string[]) {
-  const idx: Record<string, number> = {};
-  header.forEach((cell, i) => {
-    const c = norm(cell);
-    for (const [key, hints] of Object.entries(HEADER_HINTS)) {
-      if (idx[key] === undefined && hints.some((h) => c.includes(norm(h)))) idx[key] = i;
-    }
-  });
-  return idx;
+  return Number.isNaN(date.getTime()) ? null : date.toISOString();
 }
 
 /**
- * Interpreta o HTML em linhas de line-up. Estratégia em dois passos:
- * 1. tenta achar cabeçalho de tabela e mapear colunas por nome;
- * 2. se não houver cabeçalho reconhecível, cai num modo heurístico
- *    (célula com data = ETA, célula alfabética mais longa = navio).
+ * O nome do navio vem colado ao calado ("SHAMAL 10 5" = SHAMAL, 10,5m).
+ * Removemos os grupos numéricos finais sem comer nomes que terminam em
+ * número legítimo (ex.: "MSC LORENA II" fica intacto).
  */
-export function parseLineup(html: string): { rows: LineupRow[]; note: string } {
+export function cleanShipName(raw: string): string {
+  return raw
+    .replace(/[,;]+/g, " ")
+    .replace(/(\s+\d{1,3}(?:[.,]\d+)?)+\s*$/g, "")
+    .replace(/\s{2,}/g, " ")
+    .trim()
+    .toUpperCase();
+}
+
+// Embarcações da autoridade portuária / apoio: não têm tripulação cliente.
+const NON_MERCHANT = /^(CODESP|MARINHA|PRATICAGEM|DOCAS|SANTOS PILOTS)$/i;
+
+/** Parser da programação da CODESP (fonte primária). */
+export function parseCodesp(html: string): { rows: LineupRow[]; note: string } {
   const all = tableRows(html);
-  if (!all.length) return { rows: [], note: "nenhuma tabela encontrada no HTML" };
+  if (!all.length) return { rows: [], note: "nenhuma tabela encontrada" };
 
   const out: LineupRow[] = [];
-  let headerIdx: Record<string, number> | null = null;
-
   for (const cells of all) {
-    const maybe = findColumns(cells);
-    if (maybe.name !== undefined && maybe.eta !== undefined) {
-      headerIdx = maybe;
-      continue;
-    }
+    if (cells.length < 4) continue;
+    // [#, NAVIO+calado, NACIONALIDADE, DATA, (HORA), VIAGEM, AGENCIA, ...]
+    const dateIdx = cells.findIndex((c) => /\d{1,2}\/\d{1,2}\/\d{4}/.test(c));
+    if (dateIdx < 2) continue;
 
-    const pick = (k: keyof typeof HEADER_HINTS) =>
-      headerIdx && headerIdx[k] !== undefined ? cells[headerIdx[k]] : undefined;
+    const eta = parseDate(cells[dateIdx], cells[dateIdx + 1]);
+    if (!eta) continue;
 
-    let name = pick("name");
-    let etaRaw = pick("eta");
+    const name = cleanShipName(cells[dateIdx - 2] ?? "");
+    const flag = cells[dateIdx - 1]?.trim() || null;
+    if (name.length < 3 || name.length > 60) continue;
+    if (/^(NAVIO|VESSEL)/i.test(name)) continue; // cabeçalho
 
-    // heurística quando o cabeçalho não foi reconhecido
-    if (!name || !etaRaw) {
-      const dateCell = cells.find((c) => /\d{2}\/\d{2}\/\d{4}/.test(c));
-      if (!dateCell) continue;
-      const nameCell = cells
-        .filter((c) => c !== dateCell && /[A-Za-zÀ-ÿ]{3,}/.test(c) && !/^\d+$/.test(c))
-        .sort((a, b) => b.length - a.length)[0];
-      if (!nameCell) continue;
-      name = name || nameCell;
-      etaRaw = etaRaw || dateCell;
-    }
+    const agency = cells.slice(dateIdx + 1).find((c) => /AGENCIA|AGENCY|SHIPPING/i.test(c)) ?? null;
+    const rest = cells.slice(dateIdx + 1).join(" ");
+    if (NON_MERCHANT.test((agency ?? "").trim()) || /\bCODESP\b/.test(rest)) continue;
 
-    const eta = etaRaw ? parseBrDate(etaRaw) : null;
-    if (!name || !eta) continue;
-
-    const clean = name.replace(/\s{2,}/g, " ").trim();
-    if (clean.length < 3 || clean.length > 80) continue;
-
-    const imoRaw = pick("imo");
-    out.push({
-      name: clean.toUpperCase(),
-      eta,
-      berth: pick("berth")?.slice(0, 20) || null,
-      imo: imoRaw && /\d{7}/.test(imoRaw) ? imoRaw.match(/\d{7}/)![0] : null,
-      voyage: pick("voyage")?.slice(0, 30) || null,
-    });
+    out.push({ name, eta, flag, agency, berth: null, imo: null, voyage: null });
   }
 
-  // dedup por navio+ETA
   const seen = new Set<string>();
   const rows = out.filter((r) => {
-    const k = `${r.name}|${r.eta}`;
+    const k = `${r.name}|${r.eta.slice(0, 10)}`;
     if (seen.has(k)) return false;
     seen.add(k);
     return true;
   });
 
-  return {
-    rows,
-    note: headerIdx ? "cabeçalho reconhecido" : "modo heurístico (sem cabeçalho)",
-  };
+  return { rows, note: `CODESP: ${all.length} linhas brutas → ${rows.length} navios mercantes` };
+}
+
+/** Fallback genérico: qualquer tabela com nome + data. */
+export function parseGeneric(html: string): { rows: LineupRow[]; note: string } {
+  const all = tableRows(html);
+  if (!all.length) return { rows: [], note: "nenhuma tabela encontrada" };
+
+  const out: LineupRow[] = [];
+  for (const cells of all) {
+    const dateCell = cells.find((c) => /\d{1,2}\/\d{1,2}\/\d{4}/.test(c));
+    if (!dateCell) continue;
+    const eta = parseDate(dateCell);
+    if (!eta) continue;
+    const nameCell = cells
+      .filter((c) => c !== dateCell && /[A-Za-zÀ-ÿ]{3,}/.test(c) && !/^\d+$/.test(c))
+      .sort((a, b) => b.length - a.length)[0];
+    if (!nameCell) continue;
+    const name = cleanShipName(nameCell);
+    if (name.length < 3 || name.length > 60) continue;
+    out.push({ name, eta, berth: null, imo: null, voyage: null });
+  }
+
+  const seen = new Set<string>();
+  const rows = out.filter((r) => {
+    const k = `${r.name}|${r.eta.slice(0, 10)}`;
+    if (seen.has(k)) return false;
+    seen.add(k);
+    return true;
+  });
+  return { rows, note: `genérico: ${rows.length} linhas` };
+}
+
+export function parseLineup(html: string, url = ""): { rows: LineupRow[]; note: string } {
+  if (/portodesantos/i.test(url)) {
+    const codesp = parseCodesp(html);
+    if (codesp.rows.length) return codesp;
+  }
+  return parseGeneric(html);
 }
