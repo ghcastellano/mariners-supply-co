@@ -1,4 +1,4 @@
-import { USD_BRL_RATE } from "./env";
+import { USD_BRL_RATE } from "./env.ts";
 
 export const usd = (v: number) => "USD " + v.toFixed(2);
 export const brl = (v: number) => "R$ " + Math.round(v * USD_BRL_RATE);

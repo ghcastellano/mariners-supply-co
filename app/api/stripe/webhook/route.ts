@@ -1,7 +1,6 @@
-import { NextResponse } from "next/server";
 import Stripe from "stripe";
 import { createClient } from "@supabase/supabase-js";
-import { SUPABASE_URL, SUPABASE_ANON_KEY } from "@/lib/env";
+import { SUPABASE_URL, SUPABASE_ANON_KEY } from "../../../../lib/env.ts";
 
 // Webhook do Stripe: confirma o depósito quando o pagamento aprova.
 // A assinatura do evento é verificada com o signing secret; o mesmo
@@ -11,11 +10,11 @@ export async function POST(request: Request) {
   const secretKey = process.env.STRIPE_SECRET_KEY;
   const signingSecret = process.env.STRIPE_WEBHOOK_SECRET;
   if (!secretKey || !signingSecret) {
-    return NextResponse.json({ error: "not configured" }, { status: 503 });
+    return Response.json({ error: "not configured" }, { status: 503 });
   }
 
   const signature = request.headers.get("stripe-signature");
-  if (!signature) return NextResponse.json({ error: "missing signature" }, { status: 400 });
+  if (!signature) return Response.json({ error: "missing signature" }, { status: 400 });
 
   const body = await request.text();
 
@@ -23,7 +22,7 @@ export async function POST(request: Request) {
   try {
     event = new Stripe(secretKey).webhooks.constructEvent(body, signature, signingSecret);
   } catch {
-    return NextResponse.json({ error: "invalid signature" }, { status: 400 });
+    return Response.json({ error: "invalid signature" }, { status: 400 });
   }
 
   // completed cobre cartão/wallet; async_payment_succeeded cobre PIX
@@ -42,10 +41,10 @@ export async function POST(request: Request) {
       });
       if (error) {
         // 500 faz o Stripe reentregar o evento
-        return NextResponse.json({ error: "db update failed" }, { status: 500 });
+        return Response.json({ error: "db update failed" }, { status: 500 });
       }
     }
   }
 
-  return NextResponse.json({ received: true });
+  return Response.json({ received: true });
 }

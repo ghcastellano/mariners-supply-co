@@ -38,7 +38,7 @@ export default function ShipPicker({ ships }: { ships: Ship[] }) {
         const etaH = hoursUntil(s.eta);
         const closeH = hoursUntil(orderCloseAt(s.eta, s.cutoff_hours));
         const open = closeH > 0;
-        const cls = closeH > 48 ? "ok" : open ? "soon" : "closed";
+        const cls = closeH > 48 ? "ok" : closeH > 24 ? "soon" : open ? "urgent" : "closed";
         return (
           <button key={s.id} className="ship" onClick={() => pick(s)} disabled={!open}>
             <span className="nm">{s.name}</span>
@@ -46,7 +46,13 @@ export default function ShipPicker({ ships }: { ships: Ship[] }) {
               ETA IN {etaH}H{s.berth ? ` · BERTH ${s.berth}` : ""}
             </span>
             <span className="win">
-              <span className={cls}>{open ? `ORDERS CLOSE IN ${closeH}H` : "ORDERS CLOSED"}</span>
+              <span className={cls}>
+                {!open
+                  ? "ORDERS CLOSED"
+                  : closeH <= 24
+                    ? `⏳ LAST CALL · ${closeH}H LEFT`
+                    : `ORDERS CLOSE IN ${closeH}H`}
+              </span>
             </span>
           </button>
         );

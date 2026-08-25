@@ -59,9 +59,13 @@ export default function ShopPage() {
       <TopBar />
       <main className="pb-nav">
         {ship && (
-          <div className="deadline">
+          <div className={`deadline ${windowOpen && closeH <= 24 ? "urgent" : ""}`}>
             ⏱{" "}
-            {windowOpen ? (
+            {windowOpen && closeH <= 24 ? (
+              <span>
+                ⚡ LAST CALL — orders for <b>{ship.name}</b> close in <b>{closeH}h</b>. Lock your kit now.
+              </span>
+            ) : windowOpen ? (
               <span>
                 ORDERS FOR <b>{ship.name}</b> CLOSE IN {closeH}H — delivery at the gangway on docking
               </span>

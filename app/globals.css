@@ -172,6 +172,7 @@ button { font-family: inherit; }
   font-family: var(--font-mono); font-size: 10.5px; letter-spacing: .08em; line-height: 1.5;
 }
 .win .ok { color: var(--teal); } .win .soon { color: var(--amber); } .win .closed { color: var(--danger); }
+.win .urgent { color: var(--danger); font-weight: 700; animation: pulse 1.6s infinite; }
 
 /* ===== catálogo ===== */
 .deadline {
@@ -179,6 +180,10 @@ button { font-family: inherit; }
   background: rgba(255,182,72,.08); border: 1px solid rgba(255,182,72,.25);
   font-family: var(--font-mono); font-size: 11px; letter-spacing: .08em;
   color: var(--amber-hi); display: flex; gap: 8px; align-items: center;
+}
+.deadline.urgent {
+  background: rgba(255,89,100,.1); border-color: rgba(255,89,100,.45);
+  color: #FFC2C7; animation: pulse 1.6s infinite;
 }
 .cats-tabs { display: flex; gap: 8px; padding: 14px 16px 6px; overflow-x: auto; scrollbar-width: none; }
 .cats-tabs::-webkit-scrollbar { display: none; }
