@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { santosTime, shortShipName, usd } from "@/lib/format";
 import { STATUS_LABEL, STATUS_PILL, type OrderStatus } from "@/lib/types";
+import DeliveryProof from "@/components/DeliveryProof";
 import { setOrderStatus } from "./actions";
 
 export const dynamic = "force-dynamic";
@@ -27,7 +28,8 @@ const NEXT_ACTION: Partial<Record<OrderStatus, { to: OrderStatus; label: string 
   awaiting_deposit: { to: "deposit_paid", label: "✓ Deposit paid" },
   deposit_paid: { to: "preparing", label: "🛒 Start shopping" },
   preparing: { to: "at_gangway", label: "🚚 At the gangway" },
-  at_gangway: { to: "delivered", label: "✓ Delivered" },
+  // at_gangway não entra aqui: fechar a entrega passa pelo
+  // DeliveryProof, que sobe a foto junto com a mudança de estado.
 };
 
 function ActionBtn({ id, to, label, danger }: { id: string; to: OrderStatus; label: string; danger?: boolean }) {
@@ -118,7 +120,11 @@ export default async function AdminBoard() {
                   </div>
                 )}
                 <div className="actions">
-                  {next && <ActionBtn id={o.id} to={next.to} label={next.label} />}
+                  {o.status === "at_gangway" ? (
+                    <DeliveryProof orderId={o.id} code={o.code} />
+                  ) : (
+                    next && <ActionBtn id={o.id} to={next.to} label={next.label} />
+                  )}
                   {o.status !== "at_gangway" && (
                     <ActionBtn id={o.id} to="cancelled" label="Cancel" danger />
                   )}

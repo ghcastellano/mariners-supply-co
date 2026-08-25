@@ -3,8 +3,15 @@ import TopBar from "@/components/TopBar";
 import BottomNav from "@/components/BottomNav";
 import PayNowButton from "@/components/PayNowButton";
 import { createClient } from "@/lib/supabase/server";
-import { hoursUntil, usd } from "@/lib/format";
-import { PAYMENT_LABEL, STATUS_LABEL, STATUS_PILL, type OrderStatus, type PaymentMethod } from "@/lib/types";
+import { hoursUntil, santosTime, usd } from "@/lib/format";
+import {
+  DELIVERY_BUCKET,
+  PAYMENT_LABEL,
+  STATUS_LABEL,
+  STATUS_PILL,
+  type OrderStatus,
+  type PaymentMethod,
+} from "@/lib/types";
 
 export const dynamic = "force-dynamic";
 
@@ -18,6 +25,8 @@ type Row = {
   deposit_usd: number;
   balance_usd: number;
   created_at: string;
+  delivery_photo_path: string | null;
+  delivered_at: string | null;
   ships: { name: string; berth: string | null; eta: string } | null;
   order_items: { name: string; emoji: string | null; unit_price_usd: number; qty: number }[];
 };
@@ -50,13 +59,24 @@ export default async function OrderDetailPage({
   const { data } = await supabase
     .from("orders")
     .select(
-      "id, code, status, payment_method, subtotal_usd, deposit_usd, balance_usd, credit_applied_usd, created_at, ships(name, berth, eta), order_items(name, emoji, unit_price_usd, qty)"
+      "id, code, status, payment_method, subtotal_usd, deposit_usd, balance_usd, credit_applied_usd, created_at, delivery_photo_path, delivered_at, ships(name, berth, eta), order_items(name, emoji, unit_price_usd, qty)"
     )
     .eq("code", code.toUpperCase())
     .maybeSingle();
 
   const o = data as unknown as Row | null;
   if (!o) notFound();
+
+  // A foto de entrega mora em bucket privado: a policy libera a
+  // leitura para o dono do pedido, e o link assinado dura uma hora —
+  // tempo de olhar, não de circular por aí.
+  let proofUrl: string | null = null;
+  if (o.delivery_photo_path) {
+    const { data: signed } = await supabase.storage
+      .from(DELIVERY_BUCKET)
+      .createSignedUrl(o.delivery_photo_path, 3600);
+    proofUrl = signed?.signedUrl ?? null;
+  }
 
   const itemCount = o.order_items.reduce((a, i) => a + i.qty, 0);
   const dueNow = Math.max(0, Number(o.deposit_usd) - Number(o.credit_applied_usd));
@@ -149,6 +169,17 @@ export default async function OrderDetailPage({
               </div>
             ))}
           </div>
+        )}
+
+        {proofUrl && (
+          <figure className="proof-card">
+            <figcaption>
+              <span className="kicker">DELIVERY PHOTO</span>
+              {o.delivered_at && <b>{santosTime(o.delivered_at)} · Santos</b>}
+            </figcaption>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={proofUrl} alt={`Delivery proof for order ${o.code}`} />
+          </figure>
         )}
 
         <div className="cart-list">

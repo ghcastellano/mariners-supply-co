@@ -30,6 +30,9 @@ export type Product = {
   sort_order: number;
 };
 
+/** Bucket privado das fotos de entrega. */
+export const DELIVERY_BUCKET = "delivery-proofs";
+
 export type OrderStatus =
   | "awaiting_deposit"
   | "deposit_paid"

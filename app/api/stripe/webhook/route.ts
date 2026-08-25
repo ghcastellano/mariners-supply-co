@@ -1,6 +1,7 @@
 import Stripe from "stripe";
 import { createClient } from "@supabase/supabase-js";
 import { SUPABASE_URL, SUPABASE_ANON_KEY } from "../../../../lib/env.ts";
+import { sendOrderEmail } from "../../../../lib/mailer.ts";
 
 // Webhook do Stripe: confirma o depósito quando o pagamento aprova.
 // A assinatura do evento é verificada com o signing secret; o mesmo
@@ -48,6 +49,13 @@ export async function POST(request: Request) {
         // 500 faz o Stripe reentregar o evento
         return Response.json({ error: "db update failed" }, { status: 500 });
       }
+
+      // Confirmação para o marinheiro. Esperamos o envio (o Stripe dá
+      // ~10s e o transporte está calibrado bem abaixo disso), mas a
+      // falha não derruba o webhook: o depósito já está registrado e
+      // a reivindicação foi devolvida, então a reentrega do Stripe
+      // tenta o e-mail de novo sem duplicar nada.
+      await sendOrderEmail(supabase, orderId, "deposit_paid", signingSecret);
     }
   }
 

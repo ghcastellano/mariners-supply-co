@@ -664,3 +664,38 @@ input:-webkit-autofill:focus {
   flex: 1; min-width: 0; background: none; border: 0; outline: none;
   color: var(--ink); font-family: var(--font-mono); font-size: 16px; padding: 12px 0;
 }
+
+/* ===== foto-comprovante da entrega ===== */
+/* No painel: botão de câmera + miniatura, lado a lado com o resto
+   das ações do card. Herda o gap de .actions quando aninhado. */
+.proof { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.proof-thumb {
+  position: relative; padding: 0; border: 1px solid var(--line-hi);
+  border-radius: 10px; overflow: hidden; background: var(--card);
+  width: 46px; height: 46px; flex: none; cursor: pointer; line-height: 0;
+}
+.proof-thumb img { width: 100%; height: 100%; object-fit: cover; }
+.proof-thumb span {
+  position: absolute; inset: auto 0 0 0; background: rgba(1,6,13,.78);
+  color: var(--muted); font-size: 9px; letter-spacing: .5px;
+  line-height: 13px; text-align: center;
+}
+
+/* Na página do pedido: a prova, em tamanho de olhar. */
+.proof-card {
+  margin: 14px 16px; background: var(--card); border: 1px solid var(--line);
+  border-radius: 16px; overflow: hidden;
+}
+.proof-card figcaption {
+  display: flex; align-items: baseline; justify-content: space-between;
+  gap: 10px; padding: 12px 14px 10px;
+}
+.proof-card figcaption .kicker { margin: 0; }
+.proof-card figcaption b {
+  font-family: var(--font-mono); font-size: 11px; color: var(--faint); font-weight: 500;
+}
+.proof-card img {
+  display: block; width: 100%; height: auto; max-height: 62vh;
+  object-fit: cover; background: var(--abyss);
+  border-top: 1px solid var(--line);
+}

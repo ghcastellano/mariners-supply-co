@@ -3,7 +3,9 @@
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { localInputToIso } from "@/lib/format";
-import type { OrderStatus } from "@/lib/types";
+import { sendOrderEmail } from "@/lib/mailer";
+import type { EmailKind } from "@/lib/emails";
+import { DELIVERY_BUCKET, type OrderStatus } from "@/lib/types";
 
 async function adminClient() {
   const supabase = await createClient();
@@ -31,6 +33,15 @@ const TRANSITIONS: Record<OrderStatus, OrderStatus[]> = {
   cancelled: [],
 };
 
+// Estados que valem um e-mail para o marinheiro. O livro-razão
+// order_emails garante que cada um sai uma vez só, mesmo quando o
+// webhook do Stripe e o admin marcam o mesmo estado.
+const EMAIL_ON: Partial<Record<OrderStatus, EmailKind>> = {
+  deposit_paid: "deposit_paid",
+  at_gangway: "at_gangway",
+  delivered: "delivered",
+};
+
 export async function setOrderStatus(formData: FormData) {
   const supabase = await adminClient();
   if (!supabase) return;
@@ -47,9 +58,68 @@ export async function setOrderStatus(formData: FormData) {
   if (!order) return;
   if (!TRANSITIONS[order.status as OrderStatus]?.includes(to)) return;
 
-  await supabase.from("orders").update({ status: to }).eq("id", id);
+  const patch: Record<string, unknown> = { status: to };
+  if (to === "delivered") patch.delivered_at = new Date().toISOString();
+
+  const { error } = await supabase.from("orders").update(patch).eq("id", id);
+  if (error) return;
+
+  const kind = EMAIL_ON[to];
+  if (kind) await sendOrderEmail(supabase, id, kind);
+
   revalidatePath("/admin");
   revalidatePath("/admin/shopping-list");
+  revalidatePath(`/orders`);
+}
+
+/**
+ * Entrega com foto-comprovante.
+ *
+ * A foto é a prova de que a caixa chegou na prancha — é o que separa
+ * "entreguei" de "diz que entregou" quando o comandante contesta. Sobe
+ * primeiro para o bucket privado, e só depois o caminho é gravado no
+ * pedido: é o registro no pedido que autoriza o dono a ver a imagem
+ * (policy de storage), então arquivo órfão não vaza para ninguém.
+ */
+export async function markDelivered(formData: FormData) {
+  const supabase = await adminClient();
+  if (!supabase) return;
+
+  const id = String(formData.get("id") ?? "");
+  if (!id) return;
+
+  const { data: order } = await supabase
+    .from("orders")
+    .select("status")
+    .eq("id", id)
+    .maybeSingle();
+  if (!order) return;
+  if (!TRANSITIONS[order.status as OrderStatus]?.includes("delivered")) return;
+
+  const patch: Record<string, unknown> = {
+    status: "delivered",
+    delivered_at: new Date().toISOString(),
+  };
+
+  const photo = formData.get("photo");
+  if (photo instanceof File && photo.size > 0 && photo.size <= 8 * 1024 * 1024) {
+    const ext = photo.type === "image/png" ? "png" : photo.type === "image/webp" ? "webp" : "jpg";
+    const path = `orders/${id}/${Date.now()}.${ext}`;
+    const { error: upErr } = await supabase.storage
+      .from(DELIVERY_BUCKET)
+      .upload(path, photo, { contentType: photo.type || "image/jpeg", upsert: false });
+    // Foto é desejável, não bloqueante: sem ela a entrega ainda fecha.
+    if (!upErr) patch.delivery_photo_path = path;
+  }
+
+  const { error } = await supabase.from("orders").update(patch).eq("id", id);
+  if (error) return;
+
+  await sendOrderEmail(supabase, id, "delivered");
+
+  revalidatePath("/admin");
+  revalidatePath("/admin/shopping-list");
+  revalidatePath("/orders");
 }
 
 export async function saveShip(formData: FormData) {
