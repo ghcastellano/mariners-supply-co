@@ -1,0 +1,130 @@
+import type { Metadata } from "next";
+import Link from "next/link";
+import { redirect } from "next/navigation";
+import Breadcrumb from "@/components/Breadcrumb";
+import ProductCardView from "@/components/ProductCard";
+import { createClient } from "@/lib/supabase/server";
+import type { ProductCard } from "@/lib/catalog";
+import { goToAccountSection } from "@/app/account/actions";
+
+export const dynamic = "force-dynamic";
+
+export const metadata: Metadata = { title: "My Wish List" };
+
+/** Seções que o select "My Account" alcança — os mesmos destinos do menu 👤. */
+const SECTIONS: { href: string; label: string }[] = [
+  { href: "/account", label: "My Account" },
+  { href: "/orders", label: "My Orders" },
+  { href: "/wishlist", label: "My Wish List" },
+  { href: "/captain", label: "Captain rewards" },
+];
+
+/** Só o que o card da grade consome — o embed não traz nada além disso. */
+type Row = {
+  products: {
+    id: string;
+    slug: string;
+    name: string;
+    short_description: string | null;
+    price_cents: number;
+    compare_at_cents: number | null;
+    max_price_cents: number | null;
+    stock_qty: number;
+    variant_count: number;
+    primary_image_path: string | null;
+    badge: "promo" | "new" | "outlet" | null;
+    sku: string | null;
+    default_variant_id: string | null;
+    brands: { name: string } | null;
+  };
+};
+
+export default async function WishlistPage() {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) redirect("/login?next=/wishlist");
+
+  // O embed nomeia a chave estrangeira de propósito: products tem DUAS
+  // relações com product_variants (product_variants.product_id e
+  // products.default_variant_id), e o PostgREST recusa o embed assim que
+  // alguém encostar numa variante daqui. Nomear já é o hábito da casa.
+  //
+  // default_variant_id vem como coluna escalar — é o que o botão da grade
+  // adiciona ao carrinho, e evita justamente aquele embed ambíguo.
+  //
+  // !inner + active: produto tirado do ar continua na lista de desejos de
+  // quem o marcou, e um card que leva a um 404 é pior que a ausência dele.
+  const { data } = await supabase
+    .from("wishlists")
+    .select(
+      `products!wishlists_product_id_fkey!inner(
+         id, slug, name, short_description, price_cents, compare_at_cents,
+         max_price_cents, stock_qty, variant_count, primary_image_path,
+         badge, sku, default_variant_id,
+         brands(name)
+       )`
+    )
+    .eq("user_id", user.id)
+    .eq("products.active", true)
+    .order("created_at", { ascending: false });
+
+  const items: ProductCard[] = ((data ?? []) as unknown as Row[]).map((r) => {
+    const { brands, ...p } = r.products;
+    return {
+      ...p,
+      brand_name: brands?.name ?? null,
+      // cursor só existe para a paginação por keyset da listagem; aqui a
+      // lista inteira cabe numa tela e não há próxima página.
+      cursor: "",
+    };
+  });
+
+  return (
+    <main>
+      <Breadcrumb trail={[{ label: "My Wish List" }]} />
+
+      <h1 className="secttl left">My Wish List</h1>
+
+      {/* Navegação entre as seções da conta, como o select do Sunny.
+          [otim] O deles navega no próprio change, o que arranca a página
+          de baixo de quem percorre as opções pela seta do teclado. Aqui o
+          destino só vale no "Go" — mesmo gesto, mais um toque, e a tela
+          continua sendo Server Component (nenhum JavaScript vai junto). */}
+      <form action={goToAccountSection} className="listbar">
+        <label className="subhead" htmlFor="acctnav" style={{ padding: 0 }}>
+          My Account
+        </label>
+        <select id="acctnav" name="to" className="sortsel" defaultValue="/wishlist">
+          {SECTIONS.map((s) => (
+            <option key={s.href} value={s.href}>
+              {s.label}
+            </option>
+          ))}
+        </select>
+        <button className="btn small ghost" type="submit">
+          Go
+        </button>
+      </form>
+
+      {items.length === 0 ? (
+        <div className="infobox">You have no items in your wish list.</div>
+      ) : (
+        <div className="pgrid">
+          {items.map((p, i) => (
+            // As quatro primeiras acima da dobra entram com priority; o
+            // resto fica preguiçoso, que é o que segura o wifi do navio.
+            <ProductCardView key={p.id} p={p} priority={i < 4} wished />
+          ))}
+        </div>
+      )}
+
+      {/* "Back" é link de verdade, não history.back(): quem chega aqui pelo
+          ícone ♡ do cabeçalho não tem para onde voltar. */}
+      <p className="linkline">
+        <Link href="/shop">Back</Link>
+      </p>
+    </main>
+  );
+}

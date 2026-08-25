@@ -1,80 +1,107 @@
 "use client";
 
 import { useEffect, useMemo, useState, useTransition } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
-import TopBar from "@/components/TopBar";
-import PhoneInput from "@/components/PhoneInput";
 import { useCart } from "@/lib/cart";
 import { createClient } from "@/lib/supabase/client";
-import { brl, DEPOSIT_PCT, hoursUntil, usd } from "@/lib/format";
-import type { Product } from "@/lib/types";
+import { supabaseConfigured } from "@/lib/env";
+import { brl, DEPOSIT_PCT, splitOrder, toCents, usd } from "@/lib/money";
 import { placeOrder } from "./actions";
 
+type Line = {
+  id: string;
+  price_cents: number;
+  active: boolean;
+  products: { active: boolean } | null;
+};
+
+/**
+ * Resumo curto e o botão de pagar. É a única parte do checkout que
+ * precisa virar JavaScript: o carrinho mora no localStorage, então só
+ * o navegador sabe o que tem dentro.
+ *
+ * Nada de campo para digitar — nome, telefone e navio vêm do perfil,
+ * conferidos no cartão acima. Aqui só se confirma e paga.
+ */
 export default function CheckoutClient({
-  defaultName,
-  email,
+  blocked,
+  shipId,
+  contactName,
+  contactWhatsapp,
 }: {
-  defaultName: string;
-  email: string;
+  blocked: boolean;
+  shipId: string | null;
+  contactName: string;
+  contactWhatsapp: string;
 }) {
   const router = useRouter();
-  const { ship, items, count, ready, clear } = useCart();
-  const [products, setProducts] = useState<Product[] | null>(null);
-  const [creditBalance, setCreditBalance] = useState(0);
-  const [useCredit, setUseCredit] = useState(true);
-  const [contactName, setContactName] = useState(defaultName);
-  const [whatsapp, setWhatsapp] = useState("");
-  const [note, setNote] = useState("");
+  const { items, count, ready, clear } = useCart();
+  const [lines, setLines] = useState<Line[] | null>(null);
+  const [creditCents, setCreditCents] = useState(0);
   const [err, setErr] = useState<string | null>(null);
   const [placed, setPlaced] = useState(false);
   const [pending, startTransition] = useTransition();
 
+  const ids = useMemo(() => Object.keys(items), [items]);
+
   useEffect(() => {
+    if (!ready) return;
+    if (!supabaseConfigured || ids.length === 0) {
+      setLines([]);
+      return;
+    }
+    // Só as variantes do carrinho, e só as colunas que entram na conta:
+    // preço e os dois "active". Nome e foto já foram conferidos no
+    // carrinho — repetir a listagem aqui é wifi de navio gasto à toa.
     const supabase = createClient();
     supabase
-      .from("products")
-      .select("id, name, description, emoji, category, price_usd, active, sort_order")
-      .then(({ data }) => setProducts((data ?? []) as Product[]));
-    supabase
+      .from("product_variants")
+      .select("id, price_cents, active, products!product_variants_product_id_fkey!inner(active)")
+      .in("id", ids)
+      .then(({ data }) => setLines((data ?? []) as unknown as Line[]));
+  }, [ready, ids.join(",")]);
+
+  useEffect(() => {
+    if (!supabaseConfigured) return;
+    // A RPC devolve numeric em dólares e só é concedida a authenticated.
+    createClient()
       .rpc("my_credit_balance")
-      .then(({ data }) => setCreditBalance(Math.max(0, Number(data ?? 0))));
+      .then(({ data }) => setCreditCents(toCents(data ?? 0)));
   }, []);
 
   useEffect(() => {
-    // "placed" evita voltar pro carrinho no instante em que ele é esvaziado pós-pedido
-    if (ready && !placed && (count === 0 || !ship)) router.replace("/cart");
-  }, [ready, placed, count, ship, router]);
+    // "placed" evita voltar pro carrinho no instante em que ele é
+    // esvaziado pós-pedido. O navio não entra mais nessa condição: ele
+    // vem do perfil, e perfil incompleto trava o botão, não a página.
+    if (ready && !placed && count === 0) router.replace("/cart");
+  }, [ready, placed, count, router]);
 
-  const subtotal = useMemo(() => {
-    if (!products) return 0;
-    return Object.entries(items).reduce((s, [id, q]) => {
-      const p = products.find((x) => x.id === id);
-      return p ? s + Number(p.price_usd) * q : s;
-    }, 0);
-  }, [products, items]);
+  const rows = useMemo(
+    () =>
+      (lines ?? [])
+        .filter((l) => l.active && l.products?.active)
+        .map((l) => ({ ...l, qty: items[l.id] ?? 0 }))
+        .filter((l) => l.qty > 0),
+    [lines, items]
+  );
 
-  const deposit = subtotal * DEPOSIT_PCT;
-  const creditApplied = useCredit ? Math.min(creditBalance, deposit) : 0;
-  const payNow = Math.max(0, deposit - creditApplied);
-  const coveredByCredit = creditApplied > 0 && payNow <= 0.009;
-  // WhatsApp é o único canal que alcança quem já embarcou — sem ele
-  // um pedido não retirado vira prejuízo sem forma de resolver.
-  const canSubmit = ready && count > 0 && whatsapp.length > 0 && contactName.trim().length > 1;
+  const subtotal = rows.reduce((s, l) => s + l.price_cents * l.qty, 0);
+  const split = splitOrder(subtotal, creditCents);
+  const coveredByCredit = split.credit > 0 && split.dueNow === 0;
+  const canPay = ready && lines !== null && rows.length > 0 && !blocked && !pending;
 
   function submit() {
-    if (!ship) return;
-    if (!whatsapp) {
-      setErr("Add your WhatsApp — it's how we reach you if you're not at the gangway.");
-      return;
-    }
     setErr(null);
     startTransition(async () => {
       const res = await placeOrder({
-        shipId: ship.id,
-        applyCredit: useCredit && creditBalance > 0,
+        // O navio agora vem do perfil, não do carrinho: é do tripulante,
+        // não da compra, e não muda entre um pedido e outro.
+        shipId,
+        applyCredit: creditCents > 0,
         contactName,
-        contactWhatsapp: whatsapp,
-        note,
+        contactWhatsapp,
+        note: "",
         items: Object.entries(items).map(([id, qty]) => ({ id, qty })),
       });
       if (!res.ok) {
@@ -92,112 +119,71 @@ export default function CheckoutClient({
     });
   }
 
+  if (!ready || lines === null) return <div className="spin" aria-label="Loading" />;
+
   return (
-    <>
-      <TopBar title="Deposit — secure your window" backHref="/cart" />
-      <main className="pb-dock">
-        {!ready || products === null ? (
-          <div className="spin" aria-label="Loading" />
+    <section className="sumcard" aria-label="Order summary">
+      <h3>Your order</h3>
+
+      {/* "Products" com a mesma contagem do carrinho: o número não pode
+          mudar de uma tela para a outra sem nada ter mudado. */}
+      <div className="sumrow">
+        <span>Products:</span>
+        <b>{rows.length}</b>
+      </div>
+
+      <div className="sumrow">
+        <span>Subtotal</span>
+        <b>{usd(split.subtotal)}</b>
+      </div>
+
+      <div className="sumrow">
+        <span>Deposit ({DEPOSIT_PCT}%)</span>
+        <b>{usd(split.deposit)}</b>
+      </div>
+
+      {split.credit > 0 && (
+        <div className="sumrow">
+          <span>🧢 Captain credit</span>
+          <b style={{ color: "var(--teal)" }}>−{usd(split.credit)}</b>
+        </div>
+      )}
+
+      <div className="sumrow">
+        <span>Balance at the gangway</span>
+        <b>{usd(split.balance)}</b>
+      </div>
+
+      <div className="sumrow grand">
+        <span>Pay now</span>
+        <b>{usd(split.dueNow)}</b>
+      </div>
+
+      {err && <p className="alert" style={{ marginTop: 12 }}>{err}</p>}
+
+      <button className="btn" onClick={submit} disabled={!canPay}>
+        {pending ? "Placing order…" : "Proceed to Payment"}
+      </button>
+
+      <p className="finehint">
+        {blocked ? (
+          <>
+            Add the missing details above to your{" "}
+            <Link className="alink" href="/account">
+              profile
+            </Link>{" "}
+            to place this order.
+          </>
+        ) : coveredByCredit ? (
+          "Your Captain credit covers the whole deposit — confirming places your order right away."
         ) : (
           <>
-            <div className="summary">
-              <div className="r">
-                <span>
-                  {count} items · {ship?.name ?? "—"}
-                </span>
-                <b>{usd(subtotal)}</b>
-              </div>
-              <div className="r">
-                <span>Delivery window</span>
-                <b>
-                  {ship ? `BERTH ${ship.berth ?? "—"} · DOCKS IN ${hoursUntil(ship.eta)}H` : "—"}
-                </b>
-              </div>
-              <div className="r">
-                <span>Deposit (30%)</span>
-                <b>{usd(deposit)}</b>
-              </div>
-              {creditApplied > 0 && (
-                <div className="r">
-                  <span>🧢 Captain credit</span>
-                  <b style={{ color: "var(--teal)" }}>−{usd(creditApplied)}</b>
-                </div>
-              )}
-              <div className="r total">
-                <span>Pay now</span>
-                <b>{usd(payNow)}</b>
-              </div>
-              <div className="r">
-                <span>Balance at the gangway</span>
-                <b>{usd(subtotal - deposit)}</b>
-              </div>
-              <p className="hint">
-                {coveredByCredit
-                  ? "Your Captain credit covers the whole deposit — nothing to pay now."
-                  : `≈ ${brl(payNow)} charged now — your bank does the conversion, no house spread. If your ship skips Santos, the deposit becomes full credit for your next call. No paperwork.`}
-              </p>
-            </div>
-
-            {creditBalance > 0 && (
-              <div className="stack">
-                <label className="payopt">
-                  <input
-                    type="checkbox"
-                    checked={useCredit}
-                    onChange={(e) => setUseCredit(e.target.checked)}
-                  />
-                  <span>
-                    <b>Use my Captain credit ({usd(creditBalance)})</b>
-                    <span className="sub">Earned from your crew&apos;s orders — never expires</span>
-                  </span>
-                </label>
-              </div>
-            )}
-
-            <p className="subhead">Delivery contact</p>
-            <div className="stack">
-              <div className="field">
-                <label htmlFor="cname">Name at the gangway</label>
-                <input
-                  id="cname"
-                  value={contactName}
-                  onChange={(e) => setContactName(e.target.value)}
-                  placeholder="Who receives the kit"
-                />
-              </div>
-              <PhoneInput value={whatsapp} onChange={setWhatsapp} required />
-              <div className="field">
-                <label htmlFor="note">Note (optional)</label>
-                <input
-                  id="note"
-                  value={note}
-                  onChange={(e) => setNote(e.target.value)}
-                  placeholder="Anything we should know"
-                />
-              </div>
-              {err && <p className="alert">{err}</p>}
-              <p className="finehint">
-                Signed in as <span className="mono">{email}</span>.{" "}
-                {coveredByCredit
-                  ? "Confirming places your order instantly."
-                  : "Next: our secure payment page — card, Apple Pay, Google Pay or PIX. The balance is paid at the gangway on delivery."}
-              </p>
-            </div>
+            ≈ {brl(split.dueNow)} charged now, converted by your own bank — no house spread. Next
+            is our secure payment page: card, Apple Pay, Google Pay or PIX. If your ship skips the
+            call, the deposit becomes full credit for the next one — no paperwork.
           </>
         )}
-      </main>
-      <div className="cta-dock">
-        <button className="cta" onClick={submit} disabled={pending || !canSubmit}>
-          <span>
-            {pending
-              ? "Placing order…"
-              : coveredByCredit
-                ? "Confirm order"
-                : "Confirm & pay deposit"}
-          </span>
-          <span className="mono">{usd(payNow)}</span>
-        </button>
-      </div>
-    </>
+      </p>
+    </section>
   );
 }

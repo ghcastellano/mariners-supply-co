@@ -13,24 +13,50 @@ export default function PhoneInput({
   value,
   onChange,
   required,
+  label = "WhatsApp",
+  hint,
 }: {
   value: string;
   onChange: (fullNumber: string) => void;
   required?: boolean;
+  /** A espec chama este campo de "Telephone number"; a operação chama de WhatsApp. */
+  label?: string;
+  hint?: string;
 }) {
   const [country, setCountry] = useState("BR");
   const [local, setLocal] = useState("");
   const [touched, setTouched] = useState(false);
+  const [seeded, setSeeded] = useState(false);
 
   useEffect(() => {
+    // Num formulário de EDIÇÃO o campo precisa nascer com o número
+    // salvo. Sem isto o componente montava vazio e disparava
+    // onChange("") — quem entrasse só para trocar o porto apagaria o
+    // telefone sem perceber. Semeia uma vez: depois disso quem manda é
+    // o que a pessoa está digitando.
+    if (seeded) return;
+    const e164 = (value ?? "").trim();
+    if (e164.startsWith("+")) {
+      const match = [...COUNTRIES]
+        .filter((c) => e164.startsWith(c.dial))
+        .sort((a, b) => b.dial.length - a.dial.length)[0];
+      if (match) {
+        setCountry(match.code);
+        setLocal(e164.slice(match.dial.length));
+        setSeeded(true);
+        return;
+      }
+    }
     setCountry(detectCountry());
-  }, []);
+    setSeeded(true);
+  }, [value, seeded]);
 
   useEffect(() => {
+    if (!seeded) return; // não avisa o pai antes de terminar de semear
     onChange(buildPhone(country, local) ?? "");
     // onChange muda a cada render do pai; depender dele reentraria em laço
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [country, local]);
+  }, [country, local, seeded]);
 
   const valid = Boolean(buildPhone(country, local));
   const showError = required && touched && local.length > 0 && !valid;
@@ -38,7 +64,7 @@ export default function PhoneInput({
   return (
     <div className="field">
       <label htmlFor="wa">
-        WhatsApp {required ? "" : "(optional)"}
+        {label} {required ? "" : "(optional)"}
       </label>
       <div className="phone-row">
         <select
@@ -73,9 +99,10 @@ export default function PhoneInput({
         </p>
       ) : (
         <p className="finehint">
-          {required
-            ? "How we reach you if you're not at the gangway — the only channel that works from a ship."
-            : "Optional, but it's how we reach you at the gangway."}
+          {hint ??
+            (required
+              ? "How we reach you if you're not at the gangway — the only channel that works from a ship."
+              : "Optional, but it's how we reach you at the gangway.")}
         </p>
       )}
       <input type="hidden" name="contact_whatsapp" value={value} />

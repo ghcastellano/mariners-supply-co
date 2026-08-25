@@ -1,5 +1,6 @@
 "use server";
 
+import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 
@@ -7,4 +8,109 @@ export async function signOut() {
   const supabase = await createClient();
   await supabase.auth.signOut();
   redirect("/");
+}
+
+/**
+ * Destinos do select "My Account". Lista fechada de propósito: o valor
+ * chega de um <select> do cliente, e redirect() com caminho arbitrário é
+ * um open redirect de graça.
+ */
+const SECTIONS = ["/account", "/orders", "/wishlist", "/captain"];
+
+export async function goToAccountSection(formData: FormData) {
+  const to = String(formData.get("to") ?? "");
+  redirect(SECTIONS.includes(to) ? to : "/account");
+}
+
+export type ProfileInput = {
+  firstName: string;
+  lastName: string;
+  rankSlug: string;
+  nationality: string;
+  /** E.164 completo, montado pelo PhoneInput. Vazio = não mexer no salvo. */
+  whatsapp: string;
+  portId: string;
+  shipId: string | null;
+  vesselName: string;
+  vesselImo: string | null;
+  vesselFlag: string | null;
+};
+
+export type SaveProfileResult = { ok: true; complete: boolean } | { ok: false; error: string };
+
+const clean = (v: string | null | undefined, max: number) =>
+  (v ?? "").trim().slice(0, max) || null;
+
+/**
+ * Grava o cadastro que o checkout confirma.
+ *
+ * O checkout não é formulário: ele lê estes campos e recusa o pagamento
+ * quando falta um. Esta é a única tela onde eles nascem, então a validação
+ * tem de ser a mesma do placeOrder — descobrir que o telefone está fora do
+ * formato só na hora de pagar é o pior lugar para descobrir.
+ */
+export async function saveProfile(input: ProfileInput): Promise<SaveProfileResult> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { ok: false, error: "Your session expired — please sign in again." };
+
+  // O banco guarda um full_name só: é o nome que vai na prancha de
+  // embarque. Juntar de volta é exato porque o primeiro nome é o primeiro
+  // token e todo o resto foi para o sobrenome.
+  const fullName = `${(input.firstName ?? "").trim()} ${(input.lastName ?? "").trim()}`
+    .trim()
+    .slice(0, 120);
+  if (!fullName) return { ok: false, error: "First and last name are required." };
+
+  // Mesma regra E.164 do placeOrder. Campo vazio NÃO apaga o que já está
+  // salvo: o PhoneInput nasce em branco a cada montagem, e um formulário
+  // de edição que zera o telefone de quem só mudou o porto é uma armadilha.
+  const wa = (input.whatsapp ?? "").replace(/[^\d+]/g, "");
+  if (wa && !/^\+\d{8,15}$/.test(wa)) {
+    return { ok: false, error: "That telephone number isn't valid — include the country code." };
+  }
+
+  const { data: current } = await supabase
+    .from("profiles")
+    .select("whatsapp, profile_completed_at")
+    .eq("id", user.id)
+    .maybeSingle();
+
+  const whatsapp = wa || clean(current?.whatsapp, 20);
+  const portId = clean(input.portId, 36);
+  const vesselName = clean(input.vesselName, 120)?.toUpperCase() ?? null;
+
+  // "Completo" é exatamente o que o checkout exige para liberar o
+  // pagamento. O carimbo marca a PRIMEIRA vez que fechou — remarcar a cada
+  // salvamento apagaria desde quando o cadastro vale.
+  const complete = Boolean(fullName && vesselName && portId && whatsapp);
+  const profileCompletedAt = complete
+    ? (current?.profile_completed_at ?? new Date().toISOString())
+    : null;
+
+  const { error } = await supabase
+    .from("profiles")
+    .update({
+      full_name: fullName,
+      rank_slug: clean(input.rankSlug, 40),
+      nationality: clean(input.nationality, 2)?.toUpperCase() ?? null,
+      whatsapp,
+      port_id: portId,
+      ship_id: clean(input.shipId, 36),
+      vessel_name: vesselName,
+      vessel_imo: clean(input.vesselImo, 20),
+      vessel_flag: clean(input.vesselFlag, 60),
+      profile_completed_at: profileCompletedAt,
+    })
+    .eq("id", user.id);
+
+  if (error) return { ok: false, error: "Couldn't save your details — try again." };
+
+  // O checkout lê o perfil no servidor: sem invalidar, ele seguiria
+  // mostrando o dado antigo (e barrando o pagamento) depois de corrigido.
+  revalidatePath("/account");
+  revalidatePath("/checkout");
+  return { ok: true, complete };
 }

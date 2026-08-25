@@ -1,8 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import QRCode from "qrcode";
-import TopBar from "@/components/TopBar";
-import BottomNav from "@/components/BottomNav";
+import Breadcrumb from "@/components/Breadcrumb";
 import ShareCode from "@/components/ShareCode";
 import { createClient } from "@/lib/supabase/server";
 import { SITE_URL } from "@/lib/env";
@@ -49,69 +48,67 @@ export default async function CaptainPage() {
   });
 
   return (
-    <>
-      <TopBar />
-      <main className="pb-nav">
-        <div className="crew-hero">
-          <div className="cap">🧢</div>
-          <h2>
-            Be your ship&apos;s <b>Captain</b>
-          </h2>
-          <p>
-            Your crew orders with your code — you earn <b>{rate}% in credit</b> on every order.
-            Forever.
-          </p>
-        </div>
+    <main>
+      <Breadcrumb trail={[{ label: "Captain rewards" }]} />
 
-        <div className="qrcard">
-          <div className="qr" dangerouslySetInnerHTML={{ __html: qr }} />
-          <div className="info">
-            <div className="code">{code}</div>
-            <p>On your cap, in the mess room, in the ship&apos;s group — whoever scans it orders in your name.</p>
-            <ShareCode code={code} link={link} />
-          </div>
-        </div>
-
-        <div className="crew-stats">
-          <div className="cstat">
-            <b>{orders}</b>
-            <span>orders via your code</span>
-          </div>
-          <div className="cstat">
-            <b>{usd(earned)}</b>
-            <span>credit earned</span>
-          </div>
-        </div>
-
-        <div className="tiers">
-          {TIERS.map((t) => {
-            const on = t.pct === rate;
-            return (
-              <div key={t.name} className={`tier ${on ? "on" : ""}`}>
-                <span className="em">{t.em}</span>
-                <div>
-                  <h4>
-                    {t.name}
-                    {on ? " — you are here" : ""}
-                  </h4>
-                  <p>{t.range}</p>
-                </div>
-                <span className="pct">{t.pct}%</span>
-              </div>
-            );
-          })}
-        </div>
-
-        <p className="crew-note">
-          Credit lands as soon as the deposit on a referred order clears, works on any future call
-          at Santos and never expires. Open and above board — the master knows and approves.
-          Commission is for crew only; never for terminal staff, agency or authorities.{" "}
-          <Link className="alink" href="/orders">
-            See my orders →
-          </Link>
+      <div className="crew-hero">
+        <div className="cap">🧢</div>
+        <h2>
+          Be your ship&apos;s <b>Captain</b>
+        </h2>
+        <p>
+          Your crew orders with your code — you earn <b>{rate}% in credit</b> on every order.
+          Forever.
         </p>
-      </main>
-      <BottomNav />
-    </>
+      </div>
+
+      <div className="qrcard">
+        <div className="qr" dangerouslySetInnerHTML={{ __html: qr }} />
+        <div className="info">
+          <div className="code">{code}</div>
+          <p>On your cap, in the mess room, in the ship&apos;s group — whoever scans it orders in your name.</p>
+          <ShareCode code={code} link={link} />
+        </div>
+      </div>
+
+      <div className="crew-stats">
+        <div className="cstat">
+          <b>{orders}</b>
+          <span>orders via your code</span>
+        </div>
+        <div className="cstat">
+          <b>{usd(earned)}</b>
+          <span>credit earned</span>
+        </div>
+      </div>
+
+      <div className="tiers">
+        {TIERS.map((t) => {
+          const on = t.pct === rate;
+          return (
+            <div key={t.name} className={`tier ${on ? "on" : ""}`}>
+              <span className="em">{t.em}</span>
+              <div>
+                <h4>
+                  {t.name}
+                  {on ? " — you are here" : ""}
+                </h4>
+                <p>{t.range}</p>
+              </div>
+              <span className="pct">{t.pct}%</span>
+            </div>
+          );
+        })}
+      </div>
+
+      <p className="crew-note">
+        Credit lands as soon as the deposit on a referred order clears, works on any future call
+        at Santos and never expires. Open and above board — the master knows and approves.
+        Commission is for crew only; never for terminal staff, agency or authorities.{" "}
+        <Link className="alink" href="/orders">
+          See my orders →
+        </Link>
+      </p>
+    </main>
   );
 }

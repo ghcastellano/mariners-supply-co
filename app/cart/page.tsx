@@ -3,14 +3,12 @@
 import { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import TopBar from "@/components/TopBar";
-import BottomNav from "@/components/BottomNav";
+import Breadcrumb from "@/components/Breadcrumb";
 import { useCart } from "@/lib/cart";
 import { createClient } from "@/lib/supabase/client";
 import { supabaseConfigured } from "@/lib/env";
 import { imageUrl } from "@/lib/catalog";
-import { brl, splitOrder, usd } from "@/lib/money";
+import { brl, DEPOSIT_PCT, splitOrder, toCents, usd } from "@/lib/money";
 
 type Line = {
   id: string;
@@ -30,10 +28,22 @@ type Line = {
   } | null;
 };
 
+/**
+ * Carrinho na estrutura do Sunny: aviso de pedido mínimo, título,
+ * cartão "Summary" com os dois botões dentro e, só então, a lista de
+ * itens. O Summary vem ANTES da lista de propósito — é a ordem que a
+ * tripulação já tem na memória, e quem abre o carrinho abre para ver
+ * quanto deu, não para reler o que escolheu.
+ *
+ * O que era barra fixa (.cta-dock) saiu: os botões moram no Summary,
+ * como lá. Uma barra fixa a mais só rouba altura de tela no celular.
+ */
 export default function CartPage() {
-  const router = useRouter();
-  const { items, change, count, ready } = useCart();
+  const { items, change, ready } = useCart();
   const [lines, setLines] = useState<Line[] | null>(null);
+  const [minOrderCents, setMinOrderCents] = useState(0);
+  const [creditCents, setCreditCents] = useState(0);
+  const [minDismissed, setMinDismissed] = useState(false);
 
   const ids = useMemo(() => Object.keys(items), [items]);
 
@@ -57,6 +67,24 @@ export default function CartPage() {
       .then(({ data }) => setLines((data ?? []) as unknown as Line[]));
   }, [ready, ids.join(",")]);
 
+  useEffect(() => {
+    if (!supabaseConfigured) return;
+    const supabase = createClient();
+    // [otim] Mínimo do porto e saldo de crédito são buscados uma vez na
+    // montagem, não a cada toque no stepper: nenhum dos dois depende do
+    // que está no carrinho, e o wifi do navio não sobra.
+    supabase
+      .from("ports")
+      .select("min_order_cents")
+      .eq("slug", "santos")
+      .maybeSingle()
+      .then(({ data }) => setMinOrderCents(Number(data?.min_order_cents ?? 0)));
+    // A RPC só é concedida a authenticated: visitante recebe erro e fica
+    // em zero — carrinho de quem ainda não entrou não pode quebrar. E ela
+    // devolve numeric em dólares, então passa por toCents.
+    supabase.rpc("my_credit_balance").then(({ data }) => setCreditCents(toCents(data ?? 0)));
+  }, []);
+
   const rows = useMemo(
     () =>
       (lines ?? [])
@@ -79,110 +107,165 @@ export default function CartPage() {
     0
   );
   const split = splitOrder(subtotal);
+  // Porto sem mínimo cadastrado guarda 0: nesse caso o aviso nunca existe.
+  const belowMin = minOrderCents > 0 && subtotal < minOrderCents;
 
   return (
-    <>
-      <TopBar title="Your order" backHref="/shop" />
-      <main className="pb-both">
-        {lines === null || !ready ? (
-          <div className="spin" aria-label="Loading" />
-        ) : count === 0 || rows.length === 0 ? (
-          <div className="empty">
-            <div className="i">🛒</div>
-            Your kit is empty, sailor.
-            <p style={{ marginTop: 18 }}>
-              <Link className="alink" href="/shop">
-                ⚓ Browse the catalog →
-              </Link>
-            </p>
-          </div>
-        ) : (
-          <>
-            {dropped > 0 && (
-              <div className="stack" style={{ paddingTop: 12 }}>
-                <p className="alert">
-                  {dropped} item{dropped === 1 ? "" : "s"} left the catalog since you added
-                  {dropped === 1 ? " it" : " them"} — removed from your order.
-                </p>
-              </div>
-            )}
+    <main>
+      <Breadcrumb trail={[{ label: "Shopping Cart" }]} />
 
-            <div className="cart-list">
-              {rows.map((l) => {
-                const src = imageUrl(l.image_path ?? l.products?.primary_image_path);
-                const low = l.track_stock && l.stock_qty > 0 && l.stock_qty < l.qty;
-                return (
-                  <div className="ci" key={l.id}>
-                    <Link href={`/p/${l.products?.slug}`} className="ci-thumb" prefetch={false}>
-                      {src ? (
-                        <Image src={src} alt="" fill sizes="52px" style={{ objectFit: "contain" }} />
-                      ) : (
-                        <span aria-hidden>📦</span>
-                      )}
-                    </Link>
-                    <div>
-                      <div className="nm">{l.products?.name}</div>
-                      {l.option_label && <div className="pr">{l.option_label}</div>}
-                      <div className="pr mono">
-                        {l.compare_at_cents && <s>{usd(l.compare_at_cents)}</s>}{" "}
-                        {usd(l.price_cents)} each
-                      </div>
-                      <div className="sku mono">SKU {l.sku}</div>
-                      {low && <div className="pr" style={{ color: "var(--amber)" }}>
-                        Only {l.stock_qty} left
-                      </div>}
-                    </div>
-                    <div className="qty">
-                      <button onClick={() => change(l.id, -1)} aria-label="Less">−</button>
-                      <b>{l.qty}</b>
-                      <button onClick={() => change(l.id, 1)} aria-label="More">+</button>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-
-            <div className="summary">
-              <div className="r">
-                <span>Subtotal</span>
-                <b>{usd(subtotal)}</b>
-              </div>
-              {saved > 0 && (
-                <div className="r">
-                  <span>You save</span>
-                  <b style={{ color: "var(--teal)" }}>−{usd(saved)}</b>
-                </div>
-              )}
-              <div className="r">
-                <span>Delivery on board</span>
-                <b style={{ color: "var(--teal)" }}>Free</b>
-              </div>
-              <div className="r total">
-                <span>Deposit now (30%)</span>
-                <b>{usd(split.deposit)}</b>
-              </div>
-              <div className="r">
-                <span>Balance at the gangway</span>
-                <b>{usd(split.balance)}</b>
-              </div>
-              <p className="hint">
-                ≈ {brl(split.deposit)} charged now — your bank does the conversion, no house
-                spread. If your ship skips Santos, the deposit becomes full credit for your next
-                call. No paperwork.
-              </p>
-            </div>
-          </>
-        )}
-      </main>
-      {ready && rows.length > 0 && (
-        <div className="cta-dock above-nav">
-          <button className="cta" onClick={() => router.push("/checkout")}>
-            <span>Continue to deposit</span>
-            <span className="mono">{usd(split.deposit)}</span>
+      {belowMin && !minDismissed && rows.length > 0 && (
+        <div className="infobox">
+          <span>Minimum order amount {usd(minOrderCents)}</span>
+          <button onClick={() => setMinDismissed(true)} aria-label="Dismiss">
+            ✕
           </button>
         </div>
       )}
-      <BottomNav />
-    </>
+
+      <h1 className="secttl left">Shopping Cart</h1>
+
+      {lines === null || !ready ? (
+        <div className="spin" aria-label="Loading" />
+      ) : rows.length === 0 ? (
+        <div className="empty">
+          <div className="i">🛒</div>
+          Your kit is empty, sailor.
+          <p style={{ marginTop: 18 }}>
+            <Link className="alink" href="/shop">
+              ⚓ Browse the catalog →
+            </Link>
+          </p>
+        </div>
+      ) : (
+        <>
+          <section className="sumcard" aria-label="Summary">
+            <h3>Summary</h3>
+
+            <div className="sumrow">
+              <span>Products:</span>
+              <b>{rows.length}</b>
+            </div>
+
+            {/* Onde o Sunny põe "Apply Discount Code" nós pomos o crédito
+                Captain: é o mesmo lugar em que a pessoa já procura desconto,
+                e aqui não há cupom para digitar.
+                [otim] <details> nativo — recolhe sem estado e sem JS. */}
+            <details className="disc">
+              <summary>Apply Discount Code</summary>
+              <div className="disc-body">
+                <div className={`disc-line${creditCents > 0 ? "" : " zero"}`}>
+                  <span>Captain credit</span>
+                  <b>{usd(creditCents)}</b>
+                </div>
+                <p className="finehint">
+                  {creditCents > 0
+                    ? "Comes off your deposit at checkout — nothing to type in."
+                    : "No credit on this account yet. Referral credit lands here and comes off your deposit at checkout."}
+                </p>
+              </div>
+            </details>
+
+            <div className="sumrow">
+              <span>Subtotal</span>
+              <b>{usd(subtotal)}</b>
+            </div>
+
+            {saved > 0 && (
+              <div className="sumrow">
+                <span>You save</span>
+                <b style={{ color: "var(--teal)" }}>−{usd(saved)}</b>
+              </div>
+            )}
+
+            <div className="sumrow grand">
+              <span>Grand Total</span>
+              <b>{usd(subtotal)}</b>
+            </div>
+
+            <Link className="btn" href="/checkout">
+              Proceed to Checkout
+            </Link>
+            <Link className="btn navy" href="/shop">
+              Return to shopping
+            </Link>
+
+            <p className="finehint">
+              {DEPOSIT_PCT}% deposit now — {usd(split.deposit)} (≈ {brl(split.deposit)}, converted
+              by your own bank, no house spread). Balance {usd(split.balance)} at the gangway;
+              delivery on board is free. If your ship skips Santos, the deposit becomes full credit
+              for your next call — no paperwork.
+            </p>
+          </section>
+
+          {dropped > 0 && (
+            <div className="stack">
+              <p className="alert">
+                {dropped} item{dropped === 1 ? "" : "s"} left the catalog since you added
+                {dropped === 1 ? " it" : " them"} — removed from your order.
+              </p>
+            </div>
+          )}
+
+          <div className="cart-list">
+            {rows.map((l) => {
+              const src = imageUrl(l.image_path ?? l.products?.primary_image_path);
+              const short = l.track_stock && l.stock_qty > 0 && l.stock_qty < l.qty;
+              return (
+                <div className="mcline" key={l.id}>
+                  <Link href={`/p/${l.products?.slug}`} className="ci-thumb" prefetch={false}>
+                    {src ? (
+                      <Image src={src} alt="" fill sizes="62px" style={{ objectFit: "contain" }} />
+                    ) : (
+                      <span aria-hidden>📦</span>
+                    )}
+                  </Link>
+
+                  <div className="mcbody">
+                    <div className="mchead">
+                      <Link href={`/p/${l.products?.slug}`} className="nm" prefetch={false}>
+                        {l.products?.name}
+                      </Link>
+                      <b className="mono">{usd(l.price_cents * l.qty)}</b>
+                    </div>
+
+                    <span className="sku mono">Sku {l.sku}</span>
+                    {l.option_label && <span className="sku">{l.option_label}</span>}
+                    <span className="sku mono">
+                      {l.compare_at_cents ? <s>{usd(l.compare_at_cents)}</s> : null}{" "}
+                      {usd(l.price_cents)} each
+                    </span>
+                    {short && (
+                      <span className="sku" style={{ color: "var(--amber)" }}>
+                        Only {l.stock_qty} left
+                      </span>
+                    )}
+
+                    <div className="mcactions">
+                      <div className="qty">
+                        <button onClick={() => change(l.id, -1)} aria-label="Less">
+                          −
+                        </button>
+                        <span className="mono">{l.qty}</span>
+                        <button onClick={() => change(l.id, 1)} aria-label="More">
+                          +
+                        </button>
+                      </div>
+                      <button
+                        className="mcdel"
+                        onClick={() => change(l.id, -l.qty)}
+                        aria-label={`Remove ${l.products?.name ?? "item"}`}
+                      >
+                        🗑
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </>
+      )}
+    </main>
   );
 }

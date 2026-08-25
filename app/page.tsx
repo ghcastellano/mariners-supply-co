@@ -1,64 +1,216 @@
 import Link from "next/link";
-import TopBar from "@/components/TopBar";
-import ShipPicker from "@/components/ShipPicker";
+import { unstable_cache } from "next/cache";
+import { createClient as createAnonClient } from "@supabase/supabase-js";
+import ProductCardView from "@/components/ProductCard";
 import { createClient } from "@/lib/supabase/server";
-import { CONTACT_EMAIL, supabaseConfigured } from "@/lib/env";
-import type { Ship } from "@/lib/types";
+import { listProducts, type Category, type ProductCard } from "@/lib/catalog";
+import { SUPABASE_ANON_KEY, SUPABASE_URL, supabaseConfigured } from "@/lib/env";
+import { hoursUntil } from "@/lib/format";
+import { DEPOSIT_PCT } from "@/lib/money";
 
+/**
+ * Home = vitrine, na ordem do Sunny: hero, "Categories", grade de
+ * categorias raiz, e as faixas "On promo now" e "New arrivals".
+ * O seletor de navio saiu daqui — navio agora mora no perfil, e a
+ * pessoa chega na loja querendo ver o que tem, não preencher um passo.
+ *
+ * A rota é dinâmica porque a tira do navio lê a sessão, e sessão não
+ * cabe em página estática. Isso NÃO custa o cache: as quatro consultas
+ * públicas da vitrine ficam em unstable_cache por 300s (o revalidate
+ * que a espec pede), então o que renderiza por requisição é só a tira.
+ */
 export const dynamic = "force-dynamic";
 
-export default async function Home() {
-  let ships: Ship[] = [];
-  let loadError = false;
+type RootCat = Pick<Category, "id" | "slug" | "name" | "icon">;
 
-  if (supabaseConfigured) {
+type Storefront = {
+  roots: RootCat[];
+  counts: Record<string, number>;
+  promo: ProductCard[];
+  fresh: ProductCard[];
+};
+
+const EMPTY: Storefront = { roots: [], counts: {}, promo: [], fresh: [] };
+
+/**
+ * Cliente anônimo, sem cookie, de propósito: unstable_cache não pode
+ * tocar em nada de escopo de requisição (cookies() aborta o cache), e
+ * catálogo é o mesmo para toda a tripulação. RLS de leitura pública
+ * cobre categories e products ativos, então anon vê o que deve ver.
+ */
+const loadStorefront = unstable_cache(
+  async (): Promise<Storefront> => {
+    if (!supabaseConfigured) return EMPTY;
     try {
-      const supabase = await createClient();
-      const { data, error } = await supabase
-        .from("ships")
-        .select("id, name, berth, eta, cutoff_hours, active, delay_hours, previous_eta, eta_source, ata")
-        .eq("active", true)
-        .gt("eta", new Date(Date.now() - 12 * 3600e3).toISOString())
-        .order("eta", { ascending: true });
-      if (error) loadError = true;
-      else ships = (data ?? []) as Ship[];
+      const db = createAnonClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+        auth: { persistSession: false, autoRefreshToken: false },
+      });
+
+      const [cats, counts, promo, fresh] = await Promise.all([
+        db
+          .from("categories")
+          .select("id, slug, name, icon")
+          .eq("active", true)
+          .eq("depth", 0)
+          .order("sort_order"),
+        db.rpc("category_counts"),
+        listProducts(db, { badge: "promo", limit: 8 }),
+        listProducts(db, { sort: "newest", limit: 8 }),
+      ]);
+
+      // Objeto simples, não Map: o valor atravessa a serialização do
+      // cache e Map volta vazio do outro lado.
+      const byId: Record<string, number> = {};
+      for (const r of (counts.data ?? []) as { category_id: string; product_count: number }[]) {
+        byId[r.category_id] = Number(r.product_count) || 0;
+      }
+
+      return {
+        roots: (cats.data ?? []) as RootCat[],
+        counts: byId,
+        promo: promo.items,
+        fresh: fresh.items,
+      };
     } catch {
-      loadError = true;
+      // Catálogo fora do ar não pode devolver erro na porta de entrada.
+      return EMPTY;
     }
+  },
+  ["home-storefront"],
+  { revalidate: 300, tags: ["catalog"] }
+);
+
+type Crew =
+  | { kind: "vessel"; name: string; hours: number }
+  | { kind: "invite" }
+  | null;
+
+type CrewRow = {
+  ship_id: string | null;
+  ships: { name: string; eta: string } | null;
+};
+
+/** Perfil do usuário logado — só o que a tira do navio precisa. */
+async function loadCrew(): Promise<Crew> {
+  if (!supabaseConfigured) return null;
+  try {
+    const supabase = await createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) return null;
+
+    const { data } = await supabase
+      .from("profiles")
+      .select("ship_id, ships(name, eta)")
+      .eq("id", user.id)
+      .maybeSingle();
+
+    const row = data as CrewRow | null;
+    // ship_id sem ships significa navio inativo (já zarpou): a tira
+    // vira convite, que é mais útil que um nome de escala vencida.
+    if (!row?.ship_id || !row.ships) return { kind: "invite" };
+    return { kind: "vessel", name: row.ships.name, hours: hoursUntil(row.ships.eta) };
+  } catch {
+    return null;
   }
+}
+
+export default async function Home() {
+  const [store, crew] = await Promise.all([loadStorefront(), loadCrew()]);
 
   return (
-    <>
-      <TopBar chip={false} account />
-      <main>
-        <div className="hero-mini">
-          <p className="kicker">Porto de Santos · by Mariner&apos;s Bar</p>
-          <h2>Which ship are you on, sailor?</h2>
-          <p>Your order rides with your vessel&apos;s ETA. Pick your ship — we handle the rest.</p>
+    <main>
+      <section className="homehero">
+        <p className="kicker">Porto de Santos · by Mariner&apos;s Bar</p>
+        <h1>Duty-free, delivered to your gangway at Porto de Santos</h1>
+        <p className="lead">
+          Pre-order before you dock, pay a {DEPOSIT_PCT}% deposit, collect at the gangway.
+        </p>
+      </section>
+
+      <h2 className="secttl">Categories</h2>
+
+      {store.roots.length === 0 ? (
+        <div className="empty">
+          <div className="i">🧭</div>
+          The shelves are being stocked. Check back shortly.
         </div>
+      ) : (
+        <div className="catgrid">
+          {store.roots.map((c) => {
+            const n = store.counts[c.id] ?? 0;
+            return (
+              <Link key={c.id} href={`/c/${c.slug}`} className="catcard" prefetch={false}>
+                <span className="ic" aria-hidden>
+                  {c.icon ?? "▪"}
+                </span>
+                <span className="tx">
+                  <span className="nm">{c.name}</span>
+                  <span className="ct">{n === 1 ? "1 item" : `${n} items`}</span>
+                </span>
+                <span className="chev" aria-hidden>
+                  ›
+                </span>
+              </Link>
+            );
+          })}
+        </div>
+      )}
 
-        {!supabaseConfigured ? (
-          <div className="stack">
-            <p className="alert">
-              Backend not configured yet — set <code>NEXT_PUBLIC_SUPABASE_URL</code> and{" "}
-              <code>NEXT_PUBLIC_SUPABASE_ANON_KEY</code> (see README).
-            </p>
-          </div>
-        ) : loadError ? (
-          <div className="stack">
-            <p className="alert">Couldn&apos;t load the line-up. Pull to refresh or try again shortly.</p>
-          </div>
-        ) : (
-          <ShipPicker ships={ships} />
-        )}
-      </main>
+      {crew?.kind === "vessel" && (
+        <Link href="/account" className="vstrip">
+          <span className="ic" aria-hidden>
+            ⚓
+          </span>
+          <span className="tx">
+            <span className="lb">Your vessel</span>
+            <span className="nm">{crew.name}</span>
+          </span>
+          <span className="eta">{crew.hours > 0 ? `${crew.hours}h to berth` : "Alongside now"}</span>
+        </Link>
+      )}
 
-      <footer className="foot">
-        <p className="tag">Gangway delivery · pre-order by ETA · card payment</p>
-        <a href={`mailto:${CONTACT_EMAIL}`}>✉️ {CONTACT_EMAIL}</a>
-        <Link href="/login">Crew access — sign in / create account</Link>
-        <Link href="/admin">Staff access</Link>
-      </footer>
-    </>
+      {crew?.kind === "invite" && (
+        <Link href="/account" className="vstrip">
+          <span className="ic" aria-hidden>
+            ⚓
+          </span>
+          <span className="tx">
+            <span className="lb">Your vessel</span>
+            <span className="nm">Add your ship to see your order cut-off</span>
+          </span>
+          <span className="eta">Complete profile ›</span>
+        </Link>
+      )}
+
+      {/* Faixa some inteira quando não há promoção: prateleira vazia
+          com título é pior do que prateleira nenhuma. */}
+      {store.promo.length > 0 && (
+        <section>
+          <h2 className="secttl">On promo now</h2>
+          <div className="rail">
+            {store.promo.map((p) => (
+              // Nenhuma imagem com priority: no celular a grade de
+              // categorias empurra as faixas para fora da primeira
+              // tela, e priority em foto que ninguém vê rouba banda
+              // do LCP real — que aqui é o texto do hero.
+              <ProductCardView key={p.id} p={p} />
+            ))}
+          </div>
+        </section>
+      )}
+
+      {store.fresh.length > 0 && (
+        <section>
+          <h2 className="secttl">New arrivals</h2>
+          <div className="rail">
+            {store.fresh.map((p) => (
+              <ProductCardView key={p.id} p={p} />
+            ))}
+          </div>
+        </section>
+      )}
+    </main>
   );
 }

@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import TopBar from "@/components/TopBar";
-import BottomNav from "@/components/BottomNav";
+import Breadcrumb from "@/components/Breadcrumb";
 import ProductBuy from "@/components/ProductBuy";
 import ProductCardView from "@/components/ProductCard";
 import { createClient } from "@/lib/supabase/server";
@@ -66,69 +65,78 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
     : [];
 
   return (
-    <>
-      <TopBar title={p.brands?.name ?? "Product"} backHref={cat ? `/c/${cat.slug}` : "/shop"} />
-      <main className="pb-dock">
-        <ProductBuy
-          product={{
-            id: p.id,
-            slug: p.slug,
-            name: p.name,
-            brand: p.brands?.name ?? null,
-            badge: p.badge,
-            sku: p.sku,
-            short_description: p.short_description,
-            tax_class: p.tax_class,
-            min_qty: p.min_qty,
-            max_qty: p.max_qty,
-          }}
-          images={images.length ? images : p.primary_image_path
-            ? [{ id: "primary", path: p.primary_image_path, alt: p.name, sort_order: 0 }]
-            : []}
-          variants={variants}
-        />
+    <main className="pb-dock">
+      <Breadcrumb
+        trail={[
+          { label: "Shop", href: "/shop" },
+          ...(cat ? [{ label: cat.name, href: `/c/${cat.slug}` }] : []),
+          { label: p.name },
+        ]}
+      />
+      <ProductBuy
+        product={{
+          id: p.id,
+          slug: p.slug,
+          name: p.name,
+          brand: p.brands?.name ?? null,
+          badge: p.badge,
+          sku: p.sku,
+          short_description: p.short_description,
+          tax_class: p.tax_class,
+          min_qty: p.min_qty,
+          max_qty: p.max_qty,
+        }}
+        images={images.length ? images : p.primary_image_path
+          ? [{ id: "primary", path: p.primary_image_path, alt: p.name, sort_order: 0 }]
+          : []}
+        variants={variants}
+      />
 
-        {(p.specs?.length || p.description) && (
-          <section className="pdp-block">
-            <h3>Description</h3>
-            {p.specs?.length ? (
-              <ul className="specs">
-                {p.specs.map((s, i) => (
-                  <li key={i}>{s}</li>
-                ))}
-              </ul>
-            ) : (
-              <p className="pdp-text">{p.description}</p>
-            )}
-          </section>
-        )}
-
+      {(p.specs?.length || p.description) && (
         <section className="pdp-block">
-          <h3>Duty-free, delivered</h3>
-          <ul className="specs">
-            <li>Customs paperwork handled by us — nothing for you to sign.</li>
-            <li>30% deposit now, balance at the gangway.</li>
-            <li>Photo proof of delivery on your order page.</li>
-          </ul>
-        </section>
-
-        {related.length > 0 && (
-          <>
-            <p className="subhead">More in {cat?.name}</p>
-            <div className="pgrid">
-              {related.slice(0, 4).map((r) => (
-                <ProductCardView key={r.id} p={r} />
+          {/* O nome volta no título e em negrito logo abaixo, como na
+              ficha do Sunny: quem chega rolando de outra ficha confere
+              de qual produto é a lista sem subir de novo. */}
+          <h3>
+            Description <span className="slash">/</span> {p.name}
+          </h3>
+          <p className="prodname">{p.name}</p>
+          {p.specs?.length ? (
+            <ul className="specs">
+              {p.specs.map((s, i) => (
+                <li key={i}>{s}</li>
               ))}
-            </div>
-            <div className="stack" style={{ paddingTop: 2 }}>
-              <Link className="btn ghost" href={`/c/${cat?.slug}`} prefetch={false}>
-                See all {cat?.name}
-              </Link>
-            </div>
-          </>
-        )}
-      </main>
-      <BottomNav />
-    </>
+            </ul>
+          ) : (
+            <p className="pdp-text">{p.description}</p>
+          )}
+        </section>
+      )}
+
+      <section className="pdp-block">
+        <h3>Duty-free, delivered</h3>
+        <ul className="specs">
+          <li>Customs paperwork handled by us — nothing for you to sign.</li>
+          <li>30% deposit now, balance at the gangway.</li>
+          <li>Photo proof of delivery on your order page.</li>
+        </ul>
+      </section>
+
+      {related.length > 0 && (
+        <>
+          <p className="subhead">More in {cat?.name}</p>
+          <div className="pgrid">
+            {related.slice(0, 4).map((r) => (
+              <ProductCardView key={r.id} p={r} />
+            ))}
+          </div>
+          <div className="stack" style={{ paddingTop: 2 }}>
+            <Link className="btn ghost" href={`/c/${cat?.slug}`} prefetch={false}>
+              See all {cat?.name}
+            </Link>
+          </div>
+        </>
+      )}
+    </main>
   );
 }

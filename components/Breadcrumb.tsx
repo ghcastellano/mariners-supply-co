@@ -14,8 +14,8 @@ export default function Breadcrumb({
   return (
     <nav className="crumb" aria-label="Breadcrumb">
       <Link href="/">Home</Link>
-      {trail.map((t) => (
-        <span key={t.label} style={{ display: "contents" }}>
+      {trail.map((t, i) => (
+        <span key={`${i}-${t.label}`} style={{ display: "contents" }}>
           <span className="sep" aria-hidden>›</span>
           {t.href ? <Link href={t.href}>{t.label}</Link> : <span aria-current="page">{t.label}</span>}
         </span>

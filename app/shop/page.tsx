@@ -1,7 +1,5 @@
 import Link from "next/link";
-import TopBar from "@/components/TopBar";
-import BottomNav from "@/components/BottomNav";
-import SearchBar from "@/components/SearchBar";
+import Breadcrumb from "@/components/Breadcrumb";
 import ProductCardView from "@/components/ProductCard";
 import { createClient } from "@/lib/supabase/server";
 import {
@@ -55,69 +53,74 @@ export default async function ShopPage({
   };
 
   return (
-    <>
-      <TopBar title={query ? `“${query}”` : "Shop"} />
-      <main className="pb-nav">
-        <SearchBar defaultValue={query ?? ""} />
+    <main>
+      {/* Sem caixa de busca na página: a do cabeçalho global é a mesma do
+          Sunny, e duas na mesma tela dividem o gesto ao meio. */}
+      <Breadcrumb
+        trail={
+          query
+            ? [{ label: "Shop", href: "/shop" }, { label: `“${query}”` }]
+            : [{ label: "Shop" }]
+        }
+      />
+      <h1 className="secttl left">{query ? `“${query}”` : "Shop"}</h1>
 
-        {!query && !sp.cursor && !sp.badge && (
-          <>
-            <p className="subhead">Browse</p>
-            <div className="catgrid">
-              {roots.map((c) => (
-                <Link key={c.id} href={`/c/${c.slug}`} className="catcard" prefetch={false}>
-                  <span className="ic" aria-hidden>
-                    {c.icon ?? "▪"}
-                  </span>
-                  <span className="tx">
-                    <span className="nm">{c.name}</span>
-                    {c.children.length > 0 && (
-                      <span className="ct">{c.children.length} sections</span>
-                    )}
-                  </span>
-                </Link>
-              ))}
-            </div>
-          </>
-        )}
-
-        <div className="listbar">
-          <span className="count">
-            {query ? `${items.length} result${items.length === 1 ? "" : "s"}` : "All products"}
-          </span>
-          <SortSelect value={sort} options={SORT_LABEL} />
-        </div>
-
-        {items.length === 0 ? (
-          <div className="empty">
-            <div className="i">🧭</div>
-            {query ? (
-              <>
-                Nothing matches “{query}”.
-                <br />
-                Try the brand name, or browse the categories above.
-              </>
-            ) : (
-              <>The shelves are being stocked. Check back shortly.</>
-            )}
-          </div>
-        ) : (
-          <div className="pgrid">
-            {items.map((p, i) => (
-              <ProductCardView key={p.id} p={p} priority={i < 4} />
+      {!query && !sp.cursor && !sp.badge && (
+        <>
+          <p className="subhead">Browse</p>
+          <div className="catgrid">
+            {roots.map((c) => (
+              <Link key={c.id} href={`/c/${c.slug}`} className="catcard" prefetch={false}>
+                <span className="ic" aria-hidden>
+                  {c.icon ?? "▪"}
+                </span>
+                <span className="tx">
+                  <span className="nm">{c.name}</span>
+                  {c.children.length > 0 && (
+                    <span className="ct">{c.children.length} sections</span>
+                  )}
+                </span>
+              </Link>
             ))}
           </div>
-        )}
+        </>
+      )}
 
-        {nextCursor && (
-          <div className="stack" style={{ paddingTop: 6 }}>
-            <Link className="btn ghost" href={keep({ cursor: nextCursor })} prefetch={false}>
-              Load {PAGE_SIZE} more
-            </Link>
-          </div>
-        )}
-      </main>
-      <BottomNav />
-    </>
+      <div className="listbar">
+        <span className="count">
+          {query ? `${items.length} result${items.length === 1 ? "" : "s"}` : "All products"}
+        </span>
+        <SortSelect value={sort} options={SORT_LABEL} />
+      </div>
+
+      {items.length === 0 ? (
+        <div className="empty">
+          <div className="i">🧭</div>
+          {query ? (
+            <>
+              Nothing matches “{query}”.
+              <br />
+              Try the brand name, or browse the categories above.
+            </>
+          ) : (
+            <>The shelves are being stocked. Check back shortly.</>
+          )}
+        </div>
+      ) : (
+        <div className="pgrid">
+          {items.map((p, i) => (
+            <ProductCardView key={p.id} p={p} priority={i < 4} />
+          ))}
+        </div>
+      )}
+
+      {nextCursor && (
+        <div className="stack" style={{ paddingTop: 6 }}>
+          <Link className="btn ghost" href={keep({ cursor: nextCursor })} prefetch={false}>
+            Load {PAGE_SIZE} more
+          </Link>
+        </div>
+      )}
+    </main>
   );
 }

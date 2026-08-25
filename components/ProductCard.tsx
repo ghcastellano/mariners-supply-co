@@ -23,9 +23,17 @@ import { discountPercent, usd } from "@/lib/money";
 export default function ProductCardView({
   p,
   priority = false,
+  wished = false,
+  sizes = "(max-width: 620px) 92vw, (max-width: 900px) 46vw, 300px",
 }: {
   p: Card;
   priority?: boolean;
+  /** Já está na wishlist — usado na página da lista, para o coração nascer cheio. */
+  wished?: boolean;
+  /** O trilho da home mostra o card a ~74vw; a grade, a ~92vw. Servir a
+   *  imagem no tamanho errado é foto borrada de um lado ou byte jogado
+   *  fora do outro. */
+  sizes?: string;
 }) {
   const src = imageUrl(p.primary_image_path);
   const off = discountPercent(p.price_cents, p.compare_at_cents);
@@ -40,7 +48,7 @@ export default function ProductCardView({
             src={src}
             alt={p.name}
             fill
-            sizes="(max-width: 700px) 46vw, 210px"
+            sizes={sizes}
             className="pcard-img"
             priority={priority}
           />
@@ -78,7 +86,7 @@ export default function ProductCardView({
             variantCount={p.variant_count}
             soldOut={soldOut}
           />
-          <WishButton productId={p.id} name={p.name} />
+          <WishButton productId={p.id} name={p.name} initial={wished} />
         </div>
       </div>
     </article>

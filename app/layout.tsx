@@ -3,6 +3,7 @@ import "./globals.css";
 import { CartProvider } from "@/lib/cart";
 import ReferralClaim from "@/components/ReferralClaim";
 import DesktopStage from "@/components/DesktopStage";
+import ChromeGate from "@/components/ChromeGate";
 import SiteChrome from "@/components/SiteChrome";
 import SiteFooter from "@/components/SiteFooter";
 
@@ -48,9 +49,13 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             {/* Cabeçalho e rodapé no layout, não por página: no Sunny
                 são globais, e o cliente conta com eles em toda tela. */}
             <div className="shell">
-              <SiteChrome />
+              <ChromeGate>
+                <SiteChrome />
+              </ChromeGate>
               {children}
-              <SiteFooter />
+              <ChromeGate>
+                <SiteFooter />
+              </ChromeGate>
             </div>
           </div>
         </CartProvider>

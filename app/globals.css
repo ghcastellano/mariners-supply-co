@@ -1219,3 +1219,309 @@ input:-webkit-autofill:focus {
 .wish:hover { color: var(--amber); border-color: rgba(255,182,72,.5); }
 .wish.on { color: var(--danger); background: rgba(255,89,100,.12); border-color: rgba(255,89,100,.4); }
 .wish:disabled { opacity: .5; cursor: default; }
+
+/* Grade de categorias: uma coluna no celular, como a home do Sunny.
+   Duas colunas espremem o nome de categoria longa em duas linhas. */
+.catgrid { grid-template-columns: 1fr; gap: 8px; }
+@media (min-width: 620px) { .catgrid { grid-template-columns: repeat(2, 1fr); } }
+@media (min-width: 900px) { .catgrid { grid-template-columns: repeat(3, 1fr); } }
+.catcard { padding: 15px 14px; border-radius: 12px; }
+.catcard .nm { font-size: 14px; }
+.catcard .chev { margin-left: auto; color: var(--faint); font-size: 17px; flex: none; }
+
+/* Trilho horizontal das faixas da home (promo, novidades). */
+.rail {
+  display: grid; grid-auto-flow: column; grid-auto-columns: 74%;
+  gap: 10px; overflow-x: auto; padding: 4px 14px 12px;
+  scroll-snap-type: x mandatory; scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+.rail::-webkit-scrollbar { display: none; }
+.rail > * { scroll-snap-align: start; }
+@media (min-width: 620px) { .rail { grid-auto-columns: 46%; } }
+@media (min-width: 900px) { .rail { grid-auto-columns: 30%; } }
+
+/* Título de seção centralizado, como o "Categories" deles. */
+.secttl {
+  text-align: center; font-family: var(--font-disp); font-weight: 800;
+  font-size: 21px; color: var(--ink); margin: 22px 0 12px; letter-spacing: -.01em;
+}
+.secttl.left { text-align: left; padding: 0 16px; }
+
+/* Aviso azul-claro do Sunny (pedido mínimo, wishlist vazia). */
+.infobox {
+  display: flex; align-items: flex-start; gap: 10px;
+  margin: 12px 16px; padding: 12px 14px; border-radius: 11px;
+  background: rgba(46,230,200,.08); border: 1px solid rgba(46,230,200,.34);
+  color: var(--ink); font-size: 13px; line-height: 1.5;
+}
+.infobox button {
+  margin-left: auto; background: none; border: 0; color: var(--faint);
+  font-size: 16px; cursor: pointer; line-height: 1; padding: 0 2px;
+}
+
+/* Cartão "Summary" do carrinho e "Personal details" do checkout. */
+.sumcard {
+  margin: 12px 16px; padding: 16px; border-radius: 16px;
+  background: var(--card); border: 1px solid var(--line);
+}
+.sumcard.framed { border-color: rgba(255,182,72,.45); }
+.sumcard h3 {
+  font-family: var(--font-disp); font-size: 17px; font-weight: 700;
+  color: var(--ink); margin: 0 0 12px;
+}
+.sumrow {
+  display: flex; align-items: baseline; justify-content: space-between;
+  gap: 12px; padding: 9px 0;
+}
+.sumrow + .sumrow { border-top: 1px solid var(--line); }
+.sumrow span { color: var(--faint); font-size: 13px; }
+.sumrow b { color: var(--ink); font-size: 13.5px; font-family: var(--font-mono); }
+.sumrow.grand { border-top: 1px solid var(--line-hi); padding-top: 13px; margin-top: 4px; }
+.sumrow.grand span { color: var(--ink); font-size: 15.5px; font-weight: 700; }
+.sumrow.grand b { font-size: 20px; font-weight: 700; }
+.sumcard .btn { margin: 10px 0 0; }
+.sumcard .btn.navy {
+  background: var(--card-hi); color: var(--ink); border: 1px solid var(--line-hi);
+}
+
+/* Ficha de dados do perfil no checkout. */
+.factrow { padding: 10px 0; border-top: 1px solid var(--line); }
+.factrow:first-of-type { border-top: 0; }
+.factrow dt { color: var(--faint); font-size: 11.5px; margin: 0 0 3px; }
+.factrow dd { color: var(--ink); font-size: 14.5px; font-weight: 700; margin: 0; }
+.factrow.missing dt { color: var(--danger); }
+.factrow.missing dd { color: var(--danger); font-size: 13px; font-weight: 500; }
+.factrow.missing dd a { color: var(--danger); font-weight: 700; }
+.factship { display: flex; align-items: center; gap: 10px; }
+.factship .ph {
+  position: relative; width: 52px; height: 40px; flex: none; border-radius: 8px;
+  overflow: hidden; background: var(--night); display: grid; place-items: center;
+  font-size: 17px; border: 1px solid var(--line-hi);
+}
+
+/* Busca de navio e select com busca (cadastro e perfil). */
+.typeahead { position: relative; }
+.ta-panel {
+  position: absolute; top: calc(100% + 4px); left: 0; right: 0; z-index: 40;
+  background: var(--card); border: 1px solid var(--line-hi); border-radius: 12px;
+  max-height: 264px; overflow-y: auto; box-shadow: 0 16px 40px rgba(1,6,13,.6);
+}
+.ta-opt {
+  display: flex; align-items: center; gap: 9px; width: 100%;
+  padding: 11px 13px; background: none; border: 0; border-bottom: 1px solid var(--line);
+  color: var(--ink); font-size: 13.5px; text-align: left; cursor: pointer;
+  font-family: var(--font-body);
+}
+.ta-opt:last-child { border-bottom: 0; }
+.ta-opt:hover, .ta-opt[aria-selected="true"] { background: var(--card-hi); }
+.ta-opt .sub { color: var(--faint); font-size: 11px; font-family: var(--font-mono); }
+.ta-opt.create { color: var(--amber); font-weight: 700; }
+.ta-hint { padding: 11px 13px; color: var(--faint); font-size: 12px; }
+.ta-group {
+  padding: 7px 13px; color: var(--faint); font-size: 10px; letter-spacing: .14em;
+  text-transform: uppercase; background: var(--night);
+}
+
+/* Medidor de força de senha e toggle do cadastro. */
+.pwmeter { display: flex; align-items: center; gap: 8px; margin-top: 6px; }
+.pwbar { flex: 1; height: 4px; border-radius: 999px; background: var(--line-hi); overflow: hidden; }
+.pwbar i { display: block; height: 100%; transition: width .2s, background .2s; }
+.pwlabel { font-size: 11px; color: var(--faint); flex: none; }
+.pweye {
+  position: absolute; right: 8px; top: 50%; transform: translateY(-50%);
+  background: none; border: 0; color: var(--faint); font-size: 15px; cursor: pointer; padding: 6px;
+}
+.field.haseye { position: relative; }
+.field.haseye input { padding-right: 40px; }
+
+.switch { display: flex; align-items: center; gap: 10px; margin: 6px 0; cursor: pointer; }
+.switch input { position: absolute; opacity: 0; width: 0; height: 0; }
+.switch .track {
+  width: 40px; height: 22px; border-radius: 999px; background: var(--line-hi);
+  position: relative; flex: none; transition: background .16s;
+}
+.switch .track::after {
+  content: ""; position: absolute; top: 3px; left: 3px; width: 16px; height: 16px;
+  border-radius: 50%; background: var(--ink); transition: transform .16s;
+}
+.switch input:checked + .track { background: var(--amber); }
+.switch input:checked + .track::after { transform: translateX(18px); background: var(--amber-ink); }
+.switch input:focus-visible + .track { outline: 2px solid var(--teal); outline-offset: 2px; }
+.switch .lbl { color: var(--muted); font-size: 13px; line-height: 1.45; }
+
+/* Tabela da página de portos. */
+.ptable { margin: 12px 16px; border: 1px solid var(--line); border-radius: 13px; overflow: hidden; }
+.ptable table { width: 100%; border-collapse: collapse; }
+.ptable th, .ptable td {
+  padding: 10px 11px; text-align: left; font-size: 12.5px;
+  border-bottom: 1px solid var(--line);
+}
+.ptable th {
+  background: var(--panel); color: var(--faint); font-weight: 600;
+  font-size: 10.5px; letter-spacing: .1em; text-transform: uppercase;
+}
+.ptable td { color: var(--ink); }
+.ptable tr:last-child td { border-bottom: 0; }
+.ptable .wrap { overflow-x: auto; }
+
+/* Título "Description / NOME" da ficha, como o deles. */
+.pdp-block h3 .slash { color: var(--faint); font-weight: 500; }
+.pdp-block .prodname {
+  color: var(--amber); font-size: 14px; font-weight: 700; margin: 0 0 10px;
+  text-transform: uppercase; letter-spacing: .01em;
+}
+
+.deadline.compact { margin: 8px 16px; padding: 9px 12px; font-size: 12px; }
+
+/* --- mini-carrinho (painel pela direita) --- */
+.minicart {
+  position: fixed; top: 0; right: 0; bottom: 0; z-index: 91;
+  width: min(90vw, 400px); background: var(--panel);
+  border-left: 1px solid var(--line-hi);
+  display: flex; flex-direction: column;
+  animation: slideright .2s cubic-bezier(.22,.61,.36,1);
+}
+@keyframes slideright { from { transform: translateX(100%) } to { transform: translateX(0) } }
+.minicart-top {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 16px 16px 13px; border-bottom: 1px solid var(--line);
+}
+.minicart-top h2 {
+  margin: 0; font-family: var(--font-disp); font-size: 19px; font-weight: 800; color: var(--ink);
+}
+.minicart-x {
+  width: 34px; height: 34px; border: 0; border-radius: 50%;
+  background: var(--card-hi); color: var(--ink); font-size: 14px; cursor: pointer;
+}
+.minicart-list { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; padding: 6px 0; }
+.mcline { display: flex; gap: 11px; padding: 12px 16px; border-bottom: 1px solid var(--line); }
+.mcbody { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px; }
+.mchead { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; }
+.mchead .nm {
+  color: var(--ink); font-size: 13px; font-weight: 700; text-transform: uppercase;
+  line-height: 1.3; display: -webkit-box; -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical; overflow: hidden;
+}
+.mchead b { color: var(--ink); font-size: 13.5px; flex: none; }
+.mcline .sku { font-size: 10.5px; color: var(--faint); }
+.mcactions { display: flex; align-items: center; gap: 8px; margin-top: 6px; }
+.qty.small button { width: 30px; height: 32px; font-size: 16px; }
+.qty.small span { min-width: 22px; font-size: 13px; }
+.mcdel {
+  width: 34px; height: 34px; border-radius: 50%; cursor: pointer;
+  background: none; border: 1px solid var(--line-hi); color: var(--faint); font-size: 13px;
+}
+.mcdel:hover { color: var(--danger); border-color: rgba(255,89,100,.45); }
+.minicart-foot {
+  padding: 13px 16px calc(13px + env(safe-area-inset-bottom));
+  border-top: 1px solid var(--line-hi); background: var(--night);
+}
+.minicart-foot .btn { margin: 9px 0 0; }
+
+/* ===== home: vitrine ===== */
+/* Hero sem foto: não temos direito de uso de imagem de navio, e foto
+   genérica de banco pesa mais do que a promessa que ilustra. */
+.homehero {
+  padding: 30px 20px 26px;
+  background:
+    radial-gradient(120% 90% at 0% 0%, rgba(255,182,72,.16), transparent 62%),
+    radial-gradient(110% 100% at 100% 100%, rgba(46,230,200,.12), transparent 60%),
+    var(--card);
+  border-bottom: 1px solid var(--line);
+}
+.homehero h1 {
+  font-family: var(--font-disp); font-weight: 800;
+  font-size: clamp(25px, 7.2vw, 32px); line-height: 1.1;
+  letter-spacing: -.02em; margin: 6px 0 0; color: var(--ink); text-wrap: balance;
+}
+.homehero .lead { color: var(--muted); font-size: 13.5px; line-height: 1.5; margin: 10px 0 0; }
+
+/* Tira do navio: borda âmbar à esquerda em vez de cartão inteiro
+   destacado — é contexto, não um chamado concorrendo com a vitrine. */
+.vstrip {
+  display: flex; align-items: center; gap: 11px;
+  margin: 6px 14px 2px; padding: 12px 14px;
+  background: var(--card); border: 1px solid var(--line);
+  border-left: 3px solid var(--amber); border-radius: 12px;
+  color: var(--ink); text-decoration: none; transition: background .16s;
+}
+.vstrip:hover { background: var(--card-hi); }
+.vstrip .ic { font-size: 18px; line-height: 1; flex: none; }
+.vstrip .tx { display: flex; flex-direction: column; gap: 2px; min-width: 0; flex: 1; }
+.vstrip .lb {
+  font-family: var(--font-mono); font-size: 9.5px; letter-spacing: .16em;
+  text-transform: uppercase; color: var(--faint);
+}
+.vstrip .nm { font-size: 13.5px; font-weight: 600; line-height: 1.25; }
+.vstrip .eta { flex: none; font-family: var(--font-mono); font-size: 11px; color: var(--amber-hi); }
+
+/* ===== carrinho ===== */
+/* "Apply Discount Code" recolhível. No nosso não há cupom para digitar:
+   o que a tripulação acumula é crédito Captain, e ele mora no lugar em
+   que a pessoa já procura desconto. <details> nativo, sem estado. */
+.disc { border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+.disc > summary {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 12px 0; cursor: pointer; list-style: none;
+  color: var(--ink); font-size: 13.5px; font-weight: 700;
+}
+.disc > summary::-webkit-details-marker { display: none; }
+.disc > summary::after { content: "⌄"; color: var(--faint); font-size: 15px; }
+.disc[open] > summary::after { content: "⌃"; }
+.disc-body { padding: 2px 0 12px; }
+.disc-line { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
+.disc-line span { color: var(--faint); font-size: 13px; }
+.disc-line b { font-family: var(--font-mono); font-size: 17px; font-weight: 700; color: var(--teal); }
+.disc-line.zero b { color: var(--faint); } /* saldo zero não é erro nem conquista */
+
+.cart-list .mcline {
+  background: var(--card); border: 1px solid var(--line); border-radius: 14px;
+  padding: 13px 15px;
+}
+.cart-list .ci-thumb { width: 62px; height: 62px; }
+/* Fundo branco na área de imagem, como no card da grade: a foto do
+   fornecedor já vem recortada em branco, e é isso que faz o produto
+   parecer produto. */
+.ci-thumb { background: #FFFFFF; }
+
+/* ===== checkout ===== */
+/* "Need to change these details?" é rodapé do cartão, não rabicho do
+   último campo — o fio separa. */
+.sumcard .factfoot { margin: 14px 0 0; padding-top: 12px; border-top: 1px solid var(--line); }
+
+/* ===== páginas estáticas ===== */
+/* Título de página com sublinhado âmbar (espec §9). O traço curto dá
+   peso de "página" sem precisar de outra família tipográfica. */
+.pagettl {
+  font-family: var(--font-disp); font-weight: 800; font-size: 26px;
+  line-height: 1.12; letter-spacing: -.01em; color: var(--ink);
+  position: relative; margin: 12px 16px 0; padding-bottom: 11px;
+}
+.pagettl::after {
+  content: ""; position: absolute; left: 0; bottom: 0;
+  width: 52px; height: 3px; border-radius: 2px; background: var(--amber);
+}
+.pagelead { margin: 12px 16px 2px; color: var(--muted); font-size: 14px; line-height: 1.6; }
+
+/* Aviso de rascunho em Terms e Privacy. Âmbar de propósito: é cautela,
+   não falha — vermelho leria como erro do site e faria a pessoa parar
+   de ler justamente o que precisa ler. */
+.draftnote {
+  margin: 12px 16px 0; padding: 12px 14px; border-radius: 12px;
+  background: rgba(255,182,72,.09); border: 1px solid rgba(255,182,72,.35);
+  color: var(--amber-hi); font-size: 12.5px; line-height: 1.55;
+}
+.draftnote b { color: var(--amber); }
+
+/* Link no meio de resposta do FAQ. No rodapé a linha inteira é link e
+   pintar tudo de --muted funciona; aqui o link mora dentro do parágrafo
+   e sem contraste ninguém percebe que dá para clicar. */
+.sunfoot-body a.alink { color: var(--amber-hi); font-weight: 600; }
+.sunfoot-body a.alink:hover { text-decoration: underline; }
+/* Resposta de FAQ é texto de leitura, não linha de rodapé: 13px de
+   rodapé em parágrafo de cinco linhas cansa. */
+.sunfoot-body .pdp-text { font-size: 14px; }
+
+/* Nome do produto repetido sob "Description / …" (espec §4). */
+.pdp-descname { color: var(--ink); font-weight: 700; margin: 0 0 10px; }

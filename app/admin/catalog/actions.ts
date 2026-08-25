@@ -1,6 +1,6 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { parseCsvRows } from "@/lib/csv";
 import { buildImportPlan, diffAgainstExisting, type ImportProduct } from "@/lib/import";
@@ -38,6 +38,11 @@ function refresh() {
   revalidatePath("/admin/catalog");
   revalidatePath("/shop");
   revalidatePath("/", "layout");
+  // A vitrine guarda as consultas públicas em unstable_cache com a tag
+  // "catalog". Sem invalidar aqui, editar produto no painel levaria até
+  // cinco minutos para aparecer na home — tempo suficiente para alguém
+  // achar que o salvamento não funcionou e salvar de novo.
+  revalidateTag("catalog");
 }
 
 /* ------------------------------------------------------------------ */

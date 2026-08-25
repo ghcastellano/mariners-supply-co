@@ -3,7 +3,7 @@
 import { Suspense, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import TopBar from "@/components/TopBar";
+import Breadcrumb from "@/components/Breadcrumb";
 import GoogleButton from "@/components/GoogleButton";
 import { createClient } from "@/lib/supabase/client";
 import { safeNext } from "@/lib/format";
@@ -16,6 +16,8 @@ function LoginInner() {
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPw, setShowPw] = useState(false);
+  const [stay, setStay] = useState(true);
   const [err, setErr] = useState<string | null>(null);
   const [info, setInfo] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
@@ -63,64 +65,95 @@ function LoginInner() {
   }
 
   return (
-    <>
-      <TopBar title="Crew access" backHref="/" chip={false} />
-      <main>
-        <div className="hero-mini">
-          <p className="kicker">Sign in</p>
-          <h2>Welcome back, sailor.</h2>
-          <p>Your orders and gangway windows, in one place.</p>
+    <main>
+      <Breadcrumb trail={[{ label: "Login" }]} />
+      <h1 className="secttl">Login</h1>
+
+      <form onSubmit={submit} className="stack">
+        {urlError && <p className="alert">{urlError}</p>}
+
+        <div className="field">
+          <label htmlFor="email">Email</label>
+          <input
+            id="email"
+            type="email"
+            required
+            autoComplete="email"
+            enterKeyHint="next"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="you@ship.com"
+          />
         </div>
-        <div className="stack">
-          {urlError && <p className="alert">{urlError}</p>}
-          <GoogleButton next={next} />
-          <div className="divider">or with email</div>
-          <form onSubmit={submit} className="stack" style={{ padding: 0 }}>
-            <div className="field">
-              <label htmlFor="email">Email</label>
-              <input
-                id="email"
-                type="email"
-                required
-                autoComplete="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="you@ship.com"
-              />
-            </div>
-            <div className="field">
-              <label htmlFor="password">Password</label>
-              <input
-                id="password"
-                type="password"
-                required
-                autoComplete="current-password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="••••••••"
-              />
-            </div>
-            {err && <p className="alert">{err}</p>}
-            {info && <p className="note">{info}</p>}
-            {needsConfirm && (
-              <button type="button" className="btn ghost" onClick={resendConfirmation} disabled={busy || !email}>
-                Resend confirmation email
-              </button>
-            )}
-            <button className="btn" type="submit" disabled={busy}>
-              {busy ? "Signing in…" : "Sign in"}
+
+        <div className="field">
+          <label htmlFor="password">Password</label>
+          {/* O olho fica num .field só dele para centrar no input. */}
+          <div className="field haseye">
+            <input
+              id="password"
+              type={showPw ? "text" : "password"}
+              required
+              autoComplete="current-password"
+              enterKeyHint="go"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="••••••••"
+            />
+            <button
+              type="button"
+              className="pweye"
+              onClick={() => setShowPw((v) => !v)}
+              aria-pressed={showPw}
+              aria-label={showPw ? "Hide password" : "Show password"}
+            >
+              {showPw ? "🙈" : "👁"}
             </button>
-          </form>
-          <p className="linkline">
-            <Link href={`/forgot-password?next=${encodeURIComponent(next)}`}>Forgot password?</Link>
-          </p>
-          <p className="linkline">
-            First call at Santos?{" "}
-            <Link href={`/signup?next=${encodeURIComponent(next)}`}>Create your account</Link>
-          </p>
+          </div>
         </div>
-      </main>
-    </>
+
+        {/* Paridade com o Sunny. A persistência da sessão hoje é decidida
+            na criação do client do Supabase, não por login — o controle
+            existe na tela, mas ainda não muda o comportamento. */}
+        <label className="switch">
+          <input type="checkbox" checked={stay} onChange={(e) => setStay(e.target.checked)} />
+          <span className="track" />
+          <span className="lbl">Stay logged in</span>
+        </label>
+
+        <p className="linkline" style={{ textAlign: "left" }}>
+          <Link href={`/forgot-password?next=${encodeURIComponent(next)}`}>
+            Forgot Your Password?
+          </Link>
+        </p>
+
+        {err && <p className="alert">{err}</p>}
+        {info && <p className="note">{info}</p>}
+        {needsConfirm && (
+          <button
+            type="button"
+            className="btn ghost"
+            onClick={resendConfirmation}
+            disabled={busy || !email}
+          >
+            Resend confirmation email
+          </button>
+        )}
+
+        <button className="btn" type="submit" disabled={busy}>
+          {busy ? "Signing in…" : "Login"}
+        </button>
+      </form>
+
+      <div className="stack">
+        <div className="divider">or</div>
+        <GoogleButton next={next} />
+        <p className="linkline">
+          Don&apos;t have an account?{" "}
+          <Link href={`/signup?next=${encodeURIComponent(next)}`}>Register here</Link>
+        </p>
+      </div>
+    </main>
   );
 }
 

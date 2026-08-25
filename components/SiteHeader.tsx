@@ -1,9 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+
+import { Suspense, useEffect, useRef, useState } from "react";
 import CategoryDrawer from "./CategoryDrawer";
+import HeaderSearch from "./HeaderSearch";
+import MiniCart from "./MiniCart";
 import { useCart } from "@/lib/cart";
 import type { CategoryNode } from "@/lib/catalog";
 
@@ -16,11 +18,10 @@ import type { CategoryNode } from "@/lib/catalog";
  * na memória muscular. Não é lugar para criatividade.
  */
 export default function SiteHeader({ tree }: { tree: CategoryNode[] }) {
-  const router = useRouter();
   const { count, ready } = useCart();
   const [drawer, setDrawer] = useState(false);
+  const [cart, setCart] = useState(false);
   const [menu, setMenu] = useState(false);
-  const [q, setQ] = useState("");
   const acct = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -78,35 +79,29 @@ export default function SiteHeader({ tree }: { tree: CategoryNode[] }) {
 
             <Link href="/wishlist" className="headicon" aria-label="Wish list">♡</Link>
 
-            <Link href="/cart" className="headicon" aria-label="Cart">
+            {/* No Sunny o ícone abre o mini-carrinho em vez de navegar:
+                quem está no meio da listagem confere sem perder o lugar. */}
+            <button
+              className="headicon"
+              onClick={() => setCart(true)}
+              aria-label={`Cart${ready && count > 0 ? `, ${count} items` : ""}`}
+              aria-expanded={cart}
+            >
               🛒
               {ready && count > 0 && <span className="cartbadge">{count}</span>}
-            </Link>
+            </button>
           </div>
         </div>
 
-        <form
-          className="sunsearch"
-          role="search"
-          onSubmit={(e) => {
-            e.preventDefault();
-            const term = q.trim();
-            router.push(term ? `/shop?q=${encodeURIComponent(term)}` : "/shop");
-          }}
-        >
-          <input
-            type="search"
-            value={q}
-            onChange={(e) => setQ(e.target.value)}
-            placeholder="Search entire store here…"
-            aria-label="Search entire store"
-            enterKeyHint="search"
-          />
-          <button type="submit" aria-label="Search">🔍</button>
-        </form>
+        {/* Suspense porque useSearchParams força render no cliente de
+            tudo acima na árvore — e o cabeçalho mora no layout raiz. */}
+        <Suspense fallback={<div className="sunsearch" aria-hidden />}>
+          <HeaderSearch />
+        </Suspense>
       </header>
 
       <CategoryDrawer open={drawer} onClose={() => setDrawer(false)} tree={tree} cartCount={count} />
+      <MiniCart open={cart} onClose={() => setCart(false)} />
     </>
   );
 }

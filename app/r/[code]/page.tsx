@@ -1,5 +1,5 @@
 import Link from "next/link";
-import TopBar from "@/components/TopBar";
+import Breadcrumb from "@/components/Breadcrumb";
 import StoreReferral from "@/components/StoreReferral";
 
 export const dynamic = "force-dynamic";
@@ -18,8 +18,8 @@ export default async function ReferralLanding({
   return (
     <>
       <StoreReferral code={clean} />
-      <TopBar chip={false} />
       <main>
+        <Breadcrumb trail={[{ label: "Crew invite" }]} />
         <div className="okwrap">
           <div className="okring">🧢</div>
           <h2>You&apos;re on the crew list</h2>

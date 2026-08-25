@@ -92,18 +92,23 @@ export async function placeOrder(input: PlaceOrderInput): Promise<PlaceOrderResu
   );
   if (items.length === 0) return { ok: false, error: "Your kit is empty." };
 
-  // Navio virou opcional: quem manda na promessa de entrega é a grade
-  // do porto, que vale para qualquer navio que atracar lá. O navio
-  // continua entrando no pedido quando existe — é ele que a equipe
-  // procura na prancha.
-  let ship: { id: string; name: string } | null = null;
-  if (input.shipId) {
-    const { data } = await supabase
-      .from("ships")
-      .select("id, name, active")
-      .eq("id", input.shipId)
-      .maybeSingle();
-    if (data) ship = { id: data.id, name: data.name };
+  // Navio, posto e porto vêm do PERFIL, que é onde o marinheiro os
+  // mantém — o checkout só confirma. Ler daqui, e não de `ships`,
+  // também conserta um bug real: a policy de ships escondia o navio
+  // que ainda está na fila de curadoria, e o pedido era gravado sem
+  // navio nenhum. O perfil guarda nome e bandeira desnormalizados
+  // justamente para o pedido nunca depender dessa visibilidade.
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("full_name, rank_slug, whatsapp, port_id, ship_id, vessel_name, vessel_imo, vessel_flag")
+    .eq("id", user.id)
+    .maybeSingle();
+
+  const shipId = profile?.ship_id ?? input.shipId ?? null;
+  let vesselName = profile?.vessel_name ?? null;
+  if (!vesselName && shipId) {
+    const { data } = await supabase.from("ships").select("name").eq("id", shipId).maybeSingle();
+    vesselName = data?.name ?? null;
   }
 
   // Preço e estoque moram na VARIANTE. O carrinho manda ids de
@@ -148,13 +153,32 @@ export async function placeOrder(input: PlaceOrderInput): Promise<PlaceOrderResu
   const deposit = round2(split.deposit / 100);
   const balance = round2(split.balance / 100);
 
-  // Porto: por ora, o de entrega a bordo. Quando o perfil passar a
-  // guardar o porto do tripulante, ele entra aqui.
-  const { data: port } = await supabase
-    .from("ports")
-    .select("id")
-    .eq("slug", "santos")
-    .maybeSingle();
+  // Porto do perfil, com Santos como retaguarda para quem ainda não
+  // escolheu. É o porto que define a promessa de entrega e o mínimo.
+  const { data: port } = profile?.port_id
+    ? await supabase
+        .from("ports")
+        .select("id, name, min_order_cents")
+        .eq("id", profile.port_id)
+        .maybeSingle()
+    : await supabase
+        .from("ports")
+        .select("id, name, min_order_cents")
+        .eq("slug", "santos")
+        .maybeSingle();
+
+  // Pedido mínimo conferido no SERVIDOR. O carrinho mostra o aviso,
+  // mas aviso que só existe na tela é decoração: quem chama a ação
+  // direto passaria por baixo dele.
+  const minimum = Number(port?.min_order_cents ?? 0);
+  if (minimum > 0 && subtotalCents < minimum) {
+    return {
+      ok: false,
+      error: `Minimum order for ${port?.name ?? "this port"} is ${usd(
+        minimum / 100
+      )} — add ${usd((minimum - subtotalCents) / 100)} more.`,
+    };
+  }
 
   for (let attempt = 0; attempt < 5; attempt++) {
     const code = "MS-" + Math.floor(1000 + Math.random() * 9000);
@@ -163,7 +187,7 @@ export async function placeOrder(input: PlaceOrderInput): Promise<PlaceOrderResu
       .insert({
         code,
         user_id: user.id,
-        ship_id: ship?.id ?? null,
+        ship_id: shipId,
         port_id: port?.id ?? null,
         status: "awaiting_deposit",
         subtotal_usd: subtotal,
@@ -172,8 +196,11 @@ export async function placeOrder(input: PlaceOrderInput): Promise<PlaceOrderResu
         subtotal_cents: subtotalCents,
         deposit_cents: split.deposit,
         balance_cents: split.balance,
-        vessel_name: ship?.name ?? null,
-        contact_name: input.contactName?.slice(0, 120) || null,
+        vessel_name: vesselName,
+        vessel_imo: profile?.vessel_imo ?? null,
+        vessel_flag: profile?.vessel_flag ?? null,
+        contact_rank: profile?.rank_slug ?? null,
+        contact_name: (input.contactName || profile?.full_name)?.slice(0, 120) || null,
         contact_whatsapp: wa,
         note: input.note?.slice(0, 500) || null,
       })
@@ -227,7 +254,7 @@ export async function placeOrder(input: PlaceOrderInput): Promise<PlaceOrderResu
           {
             orderId: order.id,
             code: order.code,
-            shipName: ship?.name ?? "your vessel",
+            shipName: vesselName ?? "your vessel",
             amountUsd: dueNow,
             balanceUsd: balance,
             email: user.email ?? undefined,

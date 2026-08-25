@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import TopBar from "@/components/TopBar";
-import BottomNav from "@/components/BottomNav";
+import Breadcrumb from "@/components/Breadcrumb";
 import ProductCardView from "@/components/ProductCard";
 import SortSelect from "@/components/SortSelect";
 import { createClient } from "@/lib/supabase/server";
@@ -44,9 +43,10 @@ export default async function CategoryPage({
   if (!cat) notFound();
   const category = cat as Category;
 
-  // Filhos e produtos na mesma ida: o caminho materializado resolve a
-  // subárvore inteira com um LIKE, sem consulta recursiva.
-  const [{ data: children }, { items, nextCursor }] = await Promise.all([
+  // Filhos, produtos e o pai da migalha na mesma ida: o caminho
+  // materializado resolve a subárvore inteira com um LIKE, sem consulta
+  // recursiva, e a trilha não custa mais um salto ao banco.
+  const [{ data: children }, { items, nextCursor }, parentRes] = await Promise.all([
     supabase
       .from("categories")
       .select("id, slug, name, icon, sort_order")
@@ -54,7 +54,11 @@ export default async function CategoryPage({
       .eq("active", true)
       .order("sort_order"),
     listProducts(supabase, { category: category.path, sort, cursor: sp.cursor ?? null }),
+    category.parent_id
+      ? supabase.from("categories").select("slug, name").eq("id", category.parent_id).maybeSingle()
+      : null,
   ]);
+  const parent = parentRes?.data ?? null;
 
   const more = (cursor: string) => {
     const p = new URLSearchParams();
@@ -64,54 +68,59 @@ export default async function CategoryPage({
   };
 
   return (
-    <>
-      <TopBar title={category.name} backHref="/shop" />
-      <main className="pb-nav">
-        {(children ?? []).length > 0 && (
-          <div className="cats-tabs" style={{ paddingTop: 12 }}>
-            <span className="tab on">All</span>
-            {(children ?? []).map((c) => (
-              <Link key={c.id} href={`/c/${c.slug}`} className="tab" prefetch={false}>
-                {c.name}
-              </Link>
-            ))}
-          </div>
-        )}
+    <main>
+      <Breadcrumb
+        trail={[
+          { label: "Shop", href: "/shop" },
+          ...(parent ? [{ label: parent.name, href: `/c/${parent.slug}` }] : []),
+          { label: category.name },
+        ]}
+      />
+      <h1 className="secttl left">{category.name}</h1>
 
-        <div className="listbar">
-          <span className="count">
-            {items.length}
-            {nextCursor ? "+" : ""} item{items.length === 1 ? "" : "s"}
-          </span>
-          <SortSelect value={sort} options={SORT_LABEL} />
+      {(children ?? []).length > 0 && (
+        <div className="cats-tabs" style={{ paddingTop: 12 }}>
+          <span className="tab on">All</span>
+          {(children ?? []).map((c) => (
+            <Link key={c.id} href={`/c/${c.slug}`} className="tab" prefetch={false}>
+              {c.name}
+            </Link>
+          ))}
         </div>
+      )}
 
-        {items.length === 0 ? (
-          <div className="empty">
-            <div className="i">{category.icon ?? "📦"}</div>
-            Nothing in {category.name} yet.
-            <br />
-            <Link href="/shop" style={{ color: "var(--amber)" }}>
-              Browse the whole store
-            </Link>
-          </div>
-        ) : (
-          <div className="pgrid">
-            {items.map((p, i) => (
-              <ProductCardView key={p.id} p={p} priority={i < 4} />
-            ))}
-          </div>
-        )}
+      <div className="listbar">
+        <span className="count">
+          {items.length}
+          {nextCursor ? "+" : ""} item{items.length === 1 ? "" : "s"}
+        </span>
+        <SortSelect value={sort} options={SORT_LABEL} />
+      </div>
 
-        {nextCursor && (
-          <div className="stack" style={{ paddingTop: 6 }}>
-            <Link className="btn ghost" href={more(nextCursor)} prefetch={false}>
-              Load {PAGE_SIZE} more
-            </Link>
-          </div>
-        )}
-      </main>
-      <BottomNav />
-    </>
+      {items.length === 0 ? (
+        <div className="empty">
+          <div className="i">{category.icon ?? "📦"}</div>
+          Nothing in {category.name} yet.
+          <br />
+          <Link href="/shop" style={{ color: "var(--amber)" }}>
+            Browse the whole store
+          </Link>
+        </div>
+      ) : (
+        <div className="pgrid">
+          {items.map((p, i) => (
+            <ProductCardView key={p.id} p={p} priority={i < 4} />
+          ))}
+        </div>
+      )}
+
+      {nextCursor && (
+        <div className="stack" style={{ paddingTop: 6 }}>
+          <Link className="btn ghost" href={more(nextCursor)} prefetch={false}>
+            Load {PAGE_SIZE} more
+          </Link>
+        </div>
+      )}
+    </main>
   );
 }
