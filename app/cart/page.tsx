@@ -51,7 +51,7 @@ export default function CartPage() {
       .select(
         `id, sku, option_label, price_cents, compare_at_cents, stock_qty,
          track_stock, image_path, active,
-         products!inner(name, slug, primary_image_path, active)`
+         products!product_variants_product_id_fkey!inner(name, slug, primary_image_path, active)`
       )
       .in("id", ids)
       .then(({ data }) => setLines((data ?? []) as unknown as Line[]));

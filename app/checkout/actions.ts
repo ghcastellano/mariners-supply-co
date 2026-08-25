@@ -113,7 +113,7 @@ export async function placeOrder(input: PlaceOrderInput): Promise<PlaceOrderResu
     .from("product_variants")
     .select(
       `id, sku, option_label, price_cents, stock_qty, track_stock, active, image_path,
-       products!inner(id, name, emoji, slug, active, primary_image_path)`
+       products!product_variants_product_id_fkey!inner(id, name, emoji, slug, active, primary_image_path)`
     )
     .in("id", ids);
   if (prodErr) return { ok: false, error: "Couldn't validate the catalog — try again." };

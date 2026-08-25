@@ -46,7 +46,7 @@ export default async function ProductEditor({ params }: { params: Promise<{ id: 
         `id, name, sku, slug, short_description, description, specs, badge, tax_class,
          sort_order, active, price_cents, compare_at_cents, stock_qty, primary_category_id,
          product_images(id, path, alt, sort_order),
-         product_variants(id, sku, price_cents, compare_at_cents, stock_qty, track_stock, option_label)`
+         product_variants!product_variants_product_id_fkey(id, sku, price_cents, compare_at_cents, stock_qty, track_stock, option_label)`
       )
       .eq("id", id)
       .maybeSingle();

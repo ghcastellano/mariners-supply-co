@@ -18,7 +18,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
     .eq("slug", slug)
     .maybeSingle();
   return {
-    title: data?.name ? `${data.name} — Mariners Supply` : "Mariners Supply",
+    title: data?.name ?? undefined,
     description: data?.short_description ?? undefined,
   };
 }
@@ -35,7 +35,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
        variant_count, primary_image_path, primary_category_id, brand_id,
        brands(name, slug),
        product_images(id, path, alt, sort_order),
-       product_variants(id, sku, ean, option_label, options, price_cents,
+       product_variants!product_variants_product_id_fkey(id, sku, ean, option_label, options, price_cents,
                         compare_at_cents, stock_qty, track_stock, image_path,
                         active, sort_order)`
     )

@@ -18,7 +18,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
     .eq("slug", slug)
     .maybeSingle();
   return {
-    title: data?.name ? `${data.name} — Mariners Supply` : "Mariners Supply",
+    title: data?.name ?? undefined,
     description: data?.description ?? undefined,
   };
 }

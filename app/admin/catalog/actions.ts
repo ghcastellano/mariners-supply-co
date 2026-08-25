@@ -6,6 +6,7 @@ import { parseCsvRows } from "@/lib/csv";
 import { buildImportPlan, diffAgainstExisting, type ImportProduct } from "@/lib/import";
 import { toCents } from "@/lib/money";
 import { PRODUCT_BUCKET } from "@/lib/catalog";
+import { lookup } from "node:dns/promises";
 
 async function adminClient() {
   const supabase = await createClient();
@@ -214,6 +215,100 @@ export async function deleteProductImage(formData: FormData) {
   refresh();
 }
 
+
+/* ------------------------------------------------------------------ */
+/* Imagem vinda da planilha                                            */
+/* ------------------------------------------------------------------ */
+
+/**
+ * Endereço interno disfarçado de URL pública é o jeito clássico de
+ * transformar "baixe esta imagem" em leitura da rede interna. A
+ * planilha vem de fornecedor, então a URL é entrada de terceiro
+ * mesmo passando por um admin: resolve o DNS e recusa faixa privada.
+ */
+const PRIVATE_V4 =
+  /^(0\.|10\.|127\.|169\.254\.|172\.(1[6-9]|2\d|3[01])\.|192\.168\.|100\.(6[4-9]|[7-9]\d|1[01]\d|12[0-7])\.)/;
+
+async function isPublicHost(hostname: string): Promise<boolean> {
+  try {
+    const addrs = await lookup(hostname, { all: true });
+    if (addrs.length === 0) return false;
+    return addrs.every((a) => {
+      if (a.family === 6) {
+        const ip = a.address.toLowerCase();
+        return !(ip === "::1" || ip.startsWith("fc") || ip.startsWith("fd") || ip.startsWith("fe80"));
+      }
+      return !PRIVATE_V4.test(a.address);
+    });
+  } catch {
+    return false;
+  }
+}
+
+const MIME_EXT: Record<string, string> = {
+  "image/jpeg": "jpg",
+  "image/png": "png",
+  "image/webp": "webp",
+  "image/avif": "avif",
+};
+
+/** Baixa a foto e devolve o caminho no Storage, ou null se não deu. */
+async function fetchImageToStorage(
+  supabase: Db,
+  productId: string,
+  url: string
+): Promise<string | null> {
+  let parsed: URL;
+  try {
+    parsed = new URL(url);
+  } catch {
+    return null;
+  }
+  if (parsed.protocol !== "https:") return null;
+  if (!(await isPublicHost(parsed.hostname))) return null;
+
+  const ctl = new AbortController();
+  const timer = setTimeout(() => ctl.abort(), 15000);
+  try {
+    const res = await fetch(parsed.toString(), {
+      signal: ctl.signal,
+      // Sem redirect: um 302 para 127.0.0.1 fura a checagem de DNS
+      // que acabou de ser feita no host original.
+      redirect: "manual",
+      headers: { Accept: "image/*" },
+    });
+    if (!res.ok) return null;
+
+    const type = (res.headers.get("content-type") ?? "").split(";")[0].trim().toLowerCase();
+    const ext = MIME_EXT[type];
+    if (!ext) return null;
+
+    const declared = Number(res.headers.get("content-length") ?? 0);
+    if (declared > 5 * 1024 * 1024) return null;
+
+    const buf = await res.arrayBuffer();
+    if (buf.byteLength === 0 || buf.byteLength > 5 * 1024 * 1024) return null;
+
+    const path = `products/${productId}/import-${Date.now()}.${ext}`;
+    const { error } = await supabase.storage
+      .from(PRODUCT_BUCKET)
+      .upload(path, buf, { contentType: type, upsert: false });
+    if (error) return null;
+
+    await supabase.from("product_images").insert({
+      product_id: productId,
+      path,
+      alt: null,
+      sort_order: 0,
+    });
+    return path;
+  } catch {
+    return null;
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
 /* ------------------------------------------------------------------ */
 /* Importação                                                          */
 /* ------------------------------------------------------------------ */
@@ -390,6 +485,25 @@ async function applyPlan(supabase: Db, products: ImportProduct[]): Promise<numbe
       await supabase
         .from("product_categories")
         .upsert(catRows, { onConflict: "product_id,category_id", ignoreDuplicates: true });
+    }
+
+    // Fotos: só para quem tem URL na planilha e ainda não tem capa.
+    // Uma de cada vez, para não abrir cem conexões de saída de uma vez
+    // nem estourar o tempo da ação.
+    const needsImage = chunk.filter((p) => p.imageUrl && idBySku.has(p.sku));
+    if (needsImage.length) {
+      const { data: already } = await supabase
+        .from("products")
+        .select("id")
+        .in("id", needsImage.map((p) => idBySku.get(p.sku)!))
+        .not("primary_image_path", "is", null);
+      const have = new Set((already ?? []).map((r) => r.id as string));
+
+      for (const p of needsImage) {
+        const pid = idBySku.get(p.sku)!;
+        if (have.has(pid)) continue;
+        await fetchImageToStorage(supabase, pid, p.imageUrl!);
+      }
     }
 
     written += saved?.length ?? 0;
