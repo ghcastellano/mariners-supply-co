@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect } from "react";
+import { IconAnchor } from "@/components/Icon";
 import { CONTACT_EMAIL } from "@/lib/env";
 
 /**
@@ -31,8 +32,10 @@ export default function Error({
   return (
     <main>
       <div className="okwrap">
+        {/* traço da família, não emoji: cada sistema desenha a âncora
+            de um jeito, e esta tela já aparece num momento ruim */}
         <div className="okring" aria-hidden>
-          ⚓
+          <IconAnchor size={30} />
         </div>
         <h2>Something slipped</h2>
         <p>This screen didn&apos;t load. It&apos;s on our side, not yours.</p>

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { IconCompass } from "@/components/Icon";
 
 export const metadata = { title: "Page not found" };
 
@@ -14,8 +15,9 @@ export default function NotFound() {
   return (
     <main>
       <div className="okwrap">
+        {/* traço da família, não emoji: o 404 também é vitrine */}
         <div className="okring" aria-hidden>
-          🧭
+          <IconCompass size={30} />
         </div>
         <h2>Off the chart</h2>
         <p>This page isn&apos;t on our map. It may have sailed, or the link is mistyped.</p>

@@ -1,4 +1,6 @@
 import Link from "next/link";
+import { IconCap, IconHeart, IconPackage, IconUser } from "./Icon";
+import CategoryIcon from "./CategoryIcon";
 
 /**
  * Navegação das telas de conta, à direita a partir de 1024px.
@@ -11,13 +13,16 @@ import Link from "next/link";
  * não gruda dois irmãos: o Sign Out entra como filho, não como vizinho.
  */
 
-type Item = { href: string; icon: string; nome: string; nota: string };
+type Item = { href: string; icon: React.ReactNode; nome: string; nota: string };
 
+/* Traço da família no lugar do emoji: o rail vive ao lado dos catcards
+   da home, que já usam o traço — dois estilos de ícone na mesma classe
+   liam como duas interfaces. */
 const ITENS: Item[] = [
-  { href: "/account", icon: "👤", nome: "My Account", nota: "Name, vessel and port" },
-  { href: "/orders", icon: "📦", nome: "My Orders", nota: "Track every delivery" },
-  { href: "/wishlist", icon: "♡", nome: "My Wish List", nota: "Saved for the next call" },
-  { href: "/captain", icon: "🧭", nome: "Captain rewards", nota: "Your code and credit" },
+  { href: "/account", icon: <IconUser className="ic" size={19} />, nome: "My Account", nota: "Name, vessel and port" },
+  { href: "/orders", icon: <IconPackage className="ic" size={19} />, nome: "My Orders", nota: "Track every delivery" },
+  { href: "/wishlist", icon: <IconHeart className="ic" size={19} />, nome: "My Wish List", nota: "Saved for the next call" },
+  { href: "/captain", icon: <IconCap className="ic" size={19} />, nome: "Captain rewards", nota: "Your code and credit" },
 ];
 
 export default function AccountRail({
@@ -38,9 +43,7 @@ export default function AccountRail({
       <div className="catgrid">
         {itens.map((i) => (
           <Link key={i.href} href={i.href} className="catcard">
-            <span className="ic" aria-hidden>
-              {i.icon}
-            </span>
+            {i.icon}
             <span className="tx">
               <span className="nm">{i.nome}</span>
               <span className="ct">{i.nota}</span>
@@ -52,9 +55,8 @@ export default function AccountRail({
         ))}
         {isAdmin && (
           <Link href="/admin" className="catcard">
-            <span className="ic" aria-hidden>
-              🛠
-            </span>
+            {/* o traço de "tools" já existe no CategoryIcon — reúso, não desenho novo */}
+            <CategoryIcon slug="tools" size={19} />
             <span className="tx">
               <span className="nm">Staff panel</span>
               <span className="ct">Orders, catalog and line-up</span>

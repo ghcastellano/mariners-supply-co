@@ -117,3 +117,25 @@ export function IconCompass({ size = 21, className }: Props) {
     </svg>
   );
 }
+
+/** Quepe do Captain — o programa de indicação tem posto, não emoji. */
+export function IconCap({ size = 21, className }: Props) {
+  return (
+    <svg {...base(size)} className={className}>
+      <path d="M5.2 12.6c0-3.5 3-5.6 6.8-5.6s6.8 2.1 6.8 5.6" />
+      <path d="M3.8 12.6h16.4l-.9 3.2H4.7Z" />
+      <path d="M12 9.8h.1" />
+    </svg>
+  );
+}
+
+/** Porta com seta: sair da conta. O ⎋ que morava aqui é tecla de
+ *  escape em fonte de sistema — cada aparelho desenhava um glifo. */
+export function IconLogout({ size = 21, className }: Props) {
+  return (
+    <svg {...base(size)} className={className}>
+      <path d="M10 4.5H5.5v15H10" />
+      <path d="m14.8 8.5 3.5 3.5-3.5 3.5M18.3 12H9.6" />
+    </svg>
+  );
+}

@@ -28,8 +28,12 @@ const { buildImportPlan } = await import("../lib/import.ts");
  * que ninguém sabe qual venceu.
  */
 const ARQUIVO = "docs/catalogo-santos.csv";
-/** Seis categorias, de 10 a 15 cada. O piso e o teto são requisito. */
-const ESPERADAS = 82;
+/** Seis categorias, de 10 a 15 cada. O piso e o teto são requisito.
+ *  82 → 78 na faxina de fotos: onze itens saíram porque a ÚNICA foto
+ *  registrada era inaceitável (na mão, prateleira de mercado, fundo de
+ *  cozinha) e quatro entraram no lugar para segurar o piso de 10. Foto
+ *  ruim não é vaga: derruba a categoria inteira. */
+const ESPERADAS = 78;
 
 const plano = buildImportPlan(parseCsvRows(readFileSync(ARQUIVO, "utf-8")));
 

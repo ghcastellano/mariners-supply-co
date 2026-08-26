@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { signOut } from "@/app/account/actions";
 import type { CategoryNode } from "@/lib/catalog";
-import { IconAnchor, IconCart, IconClose } from "./Icon";
+import { IconAnchor, IconCap, IconCart, IconClose, IconHeart, IconLogout, IconPackage, IconUser } from "./Icon";
 import CategoryIcon from "./CategoryIcon";
 
 /**
@@ -138,34 +138,36 @@ export default function CategoryDrawer({
 
           {!current && (
             <>
+              {/* Mesmo traço das categorias logo acima: emoji aqui era a
+                  única fileira do painel fora da família de ícones. */}
               <Link className="drawer-item" href="/orders" onClick={onClose}>
-                <span className="ic" aria-hidden>📦</span>
+                <IconPackage className="ic" size={19} />
                 <span className="nm">My Orders</span>
               </Link>
               <Link className="drawer-item" href="/captain" onClick={onClose}>
-                <span className="ic" aria-hidden>🧢</span>
+                <IconCap className="ic" size={19} />
                 <span className="nm">Captain rewards</span>
               </Link>
               <Link className="drawer-item" href="/wishlist" onClick={onClose}>
-                <span className="ic" aria-hidden>♡</span>
+                <IconHeart className="ic" size={19} />
                 <span className="nm">My Wish List</span>
                 {wishCount > 0 && <span className="drawer-count">{wishCount}</span>}
               </Link>
               <Link className="drawer-item" href="/account" onClick={onClose}>
-                <span className="ic" aria-hidden>👤</span>
+                <IconUser className="ic" size={19} />
                 <span className="nm">My Account</span>
               </Link>
               {/* Sair é AÇÃO, não link: apaga o cookie no servidor. */}
               {signedIn ? (
                 <form action={signOut}>
                   <button type="submit" className="drawer-item" onClick={onClose}>
-                    <span className="ic" aria-hidden>⎋</span>
+                    <IconLogout className="ic" size={19} />
                     <span className="nm">Sign out</span>
                   </button>
                 </form>
               ) : (
                 <Link className="drawer-item" href="/login" onClick={onClose}>
-                  <span className="ic" aria-hidden>⚓</span>
+                  <IconAnchor className="ic" size={19} />
                   <span className="nm">Sign in</span>
                 </Link>
               )}

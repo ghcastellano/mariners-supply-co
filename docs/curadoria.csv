@@ -1,11 +1,9 @@
 sku,ean,category,brand,name,size,cost_brl,photo,photo_ref
 EAN-7891021006125,7891021006125,coffee-tea,MELITTA,Melitta Traditional Ground Coffee,500 g,22,https://images.openfoodfacts.org/images/products/789/102/100/6125/front_pt.25.full.jpg,
-EAN-7896005800010,7896005800010,coffee-tea,3 CORACOES,3 Corações Traditional Ground Coffee,500 g,20,https://images.openfoodfacts.org/images/products/789/600/580/0010/front_pt.6.full.jpg,
-EAN-7896005801819,7896005801819,coffee-tea,3 Corações,3 Corações Extra Strong Ground Coffee,250 g,13,https://images.openfoodfacts.org/images/products/789/600/580/1819/front_pt.4.full.jpg,
+EAN-7896005800010,7896005800010,coffee-tea,3 CORACOES,3 Corações Traditional Ground Coffee,500 g,20,https://images.openfoodfacts.org/images/products/789/600/580/0010/2.jpg,
 EAN-7896089011357,7896089011357,coffee-tea,Pilão,Pilão Ground Coffee,500 g,23,https://images.openfoodfacts.org/images/products/789/608/901/1357/front.11.full.jpg,
 EAN-7896224814126,7896224814126,coffee-tea,Santa Clara,Santa Clara Classic Ground Coffee,250 g,26,https://images.openfoodfacts.org/images/products/789/622/481/4126/front_pt.3.full.jpg,
-EAN-7896019206785,7896019206785,coffee-tea,Iguaçu,Café Iguaçu Classic Instant Coffee,200 g,24,https://images.openfoodfacts.org/images/products/789/601/920/6785/front_pt.10.full.jpg,
-EAN-7891000286449,7891000286449,coffee-tea,Nescafé,Nescafé Original Instant Coffee,230 g,29,https://images.openfoodfacts.org/images/products/789/100/028/6449/front_es.7.full.jpg,
+EAN-7896019206785,7896019206785,coffee-tea,Iguaçu,Café Iguaçu Classic Instant Coffee,200 g,24,https://images.openfoodfacts.org/images/products/789/601/920/6785/1.jpg,
 EAN-7891000076392,7891000076392,coffee-tea,NESCAFE,Nescafé Instant Cappuccino,200 g,22,https://images.openfoodfacts.org/images/products/789/100/007/6392/front_pt.12.full.jpg,
 EAN-7896005808016,7896005808016,coffee-tea,3 CORACOES,3 Corações Balance Lactose-Free Cappuccino,180 g,19,https://images.openfoodfacts.org/images/products/789/600/580/8016/front_pt.8.full.jpg,
 EAN-7891098000163,7891098000163,coffee-tea,MATTE LEAO,Leão Camomile Tea Bags,10 bags,6,https://images.openfoodfacts.org/images/products/789/109/800/0163/front_pt.3.full.jpg,
@@ -55,29 +53,27 @@ EAN-7896290300189,7896290300189,taste-of-home,PRATO FINO,Prato Fino White Rice,1
 EAN-7896196069371,7896196069371,taste-of-home,LA PASTINA,La Pastina Basmati Rice,500 g,18,https://images.openfoodfacts.org/images/products/789/619/606/9371/front_pt.3.full.jpg,
 EAN-7896247400122,7896247400122,taste-of-home,Kikkoman,Kikkoman Soy Sauce,150 ml,22,https://images.openfoodfacts.org/images/products/789/624/740/0122/front_pt.3.full.jpg,
 EAN-7891167011847,7891167011847,taste-of-home,Gomes da Costa,Gomes da Costa Tuna Pâté,,7,https://images.openfoodfacts.org/images/products/789/116/701/1847/front_pt.4.full.jpg,
-EAN-7891167011731,7891167011731,taste-of-home,Gomes da Costa,Gomes da Costa Solid Tuna in Oil,170 g,11,https://images.openfoodfacts.org/images/products/789/116/701/1731/front_pt.10.full.jpg,
+EAN-7891167011731,7891167011731,taste-of-home,Gomes da Costa,Gomes da Costa Solid Tuna in Oil,170 g,11,https://images.openfoodfacts.org/images/products/789/116/701/1731/2.jpg,
 EAN-7898943163035,7898943163035,taste-of-home,ROBINSON CRUSOE,Robinson Crusoe Solid Tuna in Oil,120 g,11,https://images.openfoodfacts.org/images/products/789/894/316/3035/front_pt.18.full.jpg,
-EAN-7891167021037,7891167021037,taste-of-home,Gomes da Costa,Gomes da Costa Sardines in Lemon,125 g,8,https://images.openfoodfacts.org/images/products/789/116/702/1037/front_pt.6.full.jpg,
 EAN-7896213000011,7896213000011,taste-of-home,VITARELLA,Vitarella Thin Spaghetti,500 g,5,https://images.openfoodfacts.org/images/products/789/621/300/0011/front_pt.7.full.jpg,
 EAN-7891024134610,7891024134610,personal-care,Colgate,Colgate Máxima Proteção Anticavity Toothpaste,180 g,6,https://images.openbeautyfacts.org/images/products/789/102/413/4610/front_es.4.full.jpg,
 EAN-7891528038568,7891528038568,personal-care,Colgate,Sorriso Fresh Gel Menthol Toothpaste,90 g,4,https://images.openbeautyfacts.org/images/products/789/152/803/8568/front_pt.7.full.jpg,
-EAN-7891024034095,7891024034095,personal-care,colgate,Colgate Toothpaste,,8,https://images.openbeautyfacts.org/images/products/789/102/403/4095/front_en.5.full.jpg,estrangeira
 EAN-8720182256836,8720182256836,personal-care,Dove,Dove Original Beauty Cream Bar Soap,360 g,11,https://images.openbeautyfacts.org/images/products/872/018/225/6836/front_en.6.full.jpg,estrangeira
 EAN-8683130036099,8683130036099,personal-care,Dove,Dove Coconut & Almond Liquid Hand Soap,450 ml,16,https://images.openbeautyfacts.org/images/products/868/313/003/6099/front_en.8.full.jpg,estrangeira
 EAN-8683130093436,8683130093436,personal-care,Dove,Dove Original Antiperspirant Spray,150 ml,15,https://images.openbeautyfacts.org/images/products/868/313/009/3436/front_en.8.full.jpg,estrangeira
 EAN-8720181594823,8720181594823,personal-care,Dove,Dove Raspberry & Rose Deodorant Stick,75 ml,18,https://images.openbeautyfacts.org/images/products/872/018/159/4823/front_nl.3.full.jpg,estrangeira
-EAN-8720181375194,8720181375194,personal-care,Dove,Dove Clean Comfort Shower Gel,,14,https://images.openbeautyfacts.org/images/products/872/018/137/5194/front_de.5.full.jpg,estrangeira
 EAN-8683130020265,8683130020265,personal-care,Rexona,Rexona Invisible 72h Antiperspirant Spray,150 ml,15,https://images.openbeautyfacts.org/images/products/868/313/002/0265/front_en.6.full.jpg,estrangeira
 EAN-8683130019290,8683130019290,personal-care,Rexona,Rexona Shower Fresh Antiperspirant Spray,150 ml,15,https://images.openbeautyfacts.org/images/products/868/313/001/9290/front_en.8.full.jpg,estrangeira
 EAN-8683130019269,8683130019269,personal-care,Rexona,Rexona Sexy Bouquet Antiperspirant Spray,150 ml,15,https://images.openbeautyfacts.org/images/products/868/313/001/9269/front_en.6.full.jpg,estrangeira
-EAN-7501054500193,7501054500193,personal-care,nivea,Nivea Creme Moisturiser,200 ml,24,https://images.openbeautyfacts.org/images/products/750/105/450/0193/front_es.12.full.jpg,estrangeira
-EAN-0079656026078,0079656026078,sun-protection,Banana Boat,Banana Boat Sunscreen Lotion SPF 50,,39,https://images.openbeautyfacts.org/images/products/007/965/602/6078/front_fr.3.full.jpg,estrangeira
-EAN-0079656049718,0079656049718,sun-protection,Banana Boat,Banana Boat Sport Performance Sunscreen SPF 30,236 ml,42,https://images.openbeautyfacts.org/images/products/007/965/604/9718/front_en.4.full.jpg,estrangeira
 EAN-4005900998996,4005900998996,sun-protection,Nivea sun,Nivea Sun UV Anti-Spot Fluid SPF 50+,40 ml,55,https://images.openbeautyfacts.org/images/products/400/590/099/8996/front_nl.7.full.jpg,estrangeira
 EAN-42429128,42429128,sun-protection,Nivea sun,Nivea Sun Kids Protect & Hydrate SPF 50+,50 ml,29,https://images.openbeautyfacts.org/images/products/000/004/242/9128/front_nl.7.full.jpg,estrangeira
 EAN-42429111,42429111,sun-protection,Nivea sun,Nivea Sun Protect & Hydrate SPF 30,50 ml,29,https://images.openbeautyfacts.org/images/products/000/004/242/9111/front_nl.7.full.jpg,estrangeira
 EAN-4005900717191,4005900717191,sun-protection,Nivea sun,Nivea Sun After Sun Bronze Lotion,200 ml,33,https://images.openbeautyfacts.org/images/products/400/590/071/7191/front_nl.11.full.jpg,estrangeira
-EAN-4006000142296,4006000142296,sun-protection,Nivea Sun,Nivea Sun Kids Protect & Hydrate SPF 50+,270 ml,46,https://images.openbeautyfacts.org/images/products/400/600/014/2296/front_fr.3.full.jpg,estrangeira
-EAN-40062075,40062075,sun-protection,Nivea,Nivea Sun Protect & Moisture SPF 50,100 ml,44,https://images.openbeautyfacts.org/images/products/000/004/006/2075/front_it.5.full.jpg,estrangeira
-EAN-40061337,40061337,sun-protection,Nivea,Nivea Sun Protect & Moisture SPF 30,100 ml,41,https://images.openbeautyfacts.org/images/products/000/004/006/1337/front_it.6.full.jpg,estrangeira
-EAN-4006000056784,4006000056784,sun-protection,Nivea Sun,Nivea Sun Protect & Moisture SPF 50+,200 ml,48,https://images.openbeautyfacts.org/images/products/400/600/005/6784/front_sv.5.full.jpg,estrangeira
+EAN-40062075,40062075,sun-protection,Nivea,Nivea Sun Protect & Moisture SPF 50,100 ml,44,https://images.openbeautyfacts.org/images/products/40062075/1.jpg,estrangeira
+EAN-40061337,40061337,sun-protection,Nivea,Nivea Sun Protect & Moisture SPF 30,100 ml,41,https://images.openbeautyfacts.org/images/products/40061337/1.jpg,estrangeira
+EAN-4006000138022,4006000138022,sun-protection,Nivea Sun,Nivea Sun UV Face Anti-Age Q10 SPF 50,50 ml,52,https://images.openbeautyfacts.org/images/products/400/600/013/8022/front_sv.4.full.jpg,estrangeira
+EAN-4006000137995,4006000137995,sun-protection,Nivea Sun,Nivea Sun UV Face Shine Control SPF 50,50 ml,50,https://images.openbeautyfacts.org/images/products/400/600/013/7995/front_sv.4.full.jpg,estrangeira
+EAN-4005900601971,4005900601971,sun-protection,Nivea Sun,Nivea Sun Kids Sensitive Protect Spray SPF 50+,200 ml,55,https://images.openbeautyfacts.org/images/products/400/590/060/1971/front_sv.4.full.jpg,estrangeira
+EAN-8690521050671,8690521050671,personal-care,Dove,Dove Deeply Caring Hand Wash,450 ml,16,https://images.openbeautyfacts.org/images/products/869/052/105/0671/front_en.8.full.jpg,estrangeira
+EAN-7891167023024,7891167023024,taste-of-home,88,88 Sardines in Tomato Sauce,125 g,6,https://images.openfoodfacts.org/images/products/789/116/702/3024/front_pt.3.full.jpg,
+EAN-93036052,93036052,sun-protection,Banana Boat,Banana Boat Sunscreen Lip Balm SPF 45,4.25 g,18,https://images.openbeautyfacts.org/images/products/000/009/303/6052/front_en.3.full.jpg,estrangeira
