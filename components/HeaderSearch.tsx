@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { IconSearch } from "./Icon";
 
 /**
  * A busca do cabeçalho, separada do resto dele.
@@ -41,7 +42,9 @@ export default function HeaderSearch() {
         aria-label="Search entire store"
         enterKeyHint="search"
       />
-      <button type="submit" aria-label="Search">🔍</button>
+      <button type="submit" aria-label="Search">
+        <IconSearch />
+      </button>
     </form>
   );
 }

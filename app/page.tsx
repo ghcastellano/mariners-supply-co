@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { unstable_cache } from "next/cache";
 import { createClient as createAnonClient } from "@supabase/supabase-js";
+import CategoryIcon from "@/components/CategoryIcon";
 import ProductCardView from "@/components/ProductCard";
 import { createClient } from "@/lib/supabase/server";
 import { listProducts, type Category, type ProductCard } from "@/lib/catalog";
@@ -119,6 +120,14 @@ async function loadCrew(): Promise<Crew> {
 export default async function Home() {
   const [store, crew] = await Promise.all([loadStorefront(), loadCrew()]);
 
+  // Categoria vazia não entra na vitrine. "Promo · 0 items" convida o
+  // toque e entrega uma página em branco — pior que não oferecer. Elas
+  // continuam no drawer, que é onde se navega a estrutura inteira.
+  // Retaguarda: se NENHUMA tiver produto, mostra todas, senão a home
+  // fica sem porta de entrada enquanto o catálogo não chega.
+  const withStock = store.roots.filter((c) => (store.counts[c.id] ?? 0) > 0);
+  const shown = withStock.length > 0 ? withStock : store.roots;
+
   return (
     <main>
       <section className="homehero">
@@ -131,23 +140,23 @@ export default async function Home() {
 
       <h2 className="secttl">Categories</h2>
 
-      {store.roots.length === 0 ? (
+      {shown.length === 0 ? (
         <div className="empty">
           <div className="i">🧭</div>
           The shelves are being stocked. Check back shortly.
         </div>
       ) : (
         <div className="catgrid">
-          {store.roots.map((c) => {
+          {shown.map((c) => {
             const n = store.counts[c.id] ?? 0;
             return (
               <Link key={c.id} href={`/c/${c.slug}`} className="catcard" prefetch={false}>
-                <span className="ic" aria-hidden>
-                  {c.icon ?? "▪"}
-                </span>
+<CategoryIcon slug={c.slug} fallback={c.icon} />
                 <span className="tx">
                   <span className="nm">{c.name}</span>
-                  <span className="ct">{n === 1 ? "1 item" : `${n} items`}</span>
+                  {n > 0 && (
+                    <span className="ct">{n === 1 ? "1 item" : `${n} items`}</span>
+                  )}
                 </span>
                 <span className="chev" aria-hidden>
                   ›

@@ -1028,24 +1028,77 @@ input:-webkit-autofill:focus {
   position: sticky; top: 0; z-index: 70;
   background: var(--night); border-bottom: 1px solid var(--line-hi);
 }
+/* Grade de três colunas com as laterais idênticas (minmax(0,1fr) dos
+   dois lados) em vez de flex. Com flex o logo era centralizado no
+   espaço QUE SOBRA, e sobra assimétrica: um ícone à esquerda contra
+   três à direita. A diferença de largura virava 38px de desvio, que a
+   olho lê como defeito de alinhamento. Na grade o centro é o centro. */
 .sunhead-row {
-  display: flex; align-items: center; gap: 8px;
-  padding: 9px 12px; min-height: 54px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: center; gap: 6px;
+  padding: 7px 10px 8px; min-height: 56px;
 }
+.sunhead-row > .hamb { justify-self: start; }
+.sunhead-row > .sunlogo { justify-self: center; }
+.sunhead-row > .headicons { justify-self: end; }
+
 .hamb, .headicon {
   display: grid; place-items: center; flex: none;
-  width: 38px; height: 38px; border-radius: 10px;
+  width: 40px; height: 40px; border-radius: 10px;
   background: none; border: 0; color: var(--ink); font-size: 19px;
   cursor: pointer; text-decoration: none; position: relative;
 }
-.hamb:hover, .headicon:hover { background: var(--card); }
-.sunlogo {
-  flex: 1; text-align: center; text-decoration: none; color: var(--ink);
-  font-family: var(--font-disp); font-weight: 800; font-size: 17px;
-  letter-spacing: -.01em; white-space: nowrap;
+/* Área de toque fixa em 44×44 — o mínimo do Apple HIG — independente
+   do tamanho VISUAL do ícone. Feita por pseudo-elemento centrado para
+   o alvo não empurrar o layout: com 44px reais de caixa, três ícones
+   mais o logotipo não cabem em 360px sem colidir. Assim o dedo tem os
+   44 e o desenho fica com o espaço que sobra. */
+.hamb::after, .headicon::after {
+  content: ""; position: absolute; left: 50%; top: 50%;
+  width: 44px; height: 44px; transform: translate(-50%, -50%);
+  border-radius: 12px;
 }
+.hamb:hover, .headicon:hover { background: var(--card); }
+
+/* Logotipo compacto, em duas linhas.
+   A conta que obriga: para o centro ser simétrico, cada lateral
+   precisa caber os três ícones (120px). Isso deixa 118px para a
+   marca, e "Mariners Supply" numa linha ocupa 136px — não cabe sem
+   colidir com o ícone de conta, que era o que acontecia. Empilhado,
+   o conjunto ocupa ~88px, fica centrado de verdade e ainda lê como
+   logotipo em vez de mais um rótulo entre ícones. */
+.sunlogo {
+  text-decoration: none; color: var(--ink);
+  display: inline-flex; align-items: center; gap: 7px;
+  line-height: 1;
+}
+.sunlogo .mark { flex: none; width: 21px; height: 21px; color: var(--amber); }
+.sunlogo .word { display: flex; flex-direction: column; gap: 1px; }
+.sunlogo .l1 {
+  font-family: var(--font-disp); font-weight: 800; font-size: 12px;
+  letter-spacing: .11em; color: var(--ink); text-transform: uppercase;
+}
+.sunlogo .l2 {
+  font-family: var(--font-disp); font-weight: 800; font-size: 12px;
+  letter-spacing: .11em; color: var(--amber); text-transform: uppercase;
+}
+/* Faixa estreita (iPhone SE e afins): o desenho dos ícones encolhe
+   para 36px, a área de toque continua 44, e o nome da marca sobrevive.
+   A conta: 3×36 = 108 de cada lado deixa 112px para o logotipo, que
+   ocupa 104. Com 40px colidia por 2px. */
+@media (max-width: 380px) {
+  .sunhead-row { padding-left: 8px; padding-right: 8px; gap: 4px; }
+  .hamb, .headicon { width: 36px; height: 36px; }
+  .sunlogo { gap: 6px; }
+  .sunlogo .l1, .sunlogo .l2 { letter-spacing: .09em; }
+}
+
+/* Abaixo disso a âncora sozinha identifica a marca — melhor perder o
+   nome que espremer alvo de toque. */
+@media (max-width: 330px) { .sunlogo .word { display: none; } }
 .sunlogo b { color: var(--amber); font-weight: 800; }
-.headicons { display: flex; align-items: center; gap: 2px; flex: none; }
+.headicons { display: flex; align-items: center; gap: 0; flex: none; }
 .cartbadge {
   position: absolute; top: 2px; right: 2px;
   min-width: 17px; height: 17px; padding: 0 4px; border-radius: 999px;
@@ -1055,7 +1108,9 @@ input:-webkit-autofill:focus {
 }
 
 /* fileira 2: busca de largura cheia, botão âmbar colado */
-.sunsearch { display: flex; padding: 0 12px 10px; gap: 0; }
+/* 6px de respiro entre a fileira dos ícones e a busca: elas estavam
+   coladas, e dois blocos interativos encostados leem como um só. */
+.sunsearch { display: flex; padding: 6px 12px 10px; gap: 0; }
 .sunsearch input {
   flex: 1; min-width: 0; border: 0; outline: none;
   background: #FFFFFF; color: #0B1B30;
@@ -1526,3 +1581,11 @@ input:-webkit-autofill:focus {
 
 /* Nome do produto repetido sob "Description / …" (espec §4). */
 .pdp-descname { color: var(--ink); font-weight: 700; margin: 0 0 10px; }
+
+/* Ícone de categoria em SVG: herda a cor do cartão e ganha o âmbar no
+   hover, como o resto da família. O emoji do banco continua servindo
+   de retaguarda e usa o mesmo box. */
+svg.ic { flex: none; color: var(--amber); }
+.catcard:hover svg.ic { color: var(--amber-hi); }
+.drawer-item svg.ic { color: var(--faint); }
+.drawer-item:hover svg.ic { color: var(--amber); }

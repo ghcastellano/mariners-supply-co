@@ -6,6 +6,7 @@ import { Suspense, useEffect, useRef, useState } from "react";
 import CategoryDrawer from "./CategoryDrawer";
 import HeaderSearch from "./HeaderSearch";
 import MiniCart from "./MiniCart";
+import { IconAnchor, IconCart, IconHeart, IconMenu, IconUser } from "./Icon";
 import { useCart } from "@/lib/cart";
 import type { CategoryNode } from "@/lib/catalog";
 
@@ -50,8 +51,12 @@ export default function SiteHeader({ tree }: { tree: CategoryNode[] }) {
             ☰
           </button>
 
-          <Link href="/" className="sunlogo">
-            Mariners <b>Supply</b>
+          <Link href="/" className="sunlogo" aria-label="Mariners Supply — home">
+            <IconAnchor className="mark" />
+            <span className="word">
+              <span className="l1">Mariners</span>
+              <span className="l2">Supply</span>
+            </span>
           </Link>
 
           <div className="headicons">
@@ -62,7 +67,7 @@ export default function SiteHeader({ tree }: { tree: CategoryNode[] }) {
                 aria-label="Account menu"
                 aria-expanded={menu}
               >
-                👤
+                <IconUser />
               </button>
               {menu && (
                 <div className="acctmenu" role="menu">
@@ -77,7 +82,9 @@ export default function SiteHeader({ tree }: { tree: CategoryNode[] }) {
               )}
             </div>
 
-            <Link href="/wishlist" className="headicon" aria-label="Wish list">♡</Link>
+            <Link href="/wishlist" className="headicon" aria-label="Wish list">
+              <IconHeart />
+            </Link>
 
             {/* No Sunny o ícone abre o mini-carrinho em vez de navegar:
                 quem está no meio da listagem confere sem perder o lugar. */}
@@ -87,7 +94,7 @@ export default function SiteHeader({ tree }: { tree: CategoryNode[] }) {
               aria-label={`Cart${ready && count > 0 ? `, ${count} items` : ""}`}
               aria-expanded={cart}
             >
-              🛒
+              <IconCart />
               {ready && count > 0 && <span className="cartbadge">{count}</span>}
             </button>
           </div>

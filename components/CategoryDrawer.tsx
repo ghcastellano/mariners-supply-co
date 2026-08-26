@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { CategoryNode } from "@/lib/catalog";
+import { IconAnchor, IconCart, IconClose } from "./Icon";
+import CategoryIcon from "./CategoryIcon";
 
 /**
  * Drawer de categorias, no fluxo do Sunny: drill-down, não acordeão.
@@ -86,11 +88,15 @@ export default function CategoryDrawer({
         aria-label={title ? `${title} categories` : "Categories"}
       >
         <div className="drawer-top">
-          <Link href="/" className="sunlogo" onClick={onClose}>
-            Mariners <b>Supply</b>
+          <Link href="/" className="sunlogo" onClick={onClose} aria-label="Mariners Supply — home">
+            <IconAnchor className="mark" />
+            <span className="word">
+              <span className="l1">Mariners</span>
+              <span className="l2">Supply</span>
+            </span>
           </Link>
           <button className="drawer-x" onClick={onClose} aria-label="Close">
-            ✕
+            <IconClose />
           </button>
         </div>
 
@@ -112,13 +118,13 @@ export default function CategoryDrawer({
           {list.map((c) =>
             c.children.length > 0 ? (
               <button key={c.id} className="drawer-item" onClick={() => setStack((s) => [...s, c])}>
-                {c.icon && <span className="ic" aria-hidden>{c.icon}</span>}
+                <CategoryIcon slug={c.slug} fallback={c.icon} size={19} />
                 <span className="nm">{c.name}</span>
                 <span className="chev" aria-hidden>›</span>
               </button>
             ) : (
               <Link key={c.id} className="drawer-item" href={`/c/${c.slug}`} onClick={onClose}>
-                {c.icon && <span className="ic" aria-hidden>{c.icon}</span>}
+                <CategoryIcon slug={c.slug} fallback={c.icon} size={19} />
                 <span className="nm">{c.name}</span>
               </Link>
             )
@@ -144,7 +150,7 @@ export default function CategoryDrawer({
 
         <div className="drawer-foot">
           <Link className="btn" href="/cart" onClick={onClose}>
-            🛒 Shopping Cart{cartCount > 0 ? ` · ${cartCount}` : ""}
+            <IconCart size={18} /> Shopping Cart{cartCount > 0 ? ` · ${cartCount}` : ""}
           </Link>
         </div>
       </div>

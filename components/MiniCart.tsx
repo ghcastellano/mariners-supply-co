@@ -8,6 +8,7 @@ import { createClient } from "@/lib/supabase/client";
 import { supabaseConfigured } from "@/lib/env";
 import { imageUrl } from "@/lib/catalog";
 import { usd } from "@/lib/money";
+import { IconClose, IconTrash } from "./Icon";
 
 type Line = {
   id: string;
@@ -82,7 +83,9 @@ export default function MiniCart({ open, onClose }: { open: boolean; onClose: ()
       <div className="minicart" ref={panel} role="dialog" aria-modal="true" aria-label="My Cart">
         <div className="minicart-top">
           <h2>My Cart</h2>
-          <button className="minicart-x" onClick={onClose} aria-label="Close">✕</button>
+          <button className="minicart-x" onClick={onClose} aria-label="Close">
+            <IconClose />
+          </button>
         </div>
 
         <div className="minicart-list">
@@ -120,7 +123,7 @@ export default function MiniCart({ open, onClose }: { open: boolean; onClose: ()
                         onClick={() => change(l.id, -l.qty)}
                         aria-label={`Remove ${l.products?.name}`}
                       >
-                        🗑
+                        <IconTrash />
                       </button>
                     </div>
                   </div>
