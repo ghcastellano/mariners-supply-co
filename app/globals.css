@@ -1511,6 +1511,13 @@ input:-webkit-autofill:focus {
 .pcard {
   display: flex; flex-direction: column;
   background: var(--card); border-radius: 14px; overflow: hidden;
+  /* Sombra baixa para ASSENTAR, não para decorar. O painel de foto é
+     branco puro sobre fundo quase preto — salto de 20:1 — e sem
+     nenhuma transição o card lia como adesivo colado na página. O
+     painel não pode escurecer (a foto normalizada é branca e um painel
+     tingido mostraria o retângulo do JPEG), então quem faz a ponte é a
+     sombra: o card ganha chão. */
+  box-shadow: 0 1px 2px rgba(1, 6, 13, .55), 0 10px 28px -18px rgba(1, 6, 13, .9);
   transition: background .18s var(--ease), transform .18s var(--ease);
 }
 .pcard.out { opacity: .55; }
@@ -1578,6 +1585,10 @@ input:-webkit-autofill:focus {
   font-family: var(--font-mono); font-size: 9.5px; letter-spacing: .14em;
   text-transform: uppercase; color: var(--faint);
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  /* Reservada mesmo vazia, como a linha do tamanho: card com marca ao
+     lado de card sem marca desalinhava a fileira inteira dali para
+     baixo — nome, preço e botão, cada um num nível. */
+  min-height: 1.3em;
 }
 .pname {
   color: var(--ink); font-size: 13.5px; font-weight: 600; line-height: 1.3;
@@ -1688,6 +1699,13 @@ input:-webkit-autofill:focus {
 .rail {
   display: grid; grid-auto-flow: column; grid-auto-columns: 74%;
   gap: var(--sp-3); overflow-x: auto;
+  /* O card seguinte aparece cortado a 26%, mas cortado SECO lê como
+     defeito de layout, não como rolagem. O desvanecimento na borda
+     direita é a convenção que diz "continua" — fica ali mesmo no fim do
+     trilho, onde custa um fio do último card; é o preço de a afordância
+     existir sem JavaScript. */
+  -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 36px), transparent);
+  mask-image: linear-gradient(to right, #000 calc(100% - 36px), transparent);
   /* Sangra e devolve o recuo por DENTRO: assim o trilho rola de borda a
      borda e o primeiro card ainda começa alinhado com o resto da
      página. Padding só nos lados — o vão vertical é da pilha. */
@@ -1750,7 +1768,9 @@ input:-webkit-autofill:focus {
 .sumrow span { color: var(--faint); font-size: 13px; }
 .sumrow b { color: var(--ink); font-size: 13.5px; font-family: var(--font-mono); }
 .sumrow.grand { border-top: 1px solid var(--line-hi); padding-top: 13px; margin-top: 4px; }
-.sumrow.grand span { color: var(--ink); font-size: 15.5px; font-weight: 700; }
+/* "Pay now" nunca quebra em "Pay / now": rótulo partido ao lado de um
+   número grande lê como defeito — e é a linha mais olhada do resumo. */
+.sumrow.grand span { color: var(--ink); font-size: 15.5px; font-weight: 700; white-space: nowrap; }
 .sumrow.grand b { font-size: 20px; font-weight: 700; }
 .sumcard .btn { margin: 10px 0 0; }
 .sumcard .btn.navy {
@@ -2398,6 +2418,9 @@ svg.ic { flex: none; color: var(--amber); }
   /* No desktop a página já recua; o trilho não sangra mais. Sem zerar,
      o margin negativo do escopo base o jogaria para fora da coluna. */
   .pg-home .catgrid, .pg-home .rail { margin-inline: 0; padding-inline: 0; }
+  /* No desktop o trilho vira grade sem rolagem: máscara fora, senão o
+     último card da fileira nasce desbotado sem haver o que rolar. */
+  .pg-home .rail { -webkit-mask-image: none; mask-image: none; }
   .pg-home .deptgrid { gap: var(--sp-4); }
   .pg-home .dept-top { padding: var(--sp-5) var(--sp-5) var(--sp-4); }
   .pg-home .dept-top .nm { font-size: 18px; }

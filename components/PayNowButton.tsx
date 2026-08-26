@@ -24,7 +24,7 @@ export default function PayNowButton({ code, amount }: { code: string; amount: s
   return (
     <div className="stack" style={{ paddingTop: 0 }}>
       <button className="btn" onClick={pay} disabled={pending}>
-        {pending ? "Opening secure payment…" : `💳 Pay deposit now · ${amount}`}
+        {pending ? "Opening secure payment…" : `Pay deposit now · ${amount}`}
       </button>
       {err && <p className="alert">{err}</p>}
     </div>

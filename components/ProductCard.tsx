@@ -95,7 +95,9 @@ export default function ProductCardView({
       </div>
 
       <div className="pcard-body">
-        {p.brand_name && <span className="pbrand">{p.brand_name}</span>}
+        {/* Sempre renderizada, como a linha do tamanho: sem marca a linha
+            fica vazia mas ocupa a altura, e a fileira termina alinhada. */}
+        <span className="pbrand">{p.brand_name ?? "\u00A0"}</span>
         <Link href={`/p/${p.slug}`} className="pname" prefetch={false}>
           {title}
         </Link>

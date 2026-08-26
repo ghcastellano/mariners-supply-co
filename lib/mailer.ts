@@ -63,7 +63,7 @@ export async function sendMail(msg: {
       to: msg.to,
       replyTo: CONTACT_EMAIL,
       subject: msg.subject,
-      html: msg.html,
+      html: msg.html || `<pre style="font: 14px/1.5 ui-monospace, monospace">${msg.text}</pre>`,
       text: msg.text,
     });
     return { sent: true };
@@ -104,6 +104,35 @@ export async function sendOrderEmail(
     html: built.html,
     text: built.text,
   });
+
+  // Aviso para a OPERAÇÃO no momento que o dinheiro entra. Sem isto o
+  // Gustavo só descobria o pedido abrindo o /admin — e a resposta dele a
+  // "como vamos acompanhar tudo?" começa por: o pedido te procura, não o
+  // contrário. Depois do e-mail do cliente e fora do caminho de erro:
+  // aviso interno que falha não pode derrubar nem repetir o e-mail do
+  // marinheiro (o claim é único por pedido).
+  if (kind === "deposit_paid" && result.sent) {
+    const linhas = (claim.items ?? [])
+      .map((i) => `${i.qty}x ${i.name}`)
+      .join("\n");
+    await sendMail({
+      to: CONTACT_EMAIL,
+      subject: `⚓ New order #${claim.code} — ${claim.ship_name ?? "no vessel"} · deposit paid`,
+      text:
+        `Order #${claim.code}\n` +
+        `Vessel: ${claim.ship_name ?? "—"}${claim.ship_berth ? ` · berth ${claim.ship_berth}` : ""}\n` +
+        `ETA: ${claim.ship_eta ?? "—"}\n` +
+        `Subtotal: $${Number(claim.subtotal_usd ?? 0).toFixed(2)} · ` +
+        `deposit $${Number(claim.deposit_usd ?? 0).toFixed(2)} · ` +
+        `balance $${Number(claim.balance_usd ?? 0).toFixed(2)}\n\n` +
+        `${linhas}\n\n${SITE_URL}/admin`,
+      // Aviso operacional é texto puro de propósito — <pre> preserva o
+      // alinhamento e nenhum cliente de e-mail tem como quebrá-lo.
+      html: "",
+    }).catch(() => {
+      // aviso interno é melhor-esforço; o log de order_email já conta a história
+    });
+  }
 
   if (!result.sent) {
     await rpc.rpc("release_order_email", args);
