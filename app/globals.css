@@ -1106,6 +1106,12 @@ input:-webkit-autofill:focus {
   font-family: var(--font-mono); font-size: 10px; font-weight: 700;
   display: grid; place-items: center;
 }
+/* Mesmo selo, cor do coração: dois âmbares lado a lado viram um número
+   só de relance, e o que se quer saber é qual dos dois tem item.
+   "wishcount", e não "wish": .wish já é o BOTÃO coração dos cards, com
+   44px de largura e fonte 16 — e por vir depois no arquivo estava
+   esticando o selo até cobrir o ícone do cabeçalho. */
+.cartbadge.wishcount { background: var(--danger); color: #FFFFFF; }
 
 /* fileira 2: busca de largura cheia, botão âmbar colado */
 /* 6px de respiro entre a fileira dos ícones e a busca: elas estavam

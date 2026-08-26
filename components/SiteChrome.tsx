@@ -1,6 +1,7 @@
 import SiteHeader from "./SiteHeader";
 import { createClient } from "@/lib/supabase/server";
 import { buildTree, type Category, type CategoryNode } from "@/lib/catalog";
+import { wishCount } from "@/lib/wishlist";
 
 /**
  * Server Component que busca a árvore de categorias uma vez e entrega
@@ -21,5 +22,10 @@ export default async function SiteChrome() {
     // Catálogo indisponível não pode derrubar o cabeçalho do site.
     tree = [];
   }
-  return <SiteHeader tree={tree} />;
+  // Contagem em paralelo não adianta aqui: a árvore já voltou. É uma
+  // consulta de contagem sobre chave primária — barata o bastante para
+  // rodar em toda tela, e é o que faz o ♡ deixar de parecer vazio.
+  const wishes = await wishCount();
+
+  return <SiteHeader tree={tree} wishCount={wishes} />;
 }

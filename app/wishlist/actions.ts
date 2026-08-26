@@ -6,6 +6,22 @@ import { createClient } from "@/lib/supabase/server";
 export type WishResult = { ok: boolean; wished: boolean; needsAuth?: boolean };
 
 /**
+ * O que precisa ser redesenhado quando a lista muda.
+ *
+ * A página da lista é óbvia. O layout raiz entra porque o selo do ♡ no
+ * cabeçalho mora lá: sem invalidar o layout, marcar um coração no
+ * /shop deixaria o número do cabeçalho parado até a próxima recarga.
+ *
+ * É o martelo grande — invalida a árvore inteira. Cabe aqui porque as
+ * telas já são dinâmicas e o que sobra de cache é a vitrine em
+ * unstable_cache, que volta em uma consulta e vale por 300s.
+ */
+function refreshWishViews() {
+  revalidatePath("/wishlist");
+  revalidatePath("/", "layout");
+}
+
+/**
  * Liga/desliga o item na lista de desejos.
  *
  * Devolve `needsAuth` em vez de redirecionar: quem chama é um botão no
@@ -31,7 +47,7 @@ export async function toggleWish(productId: string): Promise<WishResult> {
 
   if (existing) {
     await supabase.from("wishlists").delete().eq("user_id", user.id).eq("product_id", productId);
-    revalidatePath("/wishlist");
+    refreshWishViews();
     return { ok: true, wished: false };
   }
 
@@ -48,7 +64,7 @@ export async function toggleWish(productId: string): Promise<WishResult> {
     return { ok: false, wished: false };
   }
 
-  revalidatePath("/wishlist");
+  refreshWishViews();
   return { ok: true, wished: true };
 }
 
@@ -96,6 +112,6 @@ export async function claimWishes(
     return { ok: false, saved: 0 };
   }
 
-  revalidatePath("/wishlist");
+  refreshWishViews();
   return { ok: true, saved: rows.length };
 }

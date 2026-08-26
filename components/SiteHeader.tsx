@@ -18,7 +18,14 @@ import type { CategoryNode } from "@/lib/catalog";
  * A ordem dos ícones e a busca embaixo são o que a tripulação já tem
  * na memória muscular. Não é lugar para criatividade.
  */
-export default function SiteHeader({ tree }: { tree: CategoryNode[] }) {
+export default function SiteHeader({
+  tree,
+  wishCount = 0,
+}: {
+  tree: CategoryNode[];
+  /** Favoritos da pessoa logada. Zero esconde o selo. */
+  wishCount?: number;
+}) {
   const { count, ready } = useCart();
   const [drawer, setDrawer] = useState(false);
   const [cart, setCart] = useState(false);
@@ -82,8 +89,16 @@ export default function SiteHeader({ tree }: { tree: CategoryNode[] }) {
               )}
             </div>
 
-            <Link href="/wishlist" className="headicon" aria-label="Wish list">
+            {/* O selo repete o que o carrinho já fazia. Sem ele o ♡ era
+                mudo: dois itens guardados e nenhum sinal na tela — a
+                pessoa abria a lista para descobrir se tinha algo. */}
+            <Link
+              href="/wishlist"
+              className="headicon"
+              aria-label={wishCount > 0 ? `Wish list, ${wishCount} items` : "Wish list"}
+            >
               <IconHeart />
+              {wishCount > 0 && <span className="cartbadge wishcount">{wishCount}</span>}
             </Link>
 
             {/* No Sunny o ícone abre o mini-carrinho em vez de navegar:

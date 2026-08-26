@@ -43,3 +43,29 @@ export async function wishedProductIds(productIds: string[]): Promise<Set<string
 
   return new Set((data ?? []).map((r) => r.product_id as string));
 }
+
+/**
+ * Quantos favoritos a pessoa tem — só o número, para o selo do ♡ no
+ * cabeçalho.
+ *
+ * Sem ele a lista era invisível até alguém abrir a página: o carrinho
+ * mostrava "1" ao lado e o coração não mostrava nada, o que lê como
+ * lista vazia.
+ *
+ * `head: true` não traz linha nenhuma, só a contagem — e a RLS já
+ * limita ao dono, então visitante deslogado recebe zero sem consulta
+ * de sessão.
+ */
+export async function wishCount(): Promise<number> {
+  try {
+    const supabase = await createClient();
+    const { count, error } = await supabase
+      .from("wishlists")
+      .select("product_id", { count: "exact", head: true });
+    if (error) return 0;
+    return count ?? 0;
+  } catch {
+    // Contador é enfeite: nunca pode derrubar o cabeçalho do site.
+    return 0;
+  }
+}
