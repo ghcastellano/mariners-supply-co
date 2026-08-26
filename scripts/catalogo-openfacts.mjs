@@ -40,32 +40,74 @@ const ACERVOS = [
  * Marcas que um ship chandler de Santos realmente entrega, com a
  * categoria da loja em que cada uma cai. Marca é vocabulário
  * controlado no acervo; termo livre não é.
+ *
+ * `mundo: true` desliga o corte por prefixo GS1 Brasil. É o que a
+ * prateleira "Taste of home" exige: tripulação filipina quer Lucky Me e
+ * Century Tuna, indonésia quer Indomie, e esses produtos NÃO têm código
+ * brasileiro — são importados, e o código é do país de origem. Cortar
+ * por prefixo ali esvaziaria justamente a categoria que diferencia um
+ * chandler de um mercado.
  */
 const MARCAS = [
+  // Café e chá — o que mais sai em navio
   { marca: "pilao", categoria: "coffee-tea" },
   { marca: "melitta", categoria: "coffee-tea" },
   { marca: "3 coracoes", categoria: "coffee-tea" },
   { marca: "nescafe", categoria: "coffee-tea" },
   { marca: "leao", categoria: "coffee-tea" },
   { marca: "nescau", categoria: "coffee-tea" },
+  { marca: "lipton", categoria: "coffee-tea", mundo: true },
+  { marca: "twinings", categoria: "coffee-tea", mundo: true },
+  { marca: "milo", categoria: "coffee-tea", mundo: true },
+
+  // Bebida
   { marca: "guarana antarctica", categoria: "soft-drinks" },
   { marca: "coca-cola", categoria: "soft-drinks" },
-  { marca: "guarana", categoria: "soft-drinks" },
   { marca: "do bem", categoria: "soft-drinks" },
+  { marca: "red bull", categoria: "soft-drinks", mundo: true },
+  { marca: "monster", categoria: "soft-drinks", mundo: true },
+  { marca: "gatorade", categoria: "soft-drinks" },
+  { marca: "crystal", categoria: "soft-drinks" },
+
+  // Snack
   { marca: "bauducco", categoria: "snacks" },
-  { marca: "trakinas", categoria: "snacks" },
   { marca: "dori", categoria: "snacks" },
   { marca: "elma chips", categoria: "snacks" },
   { marca: "garoto", categoria: "snacks" },
   { marca: "lacta", categoria: "snacks" },
-  { marca: "nissin", categoria: "snacks" },
+  { marca: "pringles", categoria: "snacks", mundo: true },
+  { marca: "oreo", categoria: "snacks", mundo: true },
+  { marca: "snickers", categoria: "snacks", mundo: true },
+
+  // Taste of home — a prateleira que faz o chandler ser chandler.
+  // Santos recebe tripulação filipina, indonésia, indiana e ucraniana.
+  { marca: "indomie", categoria: "taste-of-home", mundo: true },
+  { marca: "lucky me", categoria: "taste-of-home", mundo: true },
+  { marca: "nissin", categoria: "taste-of-home", mundo: true },
+  { marca: "maggi", categoria: "taste-of-home", mundo: true },
+  { marca: "knorr", categoria: "taste-of-home", mundo: true },
+  { marca: "century tuna", categoria: "taste-of-home", mundo: true },
+  { marca: "ligo", categoria: "taste-of-home", mundo: true },
+  { marca: "datu puti", categoria: "taste-of-home", mundo: true },
+  { marca: "silver swan", categoria: "taste-of-home", mundo: true },
+  { marca: "ottogi", categoria: "taste-of-home", mundo: true },
+  { marca: "nongshim", categoria: "taste-of-home", mundo: true },
+  { marca: "mtr", categoria: "taste-of-home", mundo: true },
+  { marca: "gomes da costa", categoria: "taste-of-home" },
+  { marca: "coqueiro", categoria: "taste-of-home" },
+
+  // Higiene e sol — convés a 30 °C o dia inteiro
   { marca: "dove", categoria: "personal-care" },
   { marca: "rexona", categoria: "personal-care" },
   { marca: "colgate", categoria: "personal-care" },
-  { marca: "gillette", categoria: "personal-care" },
+  { marca: "gillette", categoria: "personal-care", mundo: true },
   { marca: "nivea", categoria: "personal-care" },
-  { marca: "sundown", categoria: "sun-protection" },
-  { marca: "nivea sun", categoria: "sun-protection" },
+  { marca: "protex", categoria: "personal-care", mundo: true },
+  { marca: "palmolive", categoria: "personal-care", mundo: true },
+  { marca: "head shoulders", categoria: "personal-care", mundo: true },
+  { marca: "sundown", categoria: "sun-protection", mundo: true },
+  { marca: "nivea sun", categoria: "sun-protection", mundo: true },
+  { marca: "banana boat", categoria: "sun-protection", mundo: true },
 ];
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
@@ -143,13 +185,15 @@ async function ficha(ean) {
  * aí o prefixo ATRAPALHA — Nivea e Gillette vendidos no Brasil carregam
  * EAN alemão (4005…) legítimo. Quem corta é `countries_tags_en=brazil`.
  */
-async function porMarca(marca, limite = 4) {
+async function porMarca(marca, limite = 4, mundo = false) {
   const q = encodeURIComponent(`brands:"${marca}"`);
   const comida = await json(
     `https://search.openfoodfacts.org/search?q=${q}&page_size=25&fields=code,product_name,brands`
   );
   await sleep(700);
-  const achados = (comida?.hits ?? []).map((h) => String(h.code)).filter(brasileiro);
+  const achados = (comida?.hits ?? [])
+    .map((h) => String(h.code))
+    .filter((c) => (mundo ? /^\d{8,14}$/.test(c) : brasileiro(c)));
   if (achados.length >= limite) return achados.slice(0, limite);
 
   const marcaTag = marca.replace(/\s+/g, "-").toLowerCase();
@@ -243,7 +287,7 @@ async function main() {
     alvos = eans.map((ean) => ({ ean, categoria: "" }));
   } else if (modo === "marcas") {
     for (const m of MARCAS) {
-      const eans = await porMarca(m.marca);
+      const eans = await porMarca(m.marca, 4, m.mundo === true);
       process.stderr.write(`${m.marca}: ${eans.length} código(s)\n`);
       alvos.push(...eans.map((ean) => ({ ean, categoria: m.categoria })));
     }

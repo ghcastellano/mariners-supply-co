@@ -9,11 +9,27 @@ import { readFileSync } from "node:fs";
 const { parseCsvRows } = await import("../lib/csv.ts");
 const { buildImportPlan } = await import("../lib/import.ts");
 
-const plano = buildImportPlan(parseCsvRows(readFileSync("docs/catalogo-inicial.csv", "utf-8")));
+const ARQUIVOS = [
+  ["docs/catalogo-inicial.csv", 31],
+  ["docs/catalogo-demo.csv", 47],
+];
 
-test("as 31 linhas do catálogo inicial passam sem apontamento", () => {
-  assert.equal(plano.valid.length, 31);
-  assert.deepEqual(plano.issues, []);
+const plano = buildImportPlan(
+  ARQUIVOS.flatMap(([a]) => parseCsvRows(readFileSync(a, "utf-8")))
+);
+
+for (const [arquivo, quantas] of ARQUIVOS) {
+  test(`${arquivo}: as ${quantas} linhas passam sem apontamento`, () => {
+    const p = buildImportPlan(parseCsvRows(readFileSync(arquivo, "utf-8")));
+    assert.equal(p.valid.length, quantas);
+    assert.deepEqual(p.issues, []);
+    assert.deepEqual(p.duplicates, []);
+  });
+}
+
+test("os dois arquivos não disputam SKU entre si", () => {
+  // Casamento é por SKU: se o mesmo item aparecesse nos dois com preço
+  // diferente, a ordem de importação decidiria o preço — silenciosamente.
   assert.deepEqual(plano.duplicates, []);
 });
 
