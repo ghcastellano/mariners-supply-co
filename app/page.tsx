@@ -123,7 +123,7 @@ export default async function Home() {
     <main>
       <section className="homehero">
         <p className="kicker">Porto de Santos · by Mariner&apos;s Bar</p>
-        <h1>Duty-free, delivered to your gangway at Porto de Santos</h1>
+        <h1>Delivered to your gangway at Porto de Santos</h1>
         <p className="lead">
           Pre-order before you dock, pay a {DEPOSIT_PCT}% deposit, collect at the gangway.
         </p>

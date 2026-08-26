@@ -5,6 +5,7 @@ import { useMemo, useState } from "react";
 import { useCart } from "@/lib/cart";
 import { BADGE_LABEL, imageUrl, type ProductImage, type ProductVariant } from "@/lib/catalog";
 import { brl, discountPercent, usd } from "@/lib/money";
+import { shortRegime } from "@/lib/taxregime";
 
 type Head = {
   id: string;
@@ -140,8 +141,11 @@ export default function ProductBuy({
                 </div>
               ))}
             <div>
-              <dt>Customs</dt>
-              <dd>{product.tax_class === "digital" ? "Not applicable" : "Duty-free, handled by us"}</dd>
+              <dt>Tax</dt>
+              {/* Antes dizia "Duty-free, handled by us" para tudo que não
+                  fosse digital. Só é verdade quando o item embarca sob o
+                  regime de fornecimento de bordo, e isso o canal decide. */}
+              <dd>{shortRegime(product.tax_class)}</dd>
             </div>
           </dl>
 

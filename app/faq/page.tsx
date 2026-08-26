@@ -27,9 +27,9 @@ const QA: { q: string; a: React.ReactNode }[] = [
     q: "Do I need an account?",
     a: (
       <>
-        Yes. What goes on board leaves Brazil duty-free, and Brazilian customs
-        needs the buyer named on the declaration — full name, rank, vessel and
-        nationality. That is why the{" "}
+        Yes. Anything that goes on board leaves Brazil under a customs export
+        regime, and the declaration has to name the buyer — full name, rank,
+        vessel and nationality. That is why the{" "}
         <Link className="alink" href="/signup">
           sign-up
         </Link>{" "}
@@ -98,10 +98,39 @@ const QA: { q: string; a: React.ReactNode }[] = [
     a: (
       <>
         Yes, and it is on us — no fee and nothing for you to fill in at the
-        gate. We prepare the duty-free declaration from what is on your profile.
-        Keep it accurate: a wrong vessel name or rank is the one thing that
-        stops a delivery at the terminal, and we cannot correct it once the
-        declaration is filed.
+        gate. We prepare the export dispatch from what is on your profile. Keep
+        it accurate: a wrong vessel name or rank is the one thing that stops a
+        delivery at the terminal, and we cannot correct it once the declaration
+        is filed.
+      </>
+    ),
+  },
+  {
+    q: "Is this duty-free?",
+    a: (
+      <>
+        It depends on how the goods reach you, and we would rather be exact
+        than sell you a word.
+        <br />
+        <br />
+        <b>On board.</b> Goods put aboard your vessel go under Brazil&apos;s
+        ship&apos;s-stores export regime, which takes Brazilian taxes out of the
+        price. The regime has conditions: the order is settled against the
+        vessel, in convertible currency, through its agent. When it is settled
+        that way, the price is genuinely tax-free.
+        <br />
+        <br />
+        <b>Collected at our counter.</b> That is an ordinary Brazilian retail
+        sale. Brazilian taxes are in the price. It is not duty-free, and we say
+        so on every item rather than let you find out from the receipt.
+        <br />
+        <br />
+        <b>Digital items.</b> No goods, no border, no customs. Brazilian telecom
+        taxes are included.
+        <br />
+        <br />
+        Each product page tells you which of the three applies to it, and the
+        checkout tells you which one applies to your order.
       </>
     ),
   },

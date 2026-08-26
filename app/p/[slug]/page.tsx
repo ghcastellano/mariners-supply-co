@@ -5,6 +5,7 @@ import ProductBuy from "@/components/ProductBuy";
 import ProductCardView from "@/components/ProductCard";
 import { createClient } from "@/lib/supabase/server";
 import { listProducts, type ProductDetail } from "@/lib/catalog";
+import { ELIGIBILITY } from "@/lib/taxregime";
 
 export const revalidate = 300;
 
@@ -113,12 +114,32 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
         </section>
       )}
 
+      {/* O que o imposto faz depende do CANAL, não do produto. Dizer
+          "duty-free" em tudo era promessa que a operação não sustenta:
+          o benefício do fornecimento de bordo exige adquirente no
+          exterior e pagamento em moeda conversível pelo agente do
+          armador — não cartão pessoal em real. */}
       <section className="pdp-block">
-        <h3>Duty-free, delivered</h3>
+        <h3>{ELIGIBILITY[p.tax_class].headline}</h3>
         <ul className="specs">
-          <li>Customs paperwork handled by us — nothing for you to sign.</li>
-          <li>30% deposit now, balance at the gangway.</li>
+          {ELIGIBILITY[p.tax_class].lines.map((l) => (
+            <li key={l}>{l}</li>
+          ))}
+        </ul>
+      </section>
+
+      <section className="pdp-block">
+        <h3>How it reaches you</h3>
+        <ul className="specs">
+          <li>30% deposit now, balance when you take delivery.</li>
           <li>Photo proof of delivery on your order page.</li>
+          <li>
+            If your vessel skips the port, the deposit becomes full credit —{" "}
+            <Link className="alink" href="/terms">
+              clause 6
+            </Link>
+            .
+          </li>
         </ul>
       </section>
 

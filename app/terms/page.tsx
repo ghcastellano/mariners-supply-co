@@ -136,6 +136,16 @@ export default function TermsPage() {
             </Link>
             .
           </li>
+          <li>
+            <b>Whether the price is tax-free depends on the channel.</b> Goods
+            put on board under the ship&apos;s-stores export regime carry no
+            Brazilian tax, but the regime requires the order to be settled
+            against the vessel, in convertible currency, through its agent.
+            Anything collected at our counter, or settled on your own card
+            without that arrangement, is an ordinary Brazilian retail sale with
+            Brazilian taxes in the price. The product page and the checkout say
+            which one applies before you pay.
+          </li>
         </ul>
       </section>
 
