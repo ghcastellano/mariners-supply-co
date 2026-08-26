@@ -41,14 +41,18 @@ export function ptaxUrl(from: Date, to: Date): string {
   const base =
     "https://olinda.bcb.gov.br/olinda/servico/PTAX/versao/v1/odata/" +
     "CotacaoDolarPeriodo(dataInicial=@dataInicial,dataFinalCotacao=@dataFinalCotacao)";
-  const qs = new URLSearchParams({
-    "@dataInicial": `'${bcbDate(from)}'`,
-    "@dataFinalCotacao": `'${bcbDate(to)}'`,
-    $top: "10",
-    $orderby: "dataHoraCotacao desc",
-    $format: "json",
-  });
-  return `${base}?${qs.toString()}`;
+  // Montado à mão, e não com URLSearchParams: ele percent-encoda o @ e
+  // o $ dos parâmetros OData (%40dataInicial, %24top) e o Olinda
+  // responde 400. Os VALORES continuam encodados; só os nomes ficam
+  // literais, que é o que o serviço exige.
+  const qs = [
+    `@dataInicial='${bcbDate(from)}'`,
+    `@dataFinalCotacao='${bcbDate(to)}'`,
+    "$top=10",
+    `$orderby=${encodeURIComponent("dataHoraCotacao desc")}`,
+    "$format=json",
+  ].join("&");
+  return `${base}?${qs}`;
 }
 
 /** Pega a cotação mais recente do payload, descartando o que vier torto. */

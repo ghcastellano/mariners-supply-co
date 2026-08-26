@@ -18,7 +18,19 @@ test("a URL pede período, nunca um dia só", () => {
   assert.ok(u.includes("CotacaoDolarPeriodo"));
   assert.ok(u.includes("08-19-2026"));
   assert.ok(u.includes("08-26-2026"));
-  assert.ok(u.includes("dataHoraCotacao+desc") || u.includes("dataHoraCotacao%20desc"));
+});
+
+test("os parâmetros OData vão literais — @ e $ encodados dão 400", () => {
+  // Este teste existe porque a primeira versão usava URLSearchParams,
+  // que vira %40dataInicial e %24top, e o Olinda respondeu 400 em
+  // produção. O teste antigo só checava se a data aparecia na string.
+  const u = fx.ptaxUrl(new Date("2026-08-19T00:00:00Z"), new Date("2026-08-26T00:00:00Z"));
+  assert.ok(u.includes("?@dataInicial='08-19-2026'"), u);
+  assert.ok(u.includes("&@dataFinalCotacao='08-26-2026'"), u);
+  assert.ok(u.includes("&$top=10"), u);
+  assert.ok(u.includes("&$format=json"), u);
+  assert.ok(!u.includes("%40"), "não pode encodar o @");
+  assert.ok(!u.includes("%24"), "não pode encodar o $");
 });
 
 test("pega a cotação mais recente do lote, fora de ordem inclusive", () => {
