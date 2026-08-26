@@ -1494,22 +1494,99 @@ input:-webkit-autofill:focus {
    primeira dobra. É conteúdo de desktop, onde havia espaço sobrando. */
 .herosteps { display: none; }
 
-.vstrip {
-  display: flex; align-items: center; gap: 11px;
-  margin: 6px 14px 2px; padding: 12px 14px;
+/* ===== painel do navio =====
+   Era uma tira de ícone + nome + "Alongside now". No desktop ela
+   esticava até a altura do herói e sobravam duzentos pixels de nada;
+   e o que dizia — o nome de um navio que a própria pessoa cadastrou —
+   ninguém precisava ler.
+
+   Agora é um cartão de escala. O assunto é o PRAZO: a tripulação não
+   quer saber que o navio chega quinta, quer saber até quando dá para
+   pedir. Por isso o bloco do corte tem fundo próprio e o número maior
+   da peça.
+
+   CELULAR: cartão de largura cheia, os dados em duas colunas, o prazo
+   embaixo. Nada de esconder informação atrás de toque. */
+.vpanel {
+  margin: 10px 16px; padding: 16px 18px;
   background: var(--card); border: 1px solid var(--line);
-  border-left: 3px solid var(--amber); border-radius: 12px;
-  color: var(--ink); text-decoration: none; transition: background .16s;
+  border-left: 3px solid var(--amber); border-radius: 16px;
+  display: grid; gap: 12px;
 }
-.vstrip:hover { background: var(--card-hi); }
-.vstrip .ic { font-size: 18px; line-height: 1; flex: none; }
-.vstrip .tx { display: flex; flex-direction: column; gap: 2px; min-width: 0; flex: 1; }
-.vstrip .lb {
+.vpanel.fechado { border-left-color: var(--faint); }
+
+.vpanel header { display: flex; align-items: center; gap: 8px; }
+.vpanel header .lb {
+  font-family: var(--font-mono); font-size: 10px; letter-spacing: .2em;
+  text-transform: uppercase; color: var(--faint);
+}
+.vpanel header .dot {
+  width: 6px; height: 6px; border-radius: 50%; background: var(--faint);
+  margin-left: auto; flex: none;
+}
+.vpanel header .dot.on { background: var(--teal); box-shadow: 0 0 0 3px rgba(46,230,200,.16); }
+.vpanel header .st {
+  font-family: var(--font-mono); font-size: 10px; letter-spacing: .12em;
+  text-transform: uppercase; color: var(--muted);
+}
+
+.vpanel .nome {
+  margin: 0; font-family: var(--font-disp); font-size: 20px; font-weight: 700;
+  line-height: 1.15; letter-spacing: -.01em; display: flex; align-items: center; gap: 9px;
+}
+.vpanel .nome .fl { font-size: 17px; line-height: 1; }
+.vpanel .ids {
+  margin: 0; font-family: var(--font-mono); font-size: 11px;
+  letter-spacing: .06em; color: var(--faint);
+}
+
+/* Berço e ETA lado a lado: são dois dados curtos, e empilhá-los
+   gastaria altura que o prazo usa melhor. */
+.vpanel .dados {
+  margin: 0; display: grid; grid-template-columns: auto 1fr; gap: 4px 24px;
+  padding-top: 2px; border-top: 1px solid var(--line);
+}
+.vpanel .dados > div { display: grid; gap: 2px; padding-top: 10px; }
+.vpanel .dados dt {
   font-family: var(--font-mono); font-size: 9.5px; letter-spacing: .16em;
   text-transform: uppercase; color: var(--faint);
 }
-.vstrip .nm { font-size: 13.5px; font-weight: 600; line-height: 1.25; }
-.vstrip .eta { flex: none; font-family: var(--font-mono); font-size: 11px; color: var(--amber-hi); }
+.vpanel .dados dd {
+  margin: 0; font-size: 14px; font-weight: 600;
+  display: flex; align-items: baseline; gap: 7px;
+}
+.vpanel .dados .atraso {
+  font-family: var(--font-mono); font-size: 10.5px; font-weight: 700;
+  color: var(--danger); letter-spacing: .04em;
+}
+
+/* O bloco do prazo. Fundo próprio porque é o assunto, não um dado
+   entre outros. */
+.vpanel .corte {
+  display: grid; gap: 3px; padding: 13px 14px;
+  background: var(--night); border: 1px solid var(--line); border-radius: 12px;
+}
+.vpanel .corte .ct {
+  font-family: var(--font-mono); font-size: 9.5px; letter-spacing: .16em;
+  text-transform: uppercase; color: var(--faint);
+}
+.vpanel .corte strong {
+  font-family: var(--font-mono); font-size: 26px; line-height: 1;
+  color: var(--amber); font-variant-numeric: tabular-nums; letter-spacing: -.02em;
+}
+.vpanel.fechado .corte strong { color: var(--faint); }
+.vpanel .corte .qd { font-size: 11.5px; color: var(--muted); }
+.vpanel .corte .barra {
+  height: 3px; border-radius: 2px; background: var(--line-hi);
+  overflow: hidden; margin-top: 7px;
+}
+.vpanel .corte .barra i {
+  display: block; height: 100%; background: var(--amber); border-radius: 2px;
+}
+.vpanel.fechado .corte .barra i { background: var(--faint); }
+
+.vpanel .acao { text-decoration: none; }
+
 
 /* ===== carrinho ===== */
 /* "Apply Discount Code" recolhível. No nosso não há cupom para digitar:
@@ -1822,7 +1899,7 @@ svg.ic { flex: none; color: var(--amber); }
   .pg-home > * { grid-column: 1 / -1; min-width: 0; }
   .pg-home .catgrid, .pg-home .rail { padding-left: 0; padding-right: 0; }
   .pg-home > .homehero { grid-row: 1; }
-  .pg-home > .vstrip   { grid-row: 2; margin: 0; }
+  .pg-home > .vpanel   { grid-row: 2; margin: 0; }
 
   .pg-home .homehero {
     margin: 0 calc(var(--gut) * -1);      /* full-bleed até a borda da casca */
@@ -2075,24 +2152,27 @@ svg.ic { flex: none; color: var(--amber); }
   }
   .pg-home > .herosteps .mais:hover { color: var(--amber-hi); }
 
-  /* ---- HOME: hero 8 col + painel do navio 4 col ---- */
-  /* sem :has(.vstrip) o hero ocupa as 12 e não sobra buraco */
-  .pg-home:has(> .vstrip) > .homehero { grid-column: 1 / span 8; }
-  .pg-home:has(> .vstrip) .homehero {
+  /* ---- HOME: herói 8 col + painel do navio 4 col ---- */
+  /* sem :has(.vpanel) o herói ocupa as 12 e não sobra buraco */
+  .pg-home:has(> .vpanel) > .homehero { grid-column: 1 / span 8; }
+  .pg-home:has(> .vpanel) .homehero {
     margin-right: 0;
     border: 1px solid var(--line); border-left: 0; border-bottom: 0;
     border-radius: 0 20px 20px 0;
   }
-  .pg-home > .vstrip {
+  .pg-home > .vpanel {
     grid-row: 1; grid-column: 9 / -1; align-self: stretch;
-    flex-direction: column; align-items: flex-start; justify-content: center;
-    gap: 12px; padding: 30px 26px; border-radius: 20px;
+    margin: 0; border-radius: 20px; padding: 26px 24px;
+    /* A altura vem do herói. O espaço extra vai para o meio do cartão,
+       entre os dados e o prazo, em vez de sobrar como buraco embaixo —
+       que era o defeito da versão anterior. */
+    grid-template-rows: auto auto auto 1fr auto auto; gap: 14px;
   }
-  .pg-home > .vstrip .tx  { flex: none; gap: 6px; }
-  .pg-home > .vstrip .ic  { font-size: 30px; }
-  .pg-home > .vstrip .lb  { font-size: 10.5px; }
-  .pg-home > .vstrip .nm  { font-size: 19px; line-height: 1.2; }
-  .pg-home > .vstrip .eta { font-size: 13px; }
+  .pg-home > .vpanel .nome { font-size: clamp(22px, 1.7vw, 28px); }
+  .pg-home > .vpanel .nome .fl { font-size: 22px; }
+  .pg-home > .vpanel .dados { align-self: end; }
+  .pg-home > .vpanel .corte strong { font-size: 34px; }
+  .pg-home > .vpanel .corte { padding: 15px 16px; }
 
   /* A prateleira deixa de ser carrossel. São 8 itens (limit: 8 em
      loadStorefront) — 4 x 2 mostra tudo, sem seta e sem item oculto. */

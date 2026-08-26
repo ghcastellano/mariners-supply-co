@@ -100,16 +100,51 @@ const MARCAS = [
  * categoria da loja.
  */
 const CATEGORIAS = [
+  // Café e chá
+  { cat: "coffees", categoria: "coffee-tea", limite: 6 },
+  { cat: "instant-coffees", categoria: "coffee-tea", limite: 5 },
+  { cat: "teas", categoria: "coffee-tea", limite: 6 },
+  { cat: "chocolate-powders", categoria: "coffee-tea", limite: 4 },
+
+  // Bebida
+  { cat: "sodas", categoria: "soft-drinks", limite: 8 },
+  { cat: "waters", categoria: "soft-drinks", limite: 5 },
+  { cat: "energy-drinks", categoria: "soft-drinks", limite: 5 },
+  { cat: "fruit-juices", categoria: "soft-drinks", limite: 6 },
+  { cat: "iced-teas", categoria: "soft-drinks", limite: 4 },
+
+  // Snack
+  { cat: "biscuits", categoria: "snacks", limite: 8 },
+  { cat: "chocolates", categoria: "snacks", limite: 8 },
+  { cat: "chips-and-fries", categoria: "snacks", limite: 6 },
+  { cat: "candies", categoria: "snacks", limite: 5 },
+  { cat: "peanuts", categoria: "snacks", limite: 4 },
+
+  // Taste of home
   { cat: "instant-noodles", categoria: "taste-of-home", limite: 8 },
   { cat: "rices", categoria: "taste-of-home", limite: 6 },
   { cat: "soy-sauces", categoria: "taste-of-home", limite: 5 },
-  { cat: "hot-sauces", categoria: "taste-of-home", limite: 4 },
-  { cat: "teas", categoria: "coffee-tea", limite: 6 },
-  { cat: "instant-coffees", categoria: "coffee-tea", limite: 5 },
-  { cat: "energy-drinks", categoria: "soft-drinks", limite: 5 },
-  { cat: "waters", categoria: "soft-drinks", limite: 4 },
-  { cat: "biscuits", categoria: "snacks", limite: 8 },
-  { cat: "chocolates", categoria: "snacks", limite: 6 },
+  { cat: "hot-sauces", categoria: "taste-of-home", limite: 5 },
+  { cat: "canned-fishes", categoria: "taste-of-home", limite: 6 },
+  { cat: "pastas", categoria: "taste-of-home", limite: 4 },
+];
+
+/**
+ * Higiene e cosmético vivem no Open Beauty Facts, que tem busca por
+ * categoria própria e filtro de país nativo. É de lá que sai o que a
+ * loja precisa em personal-care e sun-protection — o Open Food Facts
+ * não indexa sabonete nem protetor solar.
+ */
+const CATEGORIAS_BELEZA = [
+  { cat: "deodorants", categoria: "personal-care", limite: 6 },
+  { cat: "toothpastes", categoria: "personal-care", limite: 6 },
+  { cat: "shampoos", categoria: "personal-care", limite: 6 },
+  { cat: "soaps", categoria: "personal-care", limite: 6 },
+  { cat: "shower-gels", categoria: "personal-care", limite: 4 },
+  { cat: "shaving-creams", categoria: "personal-care", limite: 3 },
+  { cat: "sunscreens", categoria: "sun-protection", limite: 8 },
+  { cat: "sun-protection", categoria: "sun-protection", limite: 8 },
+  { cat: "after-sun", categoria: "sun-protection", limite: 3 },
 ];
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
@@ -248,6 +283,21 @@ async function porCategoria(cat, limite = 6) {
 }
 
 
+/** EANs de uma categoria do Open Beauty Facts, vendidos no Brasil. */
+async function porCategoriaBeleza(cat, limite = 6) {
+  const j = await json(
+    "https://world.openbeautyfacts.org/api/v2/search" +
+      `?categories_tags_en=${encodeURIComponent(cat)}&countries_tags_en=brazil` +
+      "&fields=code,product_name&page_size=40"
+  );
+  await sleep(700);
+  return (j?.products ?? [])
+    .filter((p) => (p.product_name ?? "").trim().length > 3)
+    .map((p) => String(p.code))
+    .filter((c) => /^\d{8,14}$/.test(c))
+    .slice(0, limite);
+}
+
 /* ------------------------------------------------------------------ */
 
 /**
@@ -333,6 +383,11 @@ async function main() {
     for (const c of CATEGORIAS) {
       const eans = await porCategoria(c.cat, c.limite);
       process.stderr.write(`${c.cat}: ${eans.length} código(s)\n`);
+      alvos.push(...eans.map((ean) => ({ ean, categoria: c.categoria })));
+    }
+    for (const c of CATEGORIAS_BELEZA) {
+      const eans = await porCategoriaBeleza(c.cat, c.limite);
+      process.stderr.write(`${c.cat} (beleza): ${eans.length} código(s)\n`);
       alvos.push(...eans.map((ean) => ({ ean, categoria: c.categoria })));
     }
   } else {

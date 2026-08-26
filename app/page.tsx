@@ -1,5 +1,6 @@
 import Link from "next/link";
 import HeroSteps from "@/components/HeroSteps";
+import VesselPanel, { type VesselFacts } from "@/components/VesselPanel";
 import { unstable_cache } from "next/cache";
 import { createClient as createAnonClient } from "@supabase/supabase-js";
 import CategoryIcon from "@/components/CategoryIcon";
@@ -8,7 +9,6 @@ import { createClient } from "@/lib/supabase/server";
 import { listProducts, type Category, type ProductCard } from "@/lib/catalog";
 import { wishedProductIds } from "@/lib/wishlist";
 import { SUPABASE_ANON_KEY, SUPABASE_URL, supabaseConfigured } from "@/lib/env";
-import { hoursUntil } from "@/lib/format";
 import { DEPOSIT_PCT } from "@/lib/money";
 
 /**
@@ -84,13 +84,17 @@ const loadStorefront = unstable_cache(
 );
 
 type Crew =
-  | { kind: "vessel"; name: string; hours: number }
+  | { kind: "vessel"; v: VesselFacts }
   | { kind: "invite" }
   | null;
 
 type CrewRow = {
   ship_id: string | null;
-  ships: { name: string; eta: string } | null;
+  ships: {
+    name: string; eta: string; berth: string | null; ata: string | null;
+    imo: string | null; voyage: string | null; flag: string | null;
+    cutoff_hours: number | null; delay_hours: number | null;
+  } | null;
 };
 
 /** Perfil do usuário logado — só o que a tira do navio precisa. */
@@ -103,9 +107,14 @@ async function loadCrew(): Promise<Crew> {
     } = await supabase.auth.getUser();
     if (!user) return null;
 
+    // Berço, IMO, viagem, bandeira, ATA e atraso já estavam no banco e
+    // não apareciam em lugar nenhum da loja. São eles que transformam a
+    // tira num painel de escala de verdade.
     const { data } = await supabase
       .from("profiles")
-      .select("ship_id, ships(name, eta)")
+      .select(
+        "ship_id, ships(name, eta, berth, ata, imo, voyage, flag, cutoff_hours, delay_hours)"
+      )
       .eq("id", user.id)
       .maybeSingle();
 
@@ -118,7 +127,17 @@ async function loadCrew(): Promise<Crew> {
     // cadastro incompleto antes da home. Então esta tira quer dizer uma
     // coisa só, e o texto pode ser específico.
     if (!row?.ship_id || !row.ships) return { kind: "invite" };
-    return { kind: "vessel", name: row.ships.name, hours: hoursUntil(row.ships.eta) };
+    const s = row.ships;
+    return {
+      kind: "vessel",
+      v: {
+        name: s.name, berth: s.berth, eta: s.eta, ata: s.ata,
+        imo: s.imo, voyage: s.voyage, flag: s.flag,
+        // 24h é o corte padrão da operação quando o navio não traz o seu.
+        cutoffHours: s.cutoff_hours ?? 24,
+        delayHours: s.delay_hours,
+      },
+    };
   } catch {
     return null;
   }
@@ -201,18 +220,7 @@ export default async function Home() {
           Google. Os dois nunca aparecem juntos. */}
       {!crew && <HeroSteps />}
 
-      {crew?.kind === "vessel" && (
-        <Link href="/account" className="vstrip">
-          <span className="ic" aria-hidden>
-            ⚓
-          </span>
-          <span className="tx">
-            <span className="lb">Your vessel</span>
-            <span className="nm">{crew.name}</span>
-          </span>
-          <span className="eta">{crew.hours > 0 ? `${crew.hours}h to berth` : "Alongside now"}</span>
-        </Link>
-      )}
+      {crew?.kind === "vessel" && <VesselPanel v={crew.v} />}
 
       {crew?.kind === "invite" && (
         <Link href="/account" className="vstrip">
