@@ -9,7 +9,11 @@
  * Roda contra o servidor local. Sem servidor, o arquivo se declara
  * pulado em vez de falhar — não é teste de unidade, é de integração.
  *
- *   npx next dev -p 3100 &   e então   npm test
+ *   npx next build && npx next start -p 3100 &   e então   npm test
+ *
+ * Producao, e nao `next dev`: o servidor de desenvolvimento ja serviu
+ * CSS vazio duas vezes nesta base, e teste que mede pagina sem estilo
+ * aprova qualquer layout — botao de 17px de altura passa por botao.
  */
 import { test, before, after, describe } from "node:test";
 import assert from "node:assert/strict";
