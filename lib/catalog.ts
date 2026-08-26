@@ -10,7 +10,11 @@
 import { SUPABASE_URL } from "./env.ts";
 
 export const PRODUCT_BUCKET = "product-images";
-export const PAGE_SIZE = 24;
+/* 48 e não 24: com ~80 produtos, 24 escondia dois terços da loja atrás
+   de um botão discreto — e "não está mostrando todos os produtos" foi
+   exatamente a leitura de quem olhou. 48 mantém a keyset barata e põe a
+   maioria do catálogo na primeira dobra de rolagem. */
+export const PAGE_SIZE = 48;
 
 export type Category = {
   id: string;

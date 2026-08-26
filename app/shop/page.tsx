@@ -22,6 +22,11 @@ import SortSelect from "@/components/SortSelect";
 // e a listagem serve do cache até lá.
 export const revalidate = 300;
 
+/** Coleções são curadorias sobre a MESMA prateleira (o item de New
+ *  Arrivals também mora em Coffee & Tea). Entrar na soma seria contar
+ *  o mesmo produto duas vezes — o rótulo dizia 96 numa loja de 81. */
+const COLECOES = new Set(["new-arrivals", "promo", "outlet"]);
+
 export default async function ShopPage({
   searchParams,
 }: {
@@ -124,7 +129,16 @@ export default async function ShopPage({
 
       <div className="listbar">
         <span className="count">
-          {query ? `${items.length} result${items.length === 1 ? "" : "s"}` : "All products"}
+          {/* O total REAL, não "All products": rótulo sem número numa
+              página que corta em 48 alimenta a leitura de catálogo
+              sumido. A soma sai das contagens por subárvore das raízes,
+              a mesma fonte dos números do trilho. */}
+          {query
+            ? `${items.length} result${items.length === 1 ? "" : "s"}`
+            : `${roots.reduce(
+                (s, r) => (COLECOES.has(r.slug) ? s : s + (counts[r.id] ?? 0)),
+                0
+              )} products`}
         </span>
         <span className="offers wide-only">
           {(["promo", "new", "outlet"] as const).map((b) => (
