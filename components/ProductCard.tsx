@@ -2,7 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import AddToCart from "./AddToCart";
 import WishButton from "./WishButton";
-import { BADGE_LABEL, imageUrl, type ProductCard as Card } from "@/lib/catalog";
+import { BADGE_LABEL, imageUrl, inStock, type ProductCard as Card } from "@/lib/catalog";
 import { discountPercent, usd } from "@/lib/money";
 
 /**
@@ -37,7 +37,10 @@ export default function ProductCardView({
 }) {
   const src = imageUrl(p.primary_image_path);
   const off = discountPercent(p.price_cents, p.compare_at_cents);
-  const soldOut = p.stock_qty <= 0;
+  // inStock, e não `stock_qty <= 0`: item sem controle de saldo está
+  // sempre disponível — o chandler compra contra o pedido, e a contagem
+  // em prateleira não é o que limita a venda.
+  const soldOut = !inStock(p);
   const from = p.max_price_cents != null && p.max_price_cents > p.price_cents;
 
   return (

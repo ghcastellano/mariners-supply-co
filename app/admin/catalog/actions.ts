@@ -8,6 +8,7 @@ import { toCents } from "@/lib/money";
 import { PRODUCT_BUCKET } from "@/lib/catalog";
 import { lookup } from "node:dns/promises";
 import { creditoDaFoto } from "@/lib/fotolicenca";
+import { normalizarFoto } from "@/lib/fotonormaliza";
 
 async function adminClient() {
   const supabase = await createClient();
@@ -311,10 +312,31 @@ async function fetchImageToStorage(
     const buf = await res.arrayBuffer();
     if (buf.byteLength === 0 || buf.byteLength > 5 * 1024 * 1024) return null;
 
-    const path = `products/${productId}/import-${Date.now()}.${ext}`;
+    // Toda foto sai do mesmo molde: recortada, sobre branco, quadrada e
+    // com a mesma folga. Foto de acervo vem tirada por voluntário, cada
+    // uma num enquadramento — lado a lado na grade isso lê como loja
+    // improvisada, e a foto é o que vende, porque a tripulação não pode
+    // pegar o produto na mão.
+    let corpo: Uint8Array;
+    let tipoFinal: string;
+    let extFinal: string;
+    try {
+      const n = await normalizarFoto(new Uint8Array(buf));
+      corpo = n.buffer;
+      tipoFinal = n.contentType;
+      extFinal = "jpg";
+    } catch {
+      // Arquivo que o sharp não abre entra como veio: foto torta é
+      // melhor que produto sem foto.
+      corpo = new Uint8Array(buf);
+      tipoFinal = type;
+      extFinal = ext;
+    }
+
+    const path = `products/${productId}/import-${Date.now()}.${extFinal}`;
     const { error } = await supabase.storage
       .from(PRODUCT_BUCKET)
-      .upload(path, buf, { contentType: type, upsert: false });
+      .upload(path, corpo, { contentType: tipoFinal, upsert: false });
     if (error) return null;
 
     // Crédito junto com a foto, na mesma gravação: se a origem é um
@@ -500,7 +522,16 @@ async function applyPlan(supabase: Db, products: ImportProduct[]): Promise<numbe
         price_cents: p.priceCents,
         compare_at_cents: p.compareAtCents,
         stock_qty: p.stockQty,
-        track_stock: true,
+        // Um ship chandler NÃO tem armazém: compra contra o pedido, na
+        // janela entre o pedido e a atracação. O que limita a venda é o
+        // prazo do line-up, não uma contagem em prateleira. Com
+        // track_stock ligado e a coluna `stock` vazia — que é o normal
+        // numa planilha de fornecedor — todo item importado nasceria
+        // "esgotado" e a loja abriria vazia.
+        //
+        // Quem de fato controla estoque de um item marca a coluna
+        // `track_stock` na planilha.
+        track_stock: p.trackStock,
         active: p.active,
       }));
     await supabase.from("product_variants").upsert(variantRows, { onConflict: "sku" });

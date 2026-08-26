@@ -27,6 +27,8 @@ export type ImportProduct = {
   specs: string[] | null;
   imageUrl: string | null;
   ean: string | null;
+  /** Controla saldo? Falso por padrão: chandler compra contra o pedido. */
+  trackStock: boolean;
   optionLabel: string | null;
   badge: "promo" | "new" | "outlet" | null;
   taxClass: "bonded" | "domestic" | "digital";
@@ -56,6 +58,7 @@ const ALIASES: Record<keyof ImportProduct | "ignore", string[]> = {
   specs: ["specs", "especificacoes", "ficha", "bullets", "features"],
   imageUrl: ["image", "image_url", "imagem", "foto", "photo", "img"],
   ean: ["ean", "gtin", "barcode", "codigo_barras"],
+  trackStock: ["track_stock", "controla_estoque", "estoque_controlado"],
   optionLabel: ["option", "variacao", "variante", "option_label"],
   badge: ["badge", "selo", "tag"],
   taxClass: ["tax_class", "regime", "fiscal"],
@@ -168,6 +171,9 @@ export function normalizeRow(
       specs: specs && specs.length ? specs : null,
       imageUrl: imageUrl && /^https:\/\//i.test(imageUrl) ? imageUrl : null,
       ean: pick(row, "ean").replace(/\D/g, "") || null,
+      // Falso por padrão, ao contrário de `active`: item sem controle de
+      // saldo aparece disponível, e é assim que a operação funciona.
+      trackStock: parseBool(pick(row, "trackStock"), false),
       optionLabel: pick(row, "optionLabel").trim() || null,
       badge,
       taxClass,

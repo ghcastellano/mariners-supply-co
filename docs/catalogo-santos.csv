@@ -1,74 +1,37 @@
 sku,name,brand,category,price,stock,ean,image_url,short_description,active
-EAN-7898711993352,GRUPO ROCHA SAÚDE Chá de Hortelã Mentha Arvensis L. Grupo Rocha Saúde 10g,Grupo Rocha Saúde,coffee-tea,4.00,0,7898711993352,https://images.openfoodfacts.org/images/products/789/871/199/3352/front_pt.9.full.jpg,,true
-EAN-7891000110829,Bebida Láctea Uht Com Café Chocolate Nescafé Smoovlatté Frasco 270ml,Nescafe,coffee-tea,6.50,0,7891000110829,https://images.openfoodfacts.org/images/products/789/100/011/0829/front_pt.24.full.jpg,Bebida Láctea UHT com Café Sabor Chocolate,true
-EAN-7896089012101,Café Torrado Em Grãos Espresso Pilão Pouch 1kg,Pilão,coffee-tea,12.00,0,7896089012101,https://images.openfoodfacts.org/images/products/789/608/901/2101/front_pt.12.full.jpg,,true
-EAN-78939806,Chá Preto Ice Tea Pêssego Leão Garrafa 250ml,Leão,coffee-tea,6.50,0,78939806,https://images.openfoodfacts.org/images/products/78939806/front_pt.20.full.jpg,,true
-EAN-6099630010958,GRUPO ROCHA SAÚDE Chá de Erva-Doce 30g,Grupo Rocha Saúde,coffee-tea,4.00,0,6099630010958,https://images.openfoodfacts.org/images/products/609/963/001/0958/front_pt.9.full.jpg,,true
-EAN-7891000389225,Nescafé cappuccino canela 270ml,Nescafe,coffee-tea,6.50,0,7891000389225,https://images.openfoodfacts.org/images/products/789/100/038/9225/front_en.3.full.jpg,,true
-EAN-7891000071823,Nescafe Classic Coffee 0.03 kg,Nescafé,coffee-tea,4.00,0,7891000071823,https://images.openfoodfacts.org/images/products/789/100/007/1823/front_en.12.full.jpg,,true
-EAN-7891000080290,Cappuccino Tradicional 200 g,Nestlé,coffee-tea,6.00,0,7891000080290,https://images.openfoodfacts.org/images/products/789/100/008/0290/front_pt.3.full.jpg,,true
-EAN-0798190061023,Evolution Coffee 220 g,Termo Coffee,coffee-tea,6.00,0,0798190061023,https://images.openfoodfacts.org/images/products/079/819/006/1023/front_pt.5.full.jpg,mistura para prepraro de bebida à base de café solúvel.,true
-EAN-7891021006071,Tradicional 250 g,Melitta,coffee-tea,6.50,0,7891021006071,https://images.openfoodfacts.org/images/products/789/102/100/6071/front_pt.10.full.jpg,"café torrado e moído, intensidade 8.",true
-EAN-7896005800027,Tradicional 250 g,3 Corações,coffee-tea,6.50,0,7896005800027,https://images.openfoodfacts.org/images/products/789/600/580/0027/front_pt.3.full.jpg,café torrado e moído.,true
-EAN-7891000061190,Nescau 2.0 200 g,Nestlé,coffee-tea,6.00,0,7891000061190,https://images.openfoodfacts.org/images/products/789/100/006/1190/front_pt.26.full.jpg,Alimento achocolatado em pó,true
-EAN-0873605000429,Cafe Pilao 250g,Pilão,coffee-tea,6.50,0,0873605000429,https://images.openfoodfacts.org/images/products/087/360/500/0429/front_pt.3.full.jpg,,true
-EAN-7891000243688,nestle 170 g,Nestlé,coffee-tea,5.50,0,7891000243688,https://images.openfoodfacts.org/images/products/789/100/024/3688/front_pt.4.full.jpg,Composto Lácteo Sabor Chocolate,true
-EAN-4005900633309,Desodorante Active Dry Impact Men 200ml/119g,Nivea,personal-care,5.00,0,4005900633309,https://images.openbeautyfacts.org/images/products/400/590/063/3309/front_pt.3.full.jpg,,true
-EAN-4045787726671,Bonacure Time Restore Shampoo Q10+ 250 ml,Schwarzkopf Professional,personal-care,5.50,0,4045787726671,https://images.openbeautyfacts.org/images/products/404/578/772/6671/front_en.3.full.jpg,,true
-EAN-7891024123560,Creme Dental Colgate Sensitive Pro 50 g,Colgate,personal-care,3.50,0,7891024123560,https://images.openbeautyfacts.org/images/products/789/102/412/3560/front_pt.3.full.jpg,Creme Dental Colgate Sensitive Pro,true
-EAN-7891528038568,Sorriso Fresh Gel Menthol Impact 90 g,Colgate,personal-care,3.50,0,7891528038568,https://images.openbeautyfacts.org/images/products/789/152/803/8568/front_pt.7.full.jpg,Creme dental com refrescante bucal,true
-EAN-7500435242615,Sh Head&Shoul 200ml Anticaspa Limpeza,Head&Shouders,personal-care,5.00,0,7500435242615,https://images.openbeautyfacts.org/images/products/750/043/524/2615/front_pt.3.full.jpg,,true
-EAN-7509546665238,Pasta de Dente Colgate Kids zero 70 g,Colgate,personal-care,3.50,0,7509546665238,https://images.openbeautyfacts.org/images/products/750/954/666/5238/front_pt.3.full.jpg,Pasta de Dente Colgate Kids zero,true
-EAN-7891150084780,Kit Seda Colágeno+vitamina C 325ml,seda,personal-care,6.00,0,7891150084780,https://images.openbeautyfacts.org/images/products/789/115/008/4780/front_pt.3.full.jpg,,true
-EAN-7891150069015,Sabonete líquido para mãos 1L,Lux,personal-care,10.50,0,7891150069015,https://images.openbeautyfacts.org/images/products/789/115/006/9015/front_pt.7.full.jpg,,true
-EAN-7891150078260,Seda Cachos Definidos 670ml,seda,personal-care,8.50,0,7891150078260,https://images.openbeautyfacts.org/images/products/789/115/007/8260/front_pt.3.full.jpg,,true
-EAN-3899775702359,Trá Lá Lá kids 480ml,Phisalia,personal-care,7.50,0,3899775702359,https://images.openbeautyfacts.org/images/products/389/977/570/2359/front_pt.3.full.jpg,,true
-EAN-78924468,Dove Original 50ml,Dove,personal-care,3.50,0,78924468,https://images.openbeautyfacts.org/images/products/78924468/front_pt.9.full.jpg,,true
-EAN-7891150097490,Seda liso perfeito,Seda,personal-care,6.00,0,7891150097490,https://images.openbeautyfacts.org/images/products/789/115/009/7490/front_pt.3.full.jpg,,true
-EAN-7898941911850,Enfamil 900g,Mead johnson,personal-care,10.00,0,7898941911850,https://images.openfoodfacts.org/images/products/789/894/191/1850/front_fr.3.full.jpg,,true
-EAN-7891000268506,"Pó Para Preparo De Bebida Vitamina De Maçã, Banana Mamão Neston Lata 400g",Nestlé,snacks,4.00,0,7891000268506,https://images.openfoodfacts.org/images/products/789/100/026/8506/front_pt.13.full.jpg,,true
-EAN-7891095001262,Mistura Para Bolinho De Chuva Tradicional Yoki Pacote 250g,Yoki,snacks,3.00,0,7891095001262,https://images.openfoodfacts.org/images/products/789/109/500/1262/front_pt.9.full.jpg,,true
-EAN-7896451902580,Bala de Goma Colorida e Aromatizada Artificialmente 18 g,Docile,snacks,2.00,0,7896451902580,https://images.openfoodfacts.org/images/products/789/645/190/2580/front_pt.3.full.jpg,,true
-EAN-7891000023808,Biscoito Chocolate Recheio Baunilha Negresco Pacote 140g,Nestlé,snacks,2.50,0,7891000023808,https://images.openfoodfacts.org/images/products/789/100/002/3808/front_pt.7.full.jpg,,true
-EAN-7891008125443,Panettone Recheio Chocolate Ao Leite Garoto Caixa 450g,Garoto,snacks,4.00,0,7891008125443,https://images.openfoodfacts.org/images/products/789/100/812/5443/front_pt.3.full.jpg,,true
-EAN-7896066305752,"Cookies Integrais Cacau, Avelã & Castanha-do-Pará 60g",Wickbold,snacks,2.00,0,7896066305752,https://images.openfoodfacts.org/images/products/789/606/630/5752/front_pt.4.full.jpg,,true
-EAN-7891962065472,Panettone Com Gotas De Chocolate Visconti Caixa 750g,Bauducco,snacks,5.50,0,7891962065472,https://images.openfoodfacts.org/images/products/789/196/206/5472/front_pt.3.full.jpg,,true
-EAN-7896024760609,Snack De Batata Cebola E Salsa Piraquê Pacote 60g,Piraque,snacks,2.00,0,7896024760609,https://images.openfoodfacts.org/images/products/789/602/476/0609/front_pt.20.full.jpg,,true
-EAN-7891095030767,Pipoca Pronta Manteiga Temperada Yoki Pacote 28g,Yoki,snacks,2.00,0,7891095030767,https://images.openfoodfacts.org/images/products/789/109/503/0767/front_pt.10.full.jpg,,true
-EAN-7891000068441,Biscoito Combina Com Seu Dia 3 Cereais 126 g,Nestlé,snacks,2.50,0,7891000068441,https://images.openfoodfacts.org/images/products/789/100/006/8441/front_pt.6.full.jpg,,true
-EAN-7899970400018,Chocolate ao leite (colesterol 3.3mg) 92 g,Hershey's,snacks,2.00,0,7899970400018,https://images.openfoodfacts.org/images/products/789/997/040/0018/front_en.3.full.jpg,,true
-EAN-7896775101881,Pasta de amendoim integral com cacau 450 g,Guimarães,snacks,4.00,0,7896775101881,https://images.openfoodfacts.org/images/products/789/677/510/1881/front_pt.4.full.jpg,,true
-EAN-7898192257547,Barra de Chocolate Branco com Cookies 85g,Cacau Show,snacks,2.00,0,7898192257547,https://images.openfoodfacts.org/images/products/789/819/225/7547/front_pt.3.full.jpg,,true
-EAN-7898279790394,Balas Fini de Gelatina Sabor Banana 90g,Fini,snacks,2.00,0,7898279790394,https://images.openfoodfacts.org/images/products/789/827/979/0394/front_pt.3.full.jpg,,true
-EAN-7891000106099,Composto Lácteo Comfor Neslac Lata 800g,Nestlé,snacks,5.50,0,7891000106099,https://images.openfoodfacts.org/images/products/789/100/010/6099/front_pt.18.full.jpg,Compost Lácteo com Óleos Vegetais,true
-EAN-7898553442933,Suco Integral Laranja Natural One Refrigerado Garrafa 900ml,Natural One,soft-drinks,5.50,0,7898553442933,https://images.openfoodfacts.org/images/products/789/855/344/2933/front_pt.10.full.jpg,,true
-EAN-7898553446986,Suco Veggie Beterraba Natural One Refrigerado Garrafa 900ml,Natural One,soft-drinks,5.50,0,7898553446986,https://images.openfoodfacts.org/images/products/789/855/344/6986/front_pt.3.full.jpg,,true
-EAN-7891991016124,Refrigerante Guaraná Zero Açúcar Antarctica Garrafa 200ml,Guaraná Antarctica,soft-drinks,3.00,0,7891991016124,https://images.openfoodfacts.org/images/products/789/199/101/6124/front_pt.9.full.jpg,,true
-EAN-7898553442940,Suco Integral Maçã Natural One Refrigerado Garrafa 900ml,Natural One,soft-drinks,5.50,0,7898553442940,https://images.openfoodfacts.org/images/products/789/855/344/2940/front_pt.23.full.jpg,,true
-EAN-7892840815875,Chá Ice Tea Pêssego Zero Açúcar Lipton Garrafa 200ml,Lipton,soft-drinks,3.00,0,7892840815875,https://images.openfoodfacts.org/images/products/789/284/081/5875/front_pt.3.full.jpg,,true
-EAN-7892840808013,Isotônico Frutas Cítricas Gatorade Garrafa 500ml,Gatorade,soft-drinks,4.50,0,7892840808013,https://images.openfoodfacts.org/images/products/789/284/080/8013/front_pt.12.full.jpg,,true
-EAN-7896349600192,Água Mineral Natural Sem Gás Fonte Timbu 10L,Timbu,soft-drinks,9.00,0,7896349600192,https://images.openfoodfacts.org/images/products/789/634/960/0192/front_pt.4.full.jpg,,true
-EAN-7894900701159,Refrigerante Sem Açúcar Coca Cola Lata 310ml,Coca-Cola,soft-drinks,3.50,0,7894900701159,https://images.openfoodfacts.org/images/products/789/490/070/1159/front_pt.20.full.jpg,,true
-EAN-7894900095005,Refrigerante Fanta Sabor Mistério 350 mL,Fanta,soft-drinks,4.00,0,7894900095005,https://images.openfoodfacts.org/images/products/789/490/009/5005/front_pt.3.full.jpg,,true
-EAN-7896062802354,Água Mineral São Lourenço Sem Gás 510 ml,Nestlé,soft-drinks,4.50,0,7896062802354,https://images.openfoodfacts.org/images/products/789/606/280/2354/front_pt.7.full.jpg,Água mineral natural sem gás,true
-EAN-7898080664389,Baly Energy Drink Melancia Garrafa 2L,Baly Energy Drink,soft-drinks,8.00,0,7898080664389,https://images.openfoodfacts.org/images/products/789/808/066/4389/front_pt.3.full.jpg,,true
-EAN-7891042000195,cha pronto com p�ssego lipton Ice tea,Lipton,soft-drinks,3.50,0,7891042000195,https://images.openfoodfacts.org/images/products/789/104/200/0195/front_pt.9.full.jpg,,true
-EAN-9002490258825,"Red Bull The Pêssego Edition 1, 250ml",Red Bull,soft-drinks,3.00,0,9002490258825,https://images.openfoodfacts.org/images/products/900/249/025/8825/front_pt.3.full.jpg,,true
-EAN-7894900521504,Água com gás saboe frutas vermelhas,Crystal,soft-drinks,3.50,0,7894900521504,https://images.openfoodfacts.org/images/products/789/490/052/1504/front_pt.4.full.jpg,,true
-EAN-0708470222068,Energético Monster Ultra Lata 473ml,Monster Energy,soft-drinks,4.50,0,0708470222068,https://images.openfoodfacts.org/images/products/070/847/022/2068/front_pt.3.full.jpg,,true
-EAN-8429420264106,Protetor solar isdin 250ml,Isdin,sun-protection,11.00,0,8429420264106,https://images.openbeautyfacts.org/images/products/842/942/026/4106/front_pt.3.full.jpg,,true
-EAN-7893500019206,Arroz Carnaroli Tio João Variedades Mundiais Cozinha Italiana Especial Para Risoto 1kg,Tio Joao,taste-of-home,7.00,0,7893500019206,https://images.openfoodfacts.org/images/products/789/350/001/9206/front_pt.3.full.jpg,,true
-EAN-7891132007523,Sopa Individual Cremosa Peito De Frango Com Queijo Vono Pacote 17g,Ajinomoto,taste-of-home,2.50,0,7891132007523,https://images.openfoodfacts.org/images/products/789/113/200/7523/front_pt.3.full.jpg,,true
-EAN-7896006779674,Mini Biscoitos de Arroz Integral Camil Natural 150 g,Camil,taste-of-home,3.00,0,7896006779674,https://images.openfoodfacts.org/images/products/789/600/677/9674/front_pt.19.full.jpg,Biscoitos de Arroz Integral,true
-EAN-7896009301162,Patê Atum Com Azeitonas Verdes Coqueiro Sachê 170g,Coqueiro,taste-of-home,3.00,0,7896009301162,https://images.openfoodfacts.org/images/products/789/600/930/1162/front_pt.3.full.jpg,,true
-EAN-7891132019717,Tempero Para Massas Sazón Pacote 60g 12 Unidades,Ajinomoto,taste-of-home,2.50,0,7891132019717,https://images.openfoodfacts.org/images/products/789/113/201/9717/front_pt.3.full.jpg,,true
-EAN-7893500018476,Arroz Parboilizado Tipo 1 Classe Longo Fino 1kg,Tio Joao,taste-of-home,7.00,0,7893500018476,https://images.openfoodfacts.org/images/products/789/350/001/8476/front_pt.3.full.jpg,,true
-EAN-3760092212657,Biothentic Riz Long 1 / 2 Complet 1Kg 500 g,Biothentic,taste-of-home,7.00,0,3760092212657,https://images.openfoodfacts.org/images/products/376/009/221/2657/front_fr.16.full.jpg,,true
-EAN-7891167011854,Patê De Atum Light Gomes Da Costa Lata 150g,Gomes Da Costa,taste-of-home,3.00,0,7891167011854,https://images.openfoodfacts.org/images/products/789/116/701/1854/front_pt.3.full.jpg,,true
-EAN-5012389000903,Encona West Indian Hot Pepper Sauce 220 ml,Encona,taste-of-home,3.50,0,5012389000903,https://images.openfoodfacts.org/images/products/501/238/900/0903/front_en.5.full.jpg,,true
-EAN-0011210009530,TABASCO Molho de Pimenta Jalapeño 60ml,Tabasco,taste-of-home,2.50,0,0011210009530,https://images.openfoodfacts.org/images/products/001/121/000/9530/front_pt.11.full.jpg,,true
-EAN-7893500018452,Arroz Parboilizado Tio João Tipo 1 5kg,Tio Joao,taste-of-home,10.50,0,7893500018452,https://images.openfoodfacts.org/images/products/789/350/001/8452/front_pt.3.full.jpg,,true
-EAN-7891515606329,Hot Bowls Mac'n Cheese Cheddar 300 g,Sadia,taste-of-home,4.00,0,7891515606329,https://images.openfoodfacts.org/images/products/789/151/560/6329/front_pt.4.full.jpg,,true
-EAN-7893500018490,Arroz Integral Tio João Tipo 1 500g,Tio Joao,taste-of-home,5.00,0,7893500018490,https://images.openfoodfacts.org/images/products/789/350/001/8490/front_pt.3.full.jpg,Arroz Tipo 1 - Classe Longo Fino Subgrupo Parbolizado Integral,true
-EAN-7896009301063,Sardinhas com Molho de Tomate 125 g,Coqueiro,taste-of-home,2.50,0,7896009301063,https://images.openfoodfacts.org/images/products/789/600/930/1063/front_pt.21.full.jpg,,true
-EAN-0600350116941,Long Grain WHite Rice 16 oz (1LB),Mc.Trader,taste-of-home,4.00,0,0600350116941,https://images.openfoodfacts.org/images/products/060/035/011/6941/front_en.6.full.jpg,Long Grain White Rice,true
+EAN-7896089012101,Pilão Espresso Coffee Beans 1 kg,Pilão,coffee-tea,12.00,0,7896089012101,https://images.openfoodfacts.org/images/products/789/608/901/2101/front_pt.12.full.jpg,,true
+EAN-78939806,Leão Peach Iced Tea 250 ml,Leão,coffee-tea,6.50,0,78939806,https://images.openfoodfacts.org/images/products/78939806/front_pt.20.full.jpg,,true
+EAN-7891021006071,Melitta Traditional Ground Coffee 250 g,Melitta,coffee-tea,6.50,0,7891021006071,https://images.openfoodfacts.org/images/products/789/102/100/6071/front_pt.10.full.jpg,,true
+EAN-7896005800027,3 Corações Traditional Ground Coffee 250 g,3 Corações,coffee-tea,6.50,0,7896005800027,https://images.openfoodfacts.org/images/products/789/600/580/0027/front_pt.3.full.jpg,,true
+EAN-7891024123560,Colgate Sensitive Pro Toothpaste 50 g,Colgate,personal-care,3.50,0,7891024123560,https://images.openbeautyfacts.org/images/products/789/102/412/3560/front_pt.3.full.jpg,,true
+EAN-7891528038568,Sorriso Fresh Gel Menthol Toothpaste 90 g,Colgate,personal-care,3.50,0,7891528038568,https://images.openbeautyfacts.org/images/products/789/152/803/8568/front_pt.7.full.jpg,,true
+EAN-78924468,Dove Original Deodorant 50 ml,Dove,personal-care,3.50,0,78924468,https://images.openbeautyfacts.org/images/products/78924468/front_pt.9.full.jpg,,true
+EAN-7896451902580,Docile Assorted Gummy Sweets 18 g,Docile,snacks,2.00,0,7896451902580,https://images.openfoodfacts.org/images/products/789/645/190/2580/front_pt.3.full.jpg,,true
+EAN-7891000023808,Negresco Chocolate Sandwich Biscuits 140 g,Nestlé,snacks,2.50,0,7891000023808,https://images.openfoodfacts.org/images/products/789/100/002/3808/front_pt.7.full.jpg,,true
+EAN-7896066305752,"Wickbold Cocoa, Hazelnut & Brazil Nut Cookies 60 g",Wickbold,snacks,2.00,0,7896066305752,https://images.openfoodfacts.org/images/products/789/606/630/5752/front_pt.4.full.jpg,,true
+EAN-7896024760609,Piraquê Onion & Parsley Potato Snack 60 g,Piraquê,snacks,2.00,0,7896024760609,https://images.openfoodfacts.org/images/products/789/602/476/0609/front_pt.20.full.jpg,,true
+EAN-7891095030767,Yoki Buttered Ready Popcorn 28 g,Yoki,snacks,2.00,0,7891095030767,https://images.openfoodfacts.org/images/products/789/109/503/0767/front_pt.10.full.jpg,,true
+EAN-7891000068441,Nestlé Three-Cereal Biscuits 126 g,Nestlé,snacks,2.50,0,7891000068441,https://images.openfoodfacts.org/images/products/789/100/006/8441/front_pt.6.full.jpg,,true
+EAN-7899970400018,Hershey's Milk Chocolate Bar 92 g,Hershey's,snacks,2.00,0,7899970400018,https://images.openfoodfacts.org/images/products/789/997/040/0018/front_en.3.full.jpg,,true
+EAN-7898192257547,Cacau Show White Chocolate with Cookies Bar 85 g,Cacau Show,snacks,2.00,0,7898192257547,https://images.openfoodfacts.org/images/products/789/819/225/7547/front_pt.3.full.jpg,,true
+EAN-7898279790394,Fini Banana Gummy Sweets 90 g,Fini,snacks,2.00,0,7898279790394,https://images.openfoodfacts.org/images/products/789/827/979/0394/front_pt.3.full.jpg,,true
+EAN-7898553442933,Natural One Orange Juice 900 ml,Natural One,soft-drinks,5.50,0,7898553442933,https://images.openfoodfacts.org/images/products/789/855/344/2933/front_pt.10.full.jpg,,true
+EAN-7898553442940,Natural One Apple Juice 900 ml,Natural One,soft-drinks,5.50,0,7898553442940,https://images.openfoodfacts.org/images/products/789/855/344/2940/front_pt.23.full.jpg,,true
+EAN-7892840815875,Lipton Peach Iced Tea Zero Sugar 200 ml,Lipton,soft-drinks,3.00,0,7892840815875,https://images.openfoodfacts.org/images/products/789/284/081/5875/front_pt.3.full.jpg,,true
+EAN-7892840808013,Gatorade Citrus Sports Drink 500 ml,Gatorade,soft-drinks,4.50,0,7892840808013,https://images.openfoodfacts.org/images/products/789/284/080/8013/front_pt.12.full.jpg,,true
+EAN-7896349600192,Fonte Timbu Still Mineral Water 10 L,Timbu,soft-drinks,9.00,0,7896349600192,https://images.openfoodfacts.org/images/products/789/634/960/0192/front_pt.4.full.jpg,,true
+EAN-7894900095005,Fanta Mystery Flavour 350 ml,Fanta,soft-drinks,4.00,0,7894900095005,https://images.openfoodfacts.org/images/products/789/490/009/5005/front_pt.3.full.jpg,,true
+EAN-7896062802354,São Lourenço Still Mineral Water 510 ml,Nestlé,soft-drinks,4.50,0,7896062802354,https://images.openfoodfacts.org/images/products/789/606/280/2354/front_pt.7.full.jpg,,true
+EAN-7898080664389,Baly Watermelon Energy Drink 2 L,Baly,soft-drinks,8.00,0,7898080664389,https://images.openfoodfacts.org/images/products/789/808/066/4389/front_pt.3.full.jpg,,true
+EAN-0708470222068,Monster Ultra Energy Drink 473 ml,Monster Energy,soft-drinks,4.50,0,0708470222068,https://images.openfoodfacts.org/images/products/070/847/022/2068/front_pt.3.full.jpg,,true
+EAN-7893500019206,Tio João Carnaroli Risotto Rice 1 kg,Tio João,taste-of-home,7.00,0,7893500019206,https://images.openfoodfacts.org/images/products/789/350/001/9206/front_pt.3.full.jpg,,true
+EAN-7891132007523,Vono Creamy Chicken & Cheese Instant Soup 17 g,Ajinomoto,taste-of-home,2.50,0,7891132007523,https://images.openfoodfacts.org/images/products/789/113/200/7523/front_pt.3.full.jpg,,true
+EAN-7896006779674,Camil Wholegrain Rice Mini Crackers 150 g,Camil,taste-of-home,3.00,0,7896006779674,https://images.openfoodfacts.org/images/products/789/600/677/9674/front_pt.19.full.jpg,,true
+EAN-7896009301162,Coqueiro Tuna Pâté with Green Olives 170 g,Coqueiro,taste-of-home,3.00,0,7896009301162,https://images.openfoodfacts.org/images/products/789/600/930/1162/front_pt.3.full.jpg,,true
+EAN-7891132019717,Sazón Pasta Seasoning 12 sachets,Ajinomoto,taste-of-home,2.50,0,7891132019717,https://images.openfoodfacts.org/images/products/789/113/201/9717/front_pt.3.full.jpg,,true
+EAN-7893500018476,Tio João Long Grain Parboiled Rice 1 kg,Tio João,taste-of-home,7.00,0,7893500018476,https://images.openfoodfacts.org/images/products/789/350/001/8476/front_pt.3.full.jpg,,true
+EAN-7891167011854,Gomes da Costa Light Tuna Pâté 150 g,Gomes da Costa,taste-of-home,3.00,0,7891167011854,https://images.openfoodfacts.org/images/products/789/116/701/1854/front_pt.3.full.jpg,,true
+EAN-7893500018452,Tio João Long Grain Parboiled Rice 5 kg,Tio João,taste-of-home,10.50,0,7893500018452,https://images.openfoodfacts.org/images/products/789/350/001/8452/front_pt.3.full.jpg,,true
+EAN-7891515606329,Sadia Hot Bowls Mac & Cheese Cheddar 300 g,Sadia,taste-of-home,4.00,0,7891515606329,https://images.openfoodfacts.org/images/products/789/151/560/6329/front_pt.4.full.jpg,,true
+EAN-7893500018490,Tio João Wholegrain Rice 500 g,Tio João,taste-of-home,5.00,0,7893500018490,https://images.openfoodfacts.org/images/products/789/350/001/8490/front_pt.3.full.jpg,,true
+EAN-7896009301063,Coqueiro Sardines in Tomato Sauce 125 g,Coqueiro,taste-of-home,2.50,0,7896009301063,https://images.openfoodfacts.org/images/products/789/600/930/1063/front_pt.21.full.jpg,,true

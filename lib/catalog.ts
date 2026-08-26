@@ -38,6 +38,8 @@ export type ProductCard = {
   compare_at_cents: number | null;
   max_price_cents: number | null;
   stock_qty: number;
+  /** Alguma variante controla saldo? Falso = sempre disponível. */
+  tracks_stock: boolean;
   variant_count: number;
   primary_image_path: string | null;
   badge: "promo" | "new" | "outlet" | null;
@@ -178,6 +180,18 @@ export function priceRange(p: Pick<ProductCard, "price_cents" | "max_price_cents
   };
 }
 
-export const inStock = (p: Pick<ProductCard, "stock_qty">) => p.stock_qty > 0;
+/**
+ * Disponível para pedir.
+ *
+ * Estoque zero NÃO é esgotado por si só. Um ship chandler não tem
+ * armazém: compra contra o pedido, na janela entre o pedido e a
+ * atracação. O que limita a venda é o prazo do line-up, não uma
+ * contagem em prateleira — e a loja inteira mostrava "Out of stock" em
+ * 43 produtos ativos, com foto e preço, por causa disso.
+ *
+ * Esgotado é só o item que DECLARA controlar saldo e chegou a zero.
+ */
+export const inStock = (p: Pick<ProductCard, "stock_qty" | "tracks_stock">) =>
+  !p.tracks_stock || p.stock_qty > 0;
 
 export type BrandOption = { id: string; slug: string; name: string };

@@ -105,12 +105,39 @@ async function medir(rota, tela) {
           if (!rola) vazando.push(`${el.tagName.toLowerCase()}.${el.className || "?"}`.slice(0, 60));
         }
       }
+      // Botões que se encostam ou se sobrepõem. Nasceu de um caso real:
+      // ao tirar o `width: 100%` do .btn, dois botões num container que
+      // era bloco solto caíram na mesma linha, colados, com o segundo
+      // vazando para fora da gaveta do carrinho. Oito pixels é o mínimo
+      // para o dedo não errar o alvo.
+      const botoes = [...document.querySelectorAll(".btn")].filter((b) => {
+        const r = b.getBoundingClientRect();
+        return r.width > 0 && r.height > 0;
+      });
+      const colados = [];
+      for (let i = 0; i < botoes.length; i++) {
+        for (let j = i + 1; j < botoes.length; j++) {
+          const a = botoes[i].getBoundingClientRect();
+          const b = botoes[j].getBoundingClientRect();
+          const folgaX = Math.max(a.left, b.left) - Math.min(a.right, b.right);
+          const folgaY = Math.max(a.top, b.top) - Math.min(a.bottom, b.bottom);
+          // Só reclama quando as caixas se cruzam nos DOIS eixos com
+          // folga menor que 8px — lado a lado com espaço está certo.
+          if (folgaX < 8 && folgaY < 8) {
+            colados.push(
+              `${botoes[i].textContent.trim().slice(0, 20)} / ${botoes[j].textContent.trim().slice(0, 20)}`
+            );
+          }
+        }
+      }
+
       const conteudo = document.querySelector(".shell > main") ?? document.querySelector("main");
       return {
         rolagemH: doc.scrollWidth > larguraTela + 1,
         scrollWidth: doc.scrollWidth,
         vazando: [...new Set(vazando)].slice(0, 5),
         larguraConteudo: conteudo ? Math.round(conteudo.getBoundingClientRect().width) : 0,
+        colados,
         larguraPagina: (() => {
           const shell = document.querySelector(".shell");
           return shell ? Math.round(shell.getBoundingClientRect().width) : 0;
@@ -143,6 +170,9 @@ describe("responsividade", () => {
         // 3. No desktop o conteúdo tem de USAR a largura. Uma coluna de
         //    500px numa tela de 1728 é o site de celular centralizado —
         //    que é exatamente a reclamação que originou este teste.
+        // Botão colado em botão: alvo de toque que o dedo erra.
+        assert.deepEqual(m.colados, [], `${rota}: botões colados em ${tela.w}px`);
+
         // 3. No desktop a PÁGINA tem de usar a largura. Vale para o
         //    container: /login e as páginas de texto mantêm coluna
         //    estreita de propósito — formulário largo é pior de

@@ -19,7 +19,7 @@ const { buildImportPlan } = await import("../lib/import.ts");
  */
 const ARQUIVOS = [
   ["docs/catalogo-inicial.csv", 31],
-  ["docs/catalogo-santos.csv", 73],
+  ["docs/catalogo-santos.csv", 36],
 ];
 
 const plano = buildImportPlan(

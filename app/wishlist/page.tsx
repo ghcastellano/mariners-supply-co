@@ -31,6 +31,7 @@ type Row = {
     compare_at_cents: number | null;
     max_price_cents: number | null;
     stock_qty: number;
+    tracks_stock: boolean;
     variant_count: number;
     primary_image_path: string | null;
     badge: "promo" | "new" | "outlet" | null;
@@ -62,7 +63,7 @@ export default async function WishlistPage() {
     .select(
       `products!wishlists_product_id_fkey!inner(
          id, slug, name, short_description, price_cents, compare_at_cents,
-         max_price_cents, stock_qty, variant_count, primary_image_path,
+         max_price_cents, stock_qty, tracks_stock, variant_count, primary_image_path,
          badge, sku, default_variant_id,
          brands(name)
        )`

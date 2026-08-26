@@ -1055,14 +1055,38 @@ input:-webkit-autofill:focus {
   line-height: 1;
 }
 .sunlogo .mark { flex: none; width: 21px; height: 21px; color: var(--amber); }
-.sunlogo .word { display: flex; flex-direction: column; gap: 1px; }
-.sunlogo .l1 {
-  font-family: var(--font-disp); font-weight: 800; font-size: 12px;
-  letter-spacing: .11em; color: var(--ink); text-transform: uppercase;
+/* Uma linha, e maior.
+   Medido no iPhone 15: a marca saía em 12px — o MENOR texto do
+   cabeçalho — empilhada em duas linhas, ao lado de um campo de busca de
+   314x44. Hierarquia visual é relativa, não absoluta: o olho ordena por
+   tamanho e peso comparados, e nessa conta a busca vencia a marca. Pior,
+   palavra que quebra em duas linhas lê como falta de espaço, não como
+   projeto.
+
+   A conta do espaço em 390px: 40 do hambúrguer + 120 dos três ícones +
+   32 de padding + 16 de folga = 208 usados, sobram 182 para a marca. Em
+   15px com esta entreletra, "MARINERS SUPPLY" mede cerca de 150 com a
+   âncora — cabe com sobra, numa linha só. */
+.sunlogo .word {
+  display: flex; flex-direction: row; align-items: baseline; gap: .34em;
+  white-space: nowrap;
 }
-.sunlogo .l2 {
-  font-family: var(--font-disp); font-weight: 800; font-size: 12px;
-  letter-spacing: .11em; color: var(--amber); text-transform: uppercase;
+.sunlogo .l1, .sunlogo .l2 {
+  font-family: var(--font-disp); font-weight: 800; font-size: 15px;
+  letter-spacing: .07em; text-transform: uppercase;
+}
+.sunlogo .l1 { color: var(--ink); }
+.sunlogo .l2 { color: var(--amber); }
+/* A âncora cresce junto: âncora pequena ao lado de texto maior deixa a
+   marca desequilibrada, com o desenho parecendo um acessório. */
+.sunlogo .mark { width: 24px; height: 24px; }
+
+/* Tela estreita de verdade (iPhone SE, 375px): a marca continua numa
+   linha só, meio ponto menor, e os ícones já encolhem para 36px pela
+   regra abaixo. */
+@media (max-width: 380px) {
+  .sunlogo .l1, .sunlogo .l2 { font-size: 13.5px; letter-spacing: .05em; }
+  .sunlogo .mark { width: 21px; height: 21px; }
 }
 /* Faixa estreita (iPhone SE e afins): o desenho dos ícones encolhe
    para 36px, a área de toque continua 44, e o nome da marca sobrevive.
@@ -1462,11 +1486,18 @@ input:-webkit-autofill:focus {
   background: none; border: 1px solid var(--line-hi); color: var(--faint); font-size: 13px;
 }
 .mcdel:hover { color: var(--danger); border-color: rgba(255,89,100,.45); }
+/* Grid, e não bloco solto com margem.
+   Enquanto o botão trazia width:100% embutido, dois deles se empilhavam
+   por acidente — cada um ocupava a linha inteira. Quando a largura
+   passou a vir do container (que é o certo: botão não decide a própria
+   largura), os dois viraram inline-flex de largura automática e caíram
+   na MESMA linha, encostados, com o segundo vazando para fora da gaveta.
+   Container que segura dois botões precisa dizer como eles se arrumam. */
 .minicart-foot {
   padding: 13px 16px calc(13px + env(safe-area-inset-bottom));
   border-top: 1px solid var(--line-hi); background: var(--night);
+  display: grid; gap: 9px;
 }
-.minicart-foot .btn { margin: 9px 0 0; }
 
 /* ===== home: vitrine ===== */
 /* Hero sem foto: não temos direito de uso de imagem de navio, e foto
