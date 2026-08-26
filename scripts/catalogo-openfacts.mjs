@@ -84,13 +84,31 @@ const MARCAS = [
   { marca: "tio joao", categoria: "taste-of-home" },
   { marca: "camil", categoria: "taste-of-home" },
 
-  // Higiene e sol
+  // Higiene e sol. O slop chest vende pasta de dente, escova, xampu,
+  // desodorante e lâmina — é a lista clássica, e o convés a 30 graus
+  // faz do protetor solar item de primeira necessidade, não de luxo.
   { marca: "dove", categoria: "personal-care" },
   { marca: "rexona", categoria: "personal-care" },
   { marca: "colgate", categoria: "personal-care" },
   { marca: "nivea", categoria: "personal-care" },
   { marca: "gillette", categoria: "personal-care" },
+  { marca: "protex", categoria: "personal-care" },
+  { marca: "palmolive", categoria: "personal-care" },
+  { marca: "seda", categoria: "personal-care" },
+  { marca: "pantene", categoria: "personal-care" },
+  { marca: "head shoulders", categoria: "personal-care" },
+  { marca: "close up", categoria: "personal-care" },
+  { marca: "sorriso", categoria: "personal-care" },
+  { marca: "oral-b", categoria: "personal-care" },
+  { marca: "lux", categoria: "personal-care" },
+  { marca: "johnson", categoria: "personal-care" },
   { marca: "sundown", categoria: "sun-protection" },
+  { marca: "nivea sun", categoria: "sun-protection" },
+  { marca: "banana boat", categoria: "sun-protection" },
+  { marca: "australian gold", categoria: "sun-protection" },
+  { marca: "neutrogena", categoria: "sun-protection" },
+  { marca: "cenoura bronze", categoria: "sun-protection" },
+  { marca: "episol", categoria: "sun-protection" },
 ];
 
 /**

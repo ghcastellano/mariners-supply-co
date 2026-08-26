@@ -29,7 +29,7 @@ const TELAS = [
   { nome: "monitor", w: 1920, h: 1080 },
 ];
 
-const ROTAS = ["/", "/shop", "/c/coffee-tea", "/cart", "/login"];
+const ROTAS = ["/", "/shop", "/c/coffee-tea", "/cart", "/login", "/signup"];
 
 /** Teto do container, em --page-w. Acima disso a página para de crescer
  *  de propósito — e o teste precisa saber disso para não exigir que ela
@@ -97,7 +97,10 @@ async function medir(rota, tela) {
           // e olhar só o pai direto marcava o carrossel como defeito.
           let rola = false;
           for (let a = el.parentElement; a && a !== document.body; a = a.parentElement) {
-            if (/auto|scroll|hidden/.test(getComputedStyle(a).overflowX)) { rola = true; break; }
+            // `clip` entra na lista: o body usa overflow-x: clip, que é o que
+            // segura o sangramento de ponta a ponta do cabeçalho e do rodapé
+            // na ultrawide sem criar rolagem lateral.
+            if (/auto|scroll|hidden|clip/.test(getComputedStyle(a).overflowX)) { rola = true; break; }
           }
           if (!rola) vazando.push(`${el.tagName.toLowerCase()}.${el.className || "?"}`.slice(0, 60));
         }

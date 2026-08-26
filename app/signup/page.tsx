@@ -242,7 +242,7 @@ function SignupInner() {
 
   if (sent) {
     return (
-      <main>
+      <main className="pg-form">
         <div className="okwrap">
           <div className="okring">✉️</div>
           <h2>Confirm your email</h2>
@@ -265,11 +265,11 @@ function SignupInner() {
   }
 
   return (
-    <main>
+    <main className="pg-form">
       <Breadcrumb trail={[{ label: "Register to shop" }]} />
       <h1 className="secttl">Register to shop</h1>
 
-      <form onSubmit={submit} className="stack">
+      <form onSubmit={submit} className="stack cadgrid">
         <div className="field">
           <label htmlFor="email">
             Email
@@ -287,7 +287,7 @@ function SignupInner() {
           />
         </div>
 
-        <div className="field">
+        <div className="field par">
           <label htmlFor="password">
             Password
             <Req />
@@ -317,7 +317,7 @@ function SignupInner() {
           </div>
         </div>
 
-        <div className="field">
+        <div className="field par">
           <label htmlFor="confirm">
             Confirm Password
             <Req />
@@ -336,7 +336,7 @@ function SignupInner() {
           </div>
         </div>
 
-        <div className="field">
+        <div className="field par">
           <label htmlFor="first">
             First Name
             <Req />
@@ -351,7 +351,7 @@ function SignupInner() {
           />
         </div>
 
-        <div className="field">
+        <div className="field par">
           <label htmlFor="last">
             Last Name
             <Req />
@@ -379,7 +379,7 @@ function SignupInner() {
 
         {/* <select> nativo, como na conta: são três portos, e no celular
             o nativo vira a roda do sistema. */}
-        <div className="field">
+        <div className="field par">
           <label htmlFor="port">
             Home port
             <Req />
