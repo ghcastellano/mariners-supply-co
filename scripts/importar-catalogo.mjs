@@ -20,12 +20,42 @@
  * rebaixa foto de produto que já tem capa.
  */
 
-import { readFileSync } from "node:fs";
+import { readFileSync, existsSync } from "node:fs";
+
+/**
+ * Lê .env.local sem depender de `set -a && . ./.env.local` na frente do
+ * comando: comando composto não casa com a regra de permissão, e o
+ * script que precisa da variável é quem deve saber onde ela mora.
+ */
+function carregarEnv(arquivo = ".env.local") {
+  try {
+    for (const linha of readFileSync(arquivo, "utf-8").split("\n")) {
+      const m = linha.match(/^\s*([A-Z_][A-Z0-9_]*)\s*=\s*(.*)\s*$/);
+      if (!m) continue;
+      const valor = m[2].replace(/^["']|["']$/g, "");
+      if (!process.env[m[1]]) process.env[m[1]] = valor;
+    }
+  } catch {
+    // sem arquivo: as variáveis podem já vir do ambiente
+  }
+}
+carregarEnv();
 import { createClient } from "@supabase/supabase-js";
 
 const CSV = process.argv[2];
 const SECO = process.argv.includes("--seco");
-const { ADMIN_EMAIL, ADMIN_PASSWORD } = process.env;
+/**
+ * Credenciais: do ambiente, ou do arquivo que conta-servico.mjs deixou.
+ * Pelo arquivo é melhor — senha em variável de ambiente aparece na linha
+ * de comando e no histórico do shell.
+ */
+const ARQUIVO_CONTA = "/tmp/conta-servico.json";
+let { ADMIN_EMAIL, ADMIN_PASSWORD } = process.env;
+if ((!ADMIN_EMAIL || !ADMIN_PASSWORD) && existsSync(ARQUIVO_CONTA)) {
+  const c = JSON.parse(readFileSync(ARQUIVO_CONTA, "utf-8"));
+  ADMIN_EMAIL = c.email;
+  ADMIN_PASSWORD = c.senha;
+}
 
 const URL_SB = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const ANON = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
