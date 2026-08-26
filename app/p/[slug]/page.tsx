@@ -5,6 +5,7 @@ import ProductBuy from "@/components/ProductBuy";
 import ProductCardView from "@/components/ProductCard";
 import { createClient } from "@/lib/supabase/server";
 import { listProducts, type ProductDetail } from "@/lib/catalog";
+import { wishedProductIds } from "@/lib/wishlist";
 import { ELIGIBILITY } from "@/lib/taxregime";
 
 export const revalidate = 300;
@@ -65,6 +66,10 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
       )
     : [];
 
+  // A ficha e os relacionados numa consulta só: o coração do produto
+  // aberto e o dos cards ao lado nascem no estado real.
+  const wished = await wishedProductIds([p.id, ...related.map((r) => r.id)]);
+
   return (
     <main className="pb-dock">
       <Breadcrumb
@@ -91,6 +96,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
           ? [{ id: "primary", path: p.primary_image_path, alt: p.name, sort_order: 0 }]
           : []}
         variants={variants}
+        wished={wished.has(p.id)}
       />
 
       {(p.specs?.length || p.description) && (
@@ -148,7 +154,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
           <p className="subhead">More in {cat?.name}</p>
           <div className="pgrid">
             {related.slice(0, 4).map((r) => (
-              <ProductCardView key={r.id} p={r} />
+              <ProductCardView key={r.id} p={r} wished={wished.has(r.id)} />
             ))}
           </div>
           <div className="stack" style={{ paddingTop: 2 }}>

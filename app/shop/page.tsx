@@ -2,6 +2,7 @@ import Link from "next/link";
 import Breadcrumb from "@/components/Breadcrumb";
 import ProductCardView from "@/components/ProductCard";
 import { createClient } from "@/lib/supabase/server";
+import { wishedProductIds } from "@/lib/wishlist";
 import {
   buildTree,
   listProducts,
@@ -40,6 +41,9 @@ export default async function ShopPage({
       .eq("active", true)
       .order("sort_order"),
   ]);
+
+  // O coração precisa nascer no estado certo, senão parece que não salvou.
+  const wished = await wishedProductIds(items.map((i) => i.id));
 
   const roots = buildTree((cats.data ?? []) as Category[]);
   const keep = (extra: Record<string, string | null>) => {
@@ -109,7 +113,7 @@ export default async function ShopPage({
       ) : (
         <div className="pgrid">
           {items.map((p, i) => (
-            <ProductCardView key={p.id} p={p} priority={i < 4} />
+            <ProductCardView key={p.id} p={p} priority={i < 4} wished={wished.has(p.id)} />
           ))}
         </div>
       )}

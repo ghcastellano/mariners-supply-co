@@ -5,6 +5,7 @@ import ProductCardView from "@/components/ProductCard";
 import SortSelect from "@/components/SortSelect";
 import { createClient } from "@/lib/supabase/server";
 import { listProducts, PAGE_SIZE, SORT_LABEL, type Category, type SortKey } from "@/lib/catalog";
+import { wishedProductIds } from "@/lib/wishlist";
 
 export const revalidate = 300;
 
@@ -60,6 +61,10 @@ export default async function CategoryPage({
   ]);
   const parent = parentRes?.data ?? null;
 
+  // O coração precisa nascer no estado certo: vazio quando já está
+  // salvo vira toque duplo, e o toque duplo desmarca.
+  const wished = await wishedProductIds(items.map((i) => i.id));
+
   const more = (cursor: string) => {
     const p = new URLSearchParams();
     if (sort !== "featured") p.set("sort", sort);
@@ -109,7 +114,7 @@ export default async function CategoryPage({
       ) : (
         <div className="pgrid">
           {items.map((p, i) => (
-            <ProductCardView key={p.id} p={p} priority={i < 4} />
+            <ProductCardView key={p.id} p={p} priority={i < 4} wished={wished.has(p.id)} />
           ))}
         </div>
       )}

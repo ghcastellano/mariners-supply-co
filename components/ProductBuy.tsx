@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import { useMemo, useState } from "react";
+import WishButton from "./WishButton";
 import { useCart } from "@/lib/cart";
 import { BADGE_LABEL, imageUrl, type ProductImage, type ProductVariant } from "@/lib/catalog";
 import { brl, discountPercent, usd } from "@/lib/money";
@@ -33,10 +34,13 @@ export default function ProductBuy({
   product,
   images,
   variants,
+  wished = false,
 }: {
   product: Head;
   images: ProductImage[];
   variants: ProductVariant[];
+  /** Já está na lista de desejos — o coração precisa nascer cheio. */
+  wished?: boolean;
 }) {
   const { items, add } = useCart();
   const [variantId, setVariantId] = useState(variants[0]?.id ?? "");
@@ -189,6 +193,11 @@ export default function ProductBuy({
             <button className="btn" onClick={addNow} disabled={soldOut}>
               {soldOut ? "Out of stock" : inCart ? `Add ${qty} more` : "Add to cart"}
             </button>
+            {/* O coração faltava justamente aqui, onde a decisão de
+                "agora não, mas depois" acontece: na ficha aberta. Quem
+                não podia guardar o item só tinha a opção de comprar ou
+                esquecer. */}
+            <WishButton productId={product.id} name={product.name} initial={wished} />
           </div>
           {inCart > 0 && <p className="finehint">{inCart} already in your cart.</p>}
         </div>
