@@ -111,7 +111,7 @@ export default function CartPage() {
   const belowMin = minOrderCents > 0 && subtotal < minOrderCents;
 
   return (
-    <main>
+    <main className="pg-cart">
       <Breadcrumb trail={[{ label: "Shopping Cart" }]} />
 
       {belowMin && !minDismissed && rows.length > 0 && (
@@ -219,7 +219,7 @@ export default function CartPage() {
                 <div className="mcline" key={l.id}>
                   <Link href={`/p/${l.products?.slug}`} className="ci-thumb" prefetch={false}>
                     {src ? (
-                      <Image src={src} alt="" fill sizes="62px" style={{ objectFit: "contain" }} />
+                      <Image src={src} alt="" fill sizes="(min-width: 1280px) 96px, (min-width: 1024px) 84px, 62px" style={{ objectFit: "contain" }} />
                     ) : (
                       <span aria-hidden>📦</span>
                     )}

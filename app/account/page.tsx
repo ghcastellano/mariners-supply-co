@@ -10,6 +10,7 @@ import VesselSearch, { type VesselValue } from "@/components/VesselSearch";
 import { COUNTRIES } from "@/lib/countries";
 import { CONTACT_EMAIL } from "@/lib/env";
 import { createClient } from "@/lib/supabase/client";
+import AccountRail from "@/components/AccountRail";
 import { missingProfileFields } from "@/lib/profile";
 import { saveProfile, signOut } from "./actions";
 
@@ -225,10 +226,11 @@ export default function AccountPage() {
     );
 
   return (
-    <main>
+    <main className="pg-acct">
       <Breadcrumb trail={[{ label: "My Account" }]} />
 
       <h1 className="secttl left">My Account Information</h1>
+      <div className="acct-main">
       <p className="finehint" style={{ padding: "0 16px" }}>
         Signed in as <span className="mono">{email}</span>
       </p>
@@ -341,65 +343,14 @@ export default function AccountPage() {
           while the name, vessel, port or telephone is missing.
         </p>
       </form>
-
-      {/* Atalhos das outras seções da conta, um cartão cada, na ordem do
-          menu 👤 do cabeçalho. */}
-      <div className="catgrid" style={{ paddingTop: 14 }}>
-        <Link href="/orders" className="catcard">
-          <span className="ic" aria-hidden>
-            📦
-          </span>
-          <span className="tx">
-            <span className="nm">My Orders</span>
-            <span className="ct">Track every delivery</span>
-          </span>
-          <span className="chev" aria-hidden>
-            ›
-          </span>
-        </Link>
-
-        <Link href="/wishlist" className="catcard">
-          <span className="ic" aria-hidden>
-            ♡
-          </span>
-          <span className="tx">
-            <span className="nm">My Wish List</span>
-            <span className="ct">Saved for the next call</span>
-          </span>
-          <span className="chev" aria-hidden>
-            ›
-          </span>
-        </Link>
-
-        <Link href="/captain" className="catcard">
-          <span className="ic" aria-hidden>
-            🧭
-          </span>
-          <span className="tx">
-            <span className="nm">Captain rewards</span>
-            <span className="ct">Your code and credit</span>
-          </span>
-          <span className="chev" aria-hidden>
-            ›
-          </span>
-        </Link>
-
-        {isAdmin && (
-          <Link href="/admin" className="catcard">
-            <span className="ic" aria-hidden>
-              ⚙️
-            </span>
-            <span className="tx">
-              <span className="nm">Staff panel</span>
-              <span className="ct">Orders, catalog, line-up</span>
-            </span>
-            <span className="chev" aria-hidden>
-              ›
-            </span>
-          </Link>
-        )}
       </div>
 
+      {/* O .catgrid inline e o Sign Out viraram AccountRail: as três
+          telas de conta usam o mesmo, e position:sticky não gruda dois
+          irmãos — por isso o Sign Out entra como filho.
+          O style inline de paddingTop saiu junto: inline vence media
+          query e quebraria o rail no desktop. */}
+      <AccountRail current="/account" isAdmin={isAdmin}>
       <div className="stack">
         <form action={signOut}>
           <button className="btn danger" type="submit">
@@ -414,6 +365,8 @@ export default function AccountPage() {
           or find us at Mariner&apos;s Bar.
         </p>
       </div>
+      </AccountRail>
+
     </main>
   );
 }

@@ -136,16 +136,31 @@ export default async function Home() {
   const shown = withStock.length > 0 ? withStock : store.roots;
 
   return (
-    <main>
+    <main className="pg-home">
       <section className="homehero">
         <p className="kicker">Porto de Santos · by Mariner&apos;s Bar</p>
         <h1>Delivered to your gangway at Porto de Santos</h1>
         <p className="lead">
           Pre-order before you dock, pay a {DEPOSIT_PCT}% deposit, collect at the gangway.
         </p>
+          {/* Chamadas do herói: só aparecem no desktop. No celular a
+              tela já é curta e a grade de categorias vem logo abaixo. */}
+          <div className="herocta">
+            <Link href="/shop" className="btn" prefetch={false}>
+              Shop all supplies
+            </Link>
+            <Link href="/ports" className="btn ghost" prefetch={false}>
+              Port line-up &amp; cut-offs
+            </Link>
+          </div>
       </section>
 
-      <h2 className="secttl">Categories</h2>
+      <h2 className="secttl">
+            Categories
+            <Link href="/shop" className="allx" prefetch={false}>
+              Browse all ›
+            </Link>
+          </h2>
 
       {shown.length === 0 ? (
         <div className="empty">
@@ -204,14 +219,19 @@ export default async function Home() {
           com título é pior do que prateleira nenhuma. */}
       {store.promo.length > 0 && (
         <section>
-          <h2 className="secttl">On promo now</h2>
+          <h2 className="secttl">
+            On promo now
+            <Link href="/shop?badge=promo" className="allx" prefetch={false}>
+              Browse all ›
+            </Link>
+          </h2>
           <div className="rail">
             {store.promo.map((p) => (
               // Nenhuma imagem com priority: no celular a grade de
               // categorias empurra as faixas para fora da primeira
               // tela, e priority em foto que ninguém vê rouba banda
               // do LCP real — que aqui é o texto do hero.
-              <ProductCardView key={p.id} p={p} wished={wished.has(p.id)} />
+              <ProductCardView key={p.id} p={p} wished={wished.has(p.id)} sizes="(max-width: 620px) 92vw, (max-width: 767px) 46vw, (max-width: 1023px) 30vw, 360px" />
             ))}
           </div>
         </section>
@@ -219,10 +239,15 @@ export default async function Home() {
 
       {store.fresh.length > 0 && (
         <section>
-          <h2 className="secttl">New arrivals</h2>
+          <h2 className="secttl">
+            New arrivals
+            <Link href="/shop?sort=newest" className="allx" prefetch={false}>
+              Browse all ›
+            </Link>
+          </h2>
           <div className="rail">
             {store.fresh.map((p) => (
-              <ProductCardView key={p.id} p={p} wished={wished.has(p.id)} />
+              <ProductCardView key={p.id} p={p} wished={wished.has(p.id)} sizes="(max-width: 620px) 92vw, (max-width: 767px) 46vw, (max-width: 1023px) 30vw, 360px" />
             ))}
           </div>
         </section>

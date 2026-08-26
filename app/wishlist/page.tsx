@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import AccountRail from "@/components/AccountRail";
 import { redirect } from "next/navigation";
 import Breadcrumb from "@/components/Breadcrumb";
 import ProductCardView from "@/components/ProductCard";
@@ -82,10 +83,14 @@ export default async function WishlistPage() {
   });
 
   return (
-    <main>
+    <main className="pg-acct">
       <Breadcrumb trail={[{ label: "My Wish List" }]} />
 
       <h1 className="secttl left">My Wish List</h1>
+
+      <AccountRail current="/wishlist" />
+
+      <div className="acct-main">
 
       {/* Navegação entre as seções da conta, como o select do Sunny.
           [otim] O deles navega no próprio change, o que arranca a página
@@ -125,6 +130,7 @@ export default async function WishlistPage() {
       <p className="linkline">
         <Link href="/shop">Back</Link>
       </p>
+      </div>
     </main>
   );
 }

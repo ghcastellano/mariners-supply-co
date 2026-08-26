@@ -81,13 +81,17 @@ export default function ProductBuy({
   return (
     <>
       <section className="pdp">
+        {/* Dois wrappers sem regra abaixo de 768px — caixas de bloco
+            transparentes. A partir daí a galeria vai para a esquerda e
+            a compra para a direita, como no Sunny. */}
+        <div className="pdp-gallery">
         <div className="pdp-hero">
           {src ? (
             <Image
               src={src}
               alt={current?.alt ?? product.name}
               fill
-              sizes="(max-width: 700px) 100vw, 430px"
+              sizes="(max-width: 520px) 100vw, (max-width: 767px) 500px, (max-width: 1023px) 54vw, (max-width: 1279px) 560px, (max-width: 1599px) 620px, 680px"
               className="pdp-img"
               priority
             />
@@ -111,13 +115,16 @@ export default function ProductBuy({
                   onClick={() => setShot(i)}
                   aria-label={`Photo ${i + 1} of ${gallery.length}`}
                 >
-                  {t && <Image src={t} alt="" fill sizes="64px" style={{ objectFit: "contain" }} />}
+                  {t && <Image src={t} alt="" fill sizes="(max-width: 767px) 64px, 92px" style={{ objectFit: "contain" }} />}
                 </button>
               );
             })}
           </div>
         )}
 
+        </div>
+
+        <div className="pdp-side">
         <div className="pdp-head">
           {product.brand && <span className="pbrand">{product.brand}</span>}
           <h1>{product.name}</h1>
@@ -202,6 +209,7 @@ export default function ProductBuy({
             <WishButton productId={product.id} name={product.name} initial={wished} />
           </div>
           {inCart > 0 && <p className="finehint">{inCart} already in your cart.</p>}
+        </div>
         </div>
       </section>
 

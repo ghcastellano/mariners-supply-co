@@ -61,7 +61,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
     : { data: null };
 
   const related = cat
-    ? (await listProducts(supabase, { category: cat.path, limit: 8 })).items.filter(
+    ? (await listProducts(supabase, { category: cat.path, limit: 5 })).items.filter(
         (r) => r.id !== p.id
       )
     : [];
@@ -71,7 +71,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
   const wished = await wishedProductIds([p.id, ...related.map((r) => r.id)]);
 
   return (
-    <main className="pb-dock">
+    <main className="pb-dock pg-pdp">
       <Breadcrumb
         trail={[
           { label: "Shop", href: "/shop" },

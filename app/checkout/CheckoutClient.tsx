@@ -161,6 +161,9 @@ export default function CheckoutClient({
       <div className="sumrow grand">
         <span>Pay now</span>
         <b>{usd(split.dueNow)}</b>
+            {/* A loja virou dólar; num cartão de 360px isso ficava na
+                quinta linha da letra miúda. Só aparece a partir de 1024. */}
+            <span className="sumcur">charged in USD</span>
       </div>
 
       {err && <p className="alert" style={{ marginTop: 12 }}>{err}</p>}

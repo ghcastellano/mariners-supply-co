@@ -87,7 +87,7 @@ export default async function CheckoutPage() {
 
 
   return (
-    <main>
+    <main className="pg-checkout">
       <Breadcrumb trail={[{ label: "Shopping Cart", href: "/cart" }, { label: "Checkout" }]} />
 
       <h1 className="secttl left">Checkout</h1>

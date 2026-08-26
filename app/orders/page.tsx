@@ -1,4 +1,5 @@
 import Link from "next/link";
+import AccountRail from "@/components/AccountRail";
 import { redirect } from "next/navigation";
 import Breadcrumb from "@/components/Breadcrumb";
 import { createClient } from "@/lib/supabase/server";
@@ -36,7 +37,7 @@ export default async function OrdersPage() {
   const orders = (data ?? []) as unknown as Row[];
 
   return (
-    <main>
+    <main className="pg-acct">
       <Breadcrumb trail={[{ label: "My Orders" }]} />
 
       <div className="hero-mini">
@@ -45,6 +46,9 @@ export default async function OrdersPage() {
         <p>Every kit rides with its ship&apos;s ETA — track each one here.</p>
       </div>
 
+      <AccountRail current="/orders" />
+
+      <div className="acct-main">
       {orders.length === 0 ? (
         <div className="empty">
           <div className="i">📦</div>
@@ -73,12 +77,22 @@ export default async function OrdersPage() {
                   {o.ships?.name ?? "—"}
                   {o.ships?.berth ? ` · BERTH ${o.ships.berth}` : ""} · {items} ITEMS ·{" "}
                   {usd(o.subtotal_cents ?? toCents(o.subtotal_usd))}
+                  {/* created_at já vinha na consulta e era descartado.
+                      Aparece só a partir de 1024, onde sobra largura. */}
+                  <span className="odate">
+                    {new Date(o.created_at).toLocaleDateString("en-GB", {
+                      day: "2-digit",
+                      month: "short",
+                      year: "numeric",
+                    })}
+                  </span>
                 </div>
               </Link>
             );
           })}
         </div>
       )}
+      </div>
     </main>
   );
 }
