@@ -106,7 +106,29 @@ export async function saveProfile(input: ProfileInput): Promise<SaveProfileResul
     })
     .eq("id", user.id);
 
-  if (error) return { ok: false, error: "Couldn't save your details — try again." };
+  if (error) {
+    // Erro mudo na tela custou uma sessão inteira de diagnóstico: a
+    // causa era 42501 (sem GRANT de UPDATE), e "try again" não dizia
+    // nada a ninguém. O detalhe vai para o log do servidor, e a tela
+    // separa os dois casos que o usuário pode resolver sozinho dos que
+    // ele não pode.
+    console.error(
+      JSON.stringify({ at: "save_profile", user: user.id, code: error.code, message: error.message })
+    );
+    if (error.code === "42501") {
+      return {
+        ok: false,
+        error: "We can't write to your profile right now — our side, not yours. We're on it.",
+      };
+    }
+    if (error.code === "23503") {
+      return {
+        ok: false,
+        error: "That vessel or port is no longer on file — pick it again from the list.",
+      };
+    }
+    return { ok: false, error: "Couldn't save your details — try again." };
+  }
 
   // O checkout lê o perfil no servidor: sem invalidar, ele seguiria
   // mostrando o dado antigo (e barrando o pagamento) depois de corrigido.
