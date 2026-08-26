@@ -17,9 +17,17 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
     .select("name, description")
     .eq("slug", slug)
     .maybeSingle();
+  const nome = data?.name;
   return {
-    title: data?.name ?? undefined,
-    description: data?.description ?? undefined,
+    title: nome ?? undefined,
+    // Nenhuma das categorias tem descrição no banco ainda, e sem esta
+    // linha toda página de categoria ia para o buscador sem resumo. O
+    // texto diz o que a página é de verdade — não é enfeite de SEO.
+    description:
+      data?.description ??
+      (nome
+        ? `${nome} for your vessel's next call at Porto de Santos. Pre-order before docking, pay a 30% deposit, receive at the gangway.`
+        : undefined),
   };
 }
 

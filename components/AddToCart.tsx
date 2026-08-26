@@ -49,7 +49,9 @@ export default function AddToCart({
     <button
       className={`padd ${qty ? "in" : ""}`}
       onClick={() => add(variantId)}
-      aria-label={`Add ${name} to cart`}
+      // O texto visível ("Add to cart") tem de ser prefixo do nome
+      // acessível, senão comando de voz não acha o botão — WCAG 2.5.3.
+      aria-label={`Add to cart — ${name}`}
     >
       {qty ? `In cart · ${qty}` : "Add to cart"}
     </button>

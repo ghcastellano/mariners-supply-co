@@ -104,9 +104,9 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
           {/* O nome volta no título e em negrito logo abaixo, como na
               ficha do Sunny: quem chega rolando de outra ficha confere
               de qual produto é a lista sem subir de novo. */}
-          <h3>
+          <h2>
             Description <span className="slash">/</span> {p.name}
-          </h3>
+          </h2>
           <p className="prodname">{p.name}</p>
           {p.specs?.length ? (
             <ul className="specs">
@@ -126,7 +126,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
           exterior e pagamento em moeda conversível pelo agente do
           armador — não cartão pessoal em real. */}
       <section className="pdp-block">
-        <h3>{ELIGIBILITY[p.tax_class].headline}</h3>
+        <h2>{ELIGIBILITY[p.tax_class].headline}</h2>
         <ul className="specs">
           {ELIGIBILITY[p.tax_class].lines.map((l) => (
             <li key={l}>{l}</li>
@@ -135,7 +135,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
       </section>
 
       <section className="pdp-block">
-        <h3>How it reaches you</h3>
+        <h2>How it reaches you</h2>
         <ul className="specs">
           <li>30% deposit now, balance when you take delivery.</li>
           <li>Photo proof of delivery on your order page.</li>
