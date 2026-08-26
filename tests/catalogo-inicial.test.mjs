@@ -33,7 +33,7 @@ const ARQUIVO = "docs/catalogo-santos.csv";
  *  registrada era inaceitável (na mão, prateleira de mercado, fundo de
  *  cozinha) e quatro entraram no lugar para segurar o piso de 10. Foto
  *  ruim não é vaga: derruba a categoria inteira. */
-const ESPERADAS = 81;
+const ESPERADAS = 80;
 
 /** O piso de 10–15 vale para os corredores de MANTIMENTO — é regra de
  *  rancho: corredor com três itens não é corredor. Linhas de serviço
