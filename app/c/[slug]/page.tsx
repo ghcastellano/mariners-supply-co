@@ -2,9 +2,19 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import Breadcrumb from "@/components/Breadcrumb";
 import ProductCardView from "@/components/ProductCard";
+import FacetRail from "@/components/FacetRail";
 import SortSelect from "@/components/SortSelect";
 import { createClient } from "@/lib/supabase/server";
-import { listProducts, PAGE_SIZE, SORT_LABEL, type Category, type SortKey } from "@/lib/catalog";
+import {
+  BADGE_LABEL,
+  buildTree,
+  listProducts,
+  PAGE_SIZE,
+  SORT_LABEL,
+  type Category,
+  type CategoryNode,
+  type SortKey,
+} from "@/lib/catalog";
 import { wishedProductIds } from "@/lib/wishlist";
 
 export const revalidate = 300;
@@ -36,52 +46,61 @@ export default async function CategoryPage({
   searchParams,
 }: {
   params: Promise<{ slug: string }>;
-  searchParams: Promise<{ sort?: string; cursor?: string }>;
+  searchParams: Promise<{ sort?: string; cursor?: string; badge?: string }>;
 }) {
   const { slug } = await params;
   const sp = await searchParams;
   const supabase = await createClient();
   const sort = (sp.sort as SortKey) ?? "featured";
 
-  const { data: cat } = await supabase
+  // Uma consulta só da árvore ativa, em vez de três (categoria, filhos
+  // e pai): o trilho de filtros precisa da árvore inteira de qualquer
+  // jeito, e pai e filhos saem dela de graça, em memória.
+  const { data: todas } = await supabase
     .from("categories")
     .select("id, parent_id, slug, name, icon, image_path, path, depth, active, sort_order")
-    .eq("slug", slug)
     .eq("active", true)
-    .maybeSingle();
-  if (!cat) notFound();
-  const category = cat as Category;
+    .order("sort_order");
 
-  // Filhos, produtos e o pai da migalha na mesma ida: o caminho
-  // materializado resolve a subárvore inteira com um LIKE, sem consulta
-  // recursiva, e a trilha não custa mais um salto ao banco.
-  const [{ data: children }, { items, nextCursor }, parentRes] = await Promise.all([
-    supabase
-      .from("categories")
-      .select("id, slug, name, icon, sort_order")
-      .eq("parent_id", category.id)
-      .eq("active", true)
-      .order("sort_order"),
-    listProducts(supabase, { category: category.path, sort, cursor: sp.cursor ?? null }),
-    category.parent_id
-      ? supabase.from("categories").select("slug, name").eq("id", category.parent_id).maybeSingle()
-      : null,
-  ]);
-  const parent = parentRes?.data ?? null;
+  const planas = (todas ?? []) as Category[];
+  const roots = buildTree(planas);
+  const achada = planas.find((c) => c.slug === slug);
+  if (!achada) notFound();
+  const category = achada;
+
+  const children = planas.filter((c) => c.parent_id === category.id);
+  const parent = category.parent_id
+    ? (planas.find((c) => c.id === category.parent_id) ?? null)
+    : null;
+
+  const { items, nextCursor } = await listProducts(supabase, {
+    category: category.path,
+    sort,
+    badge: (sp.badge as "promo" | "new" | "outlet" | undefined) ?? null,
+    cursor: sp.cursor ?? null,
+  });
 
   // O coração precisa nascer no estado certo: vazio quando já está
   // salvo vira toque duplo, e o toque duplo desmarca.
   const wished = await wishedProductIds(items.map((i) => i.id));
 
-  const more = (cursor: string) => {
+  // Preserva sort E badge. O more() antigo só carregava o sort, então
+  // paginar dentro de um filtro apagava o filtro em silêncio.
+  const keep = (extra: Record<string, string | null>) => {
     const p = new URLSearchParams();
-    if (sort !== "featured") p.set("sort", sort);
-    p.set("cursor", cursor);
-    return `/c/${slug}?${p.toString()}`;
+    const atual: Record<string, string | null> = {
+      sort: sort !== "featured" ? sort : null,
+      badge: sp.badge ?? null,
+      cursor: sp.cursor ?? null,
+      ...extra,
+    };
+    for (const [k, v] of Object.entries(atual)) if (v) p.set(k, v);
+    const qs = p.toString();
+    return `/c/${slug}${qs ? `?${qs}` : ""}`;
   };
 
   return (
-    <main>
+    <main className="pg-list">
       <Breadcrumb
         trail={[
           { label: "Shop", href: "/shop" },
@@ -90,6 +109,10 @@ export default async function CategoryPage({
         ]}
       />
       <h1 className="secttl left">{category.name}</h1>
+
+      <div className="shop-body">
+        <FacetRail tree={roots as CategoryNode[]} activeSlug={slug} />
+        <div className="listcol">
 
       {(children ?? []).length > 0 && (
         <div className="cats-tabs" style={{ paddingTop: 12 }}>
@@ -107,8 +130,31 @@ export default async function CategoryPage({
           {items.length}
           {nextCursor ? "+" : ""} item{items.length === 1 ? "" : "s"}
         </span>
+        <span className="offers wide-only">
+          {(["promo", "new", "outlet"] as const).map((b) => (
+            <Link
+              key={b}
+              href={keep({ badge: sp.badge === b ? null : b, cursor: null })}
+              className={sp.badge === b ? "on" : ""}
+              prefetch={false}
+            >
+              {BADGE_LABEL[b]}
+            </Link>
+          ))}
+        </span>
+        <span className="sortlbl" aria-hidden>
+          Sort by
+        </span>
         <SortSelect value={sort} options={SORT_LABEL} />
       </div>
+
+      {sp.badge && (
+        <div className="chips wide-only">
+          <Link href={keep({ badge: null, cursor: null })} prefetch={false}>
+            <b>Offer</b> {BADGE_LABEL[sp.badge as "promo" | "new" | "outlet"]}
+          </Link>
+        </div>
+      )}
 
       {items.length === 0 ? (
         <div className="empty">
@@ -128,12 +174,19 @@ export default async function CategoryPage({
       )}
 
       {nextCursor && (
-        <div className="stack" style={{ paddingTop: 6 }}>
-          <Link className="btn ghost" href={more(nextCursor)} prefetch={false}>
-            Load {PAGE_SIZE} more
+        <div className="stack">
+          {sp.cursor && (
+            <Link className="btn ghost back" href={keep({ cursor: null })} prefetch={false}>
+              ← Back to start
+            </Link>
+          )}
+          <Link className="btn ghost" href={keep({ cursor: nextCursor })} prefetch={false}>
+            Next {PAGE_SIZE} →
           </Link>
         </div>
       )}
+        </div>
+      </div>
     </main>
   );
 }

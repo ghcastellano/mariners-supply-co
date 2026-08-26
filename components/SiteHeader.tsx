@@ -3,6 +3,7 @@
 import Link from "next/link";
 
 import { Suspense, useEffect, useRef, useState } from "react";
+import { usePathname } from "next/navigation";
 import CategoryDrawer from "./CategoryDrawer";
 import HeaderSearch from "./HeaderSearch";
 import MiniCart from "./MiniCart";
@@ -31,6 +32,14 @@ export default function SiteHeader({
   const [cart, setCart] = useState(false);
   const [menu, setMenu] = useState(false);
   const acct = useRef<HTMLDivElement>(null);
+  // Barra horizontal de categorias: só existe no desktop/iPad, mas o
+  // estado mora aqui porque o markup é o mesmo — o CSS é que esconde.
+  const [mega, setMega] = useState<string | null>(null);
+  const bar = useRef<HTMLElement>(null);
+  // usePathname não provoca o bailout de pré-render que o
+  // useSearchParams provoca — por isso ele pode viver aqui, e o
+  // HeaderSearch continua isolado no <Suspense>.
+  const path = usePathname();
 
   useEffect(() => {
     if (!menu) return;
@@ -46,6 +55,23 @@ export default function SiteHeader({
     };
   }, [menu]);
 
+  useEffect(() => {
+    if (!mega) return;
+    const onDown = (e: MouseEvent) => {
+      if (bar.current && !bar.current.contains(e.target as Node)) setMega(null);
+    };
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && setMega(null);
+    document.addEventListener("mousedown", onDown);
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("mousedown", onDown);
+      document.removeEventListener("keydown", onKey);
+    };
+  }, [mega]);
+
+  // Navegou: fecha. Sem isto o painel fica aberto por cima da página nova.
+  useEffect(() => setMega(null), [path]);
+
   return (
     <>
       <Link className="announce" href="/brochures">
@@ -56,6 +82,7 @@ export default function SiteHeader({
         <div className="sunhead-row">
           <button className="hamb" onClick={() => setDrawer(true)} aria-label="Open menu" aria-expanded={drawer}>
             ☰
+            <span className="hamb-label">All Categories</span>
           </button>
 
           {/* O nome acessível precisa CONTER o texto visível (WCAG 2.5.3).
@@ -124,6 +151,68 @@ export default function SiteHeader({
         <Suspense fallback={<div className="sunsearch" aria-hidden />}>
           <HeaderSearch />
         </Suspense>
+
+        {/* Barra de categorias do desktop. No celular ela existe no
+            HTML mas o CSS a esconde — e o painel só é RENDERIZADO
+            quando aberto, então o celular não carrega árvore de
+            submenu nenhuma. */}
+        <nav
+          className="catbar"
+          aria-label="Product categories"
+          ref={bar}
+          onPointerLeave={(e) => e.pointerType === "mouse" && setMega(null)}
+        >
+          <ul className="catbar-list">
+            {tree.map((c) => {
+              const hot = c.slug === "promo" || c.slug === "outlet" || c.slug === "new-arrivals";
+              const cls = `catlink${hot ? " hot" : ""}${path.startsWith(`/c/${c.slug}`) ? " on" : ""}`;
+              return (
+                <li key={c.id} className="catwrap">
+                  {c.children.length > 0 ? (
+                    <>
+                      <button
+                        className={cls}
+                        aria-haspopup="true"
+                        aria-expanded={mega === c.id}
+                        onClick={() => setMega((m) => (m === c.id ? null : c.id))}
+                        /* filtrado por pointerType: hover no mouse, toque
+                           no iPad, com o mesmo código e sem matchMedia */
+                        onPointerEnter={(e) => e.pointerType === "mouse" && setMega(c.id)}
+                      >
+                        {c.name} <span className="cchev" aria-hidden>▾</span>
+                      </button>
+                      {mega === c.id && (
+                        <div className="megapanel" role="group" aria-label={c.name}>
+                          <div className="megagrid">
+                            {c.children.map((s) => (
+                              <div key={s.id} className="megacol">
+                                <Link className="megahead" href={`/c/${s.slug}`} onClick={() => setMega(null)}>
+                                  {s.name}
+                                </Link>
+                                {s.children.map((g) => (
+                                  <Link key={g.id} className="megalink" href={`/c/${g.slug}`} onClick={() => setMega(null)}>
+                                    {g.name}
+                                  </Link>
+                                ))}
+                              </div>
+                            ))}
+                          </div>
+                          <Link className="megaall" href={`/c/${c.slug}`} onClick={() => setMega(null)}>
+                            See all {c.name} →
+                          </Link>
+                        </div>
+                      )}
+                    </>
+                  ) : (
+                    <Link className={cls} href={`/c/${c.slug}`}>
+                      {c.name}
+                    </Link>
+                  )}
+                </li>
+              );
+            })}
+          </ul>
+        </nav>
       </header>
 
       <CategoryDrawer open={drawer} onClose={() => setDrawer(false)} tree={tree} cartCount={count} />

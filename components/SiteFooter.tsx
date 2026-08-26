@@ -50,6 +50,19 @@ const SECTIONS = [
 export default function SiteFooter() {
   return (
     <footer className="sunfoot">
+      {/* Coluna de marca: só aparece no desktop, onde o rodapé vira
+          colunas em vez de acordeão. No celular o CSS a esconde e o
+          acordeão continua exatamente como está — ele foi validado. */}
+      <div className="sunfoot-brand">
+        <p className="bl">
+          Mariners <b>Supply</b>
+        </p>
+        <p>
+          Pre-order before docking. 30% deposit now, the rest at the gangway. Porto de Santos, by
+          Mariner&apos;s Bar.
+        </p>
+        <Link href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</Link>
+      </div>
       {SECTIONS.map((s) => (
         <details key={s.title} className="sunfoot-sec">
           <summary>{s.title}</summary>

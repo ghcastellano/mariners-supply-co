@@ -1,9 +1,11 @@
 import Link from "next/link";
 import Breadcrumb from "@/components/Breadcrumb";
 import ProductCardView from "@/components/ProductCard";
+import FacetRail from "@/components/FacetRail";
 import { createClient } from "@/lib/supabase/server";
 import { wishedProductIds } from "@/lib/wishlist";
 import {
+  BADGE_LABEL,
   buildTree,
   listProducts,
   PAGE_SIZE,
@@ -57,7 +59,7 @@ export default async function ShopPage({
   };
 
   return (
-    <main>
+    <main className="pg-list">
       {/* Sem caixa de busca na página: a do cabeçalho global é a mesma do
           Sunny, e duas na mesma tela dividem o gesto ao meio. */}
       <Breadcrumb
@@ -68,6 +70,13 @@ export default async function ShopPage({
         }
       />
       <h1 className="secttl left">{query ? `“${query}”` : "Shop"}</h1>
+
+      {/* Duas colunas a partir de 1024px: trilho de categorias à
+          esquerda, lista à direita. Abaixo disso o CSS achata tudo de
+          volta numa coluna e o trilho some — o celular não muda. */}
+      <div className="shop-body">
+        <FacetRail tree={roots} activeSlug={null} />
+        <div className="listcol">
 
       {!query && !sp.cursor && !sp.badge && (
         <>
@@ -94,8 +103,40 @@ export default async function ShopPage({
         <span className="count">
           {query ? `${items.length} result${items.length === 1 ? "" : "s"}` : "All products"}
         </span>
+        <span className="offers wide-only">
+          {(["promo", "new", "outlet"] as const).map((b) => (
+            <Link
+              key={b}
+              href={keep({ badge: sp.badge === b ? null : b, cursor: null })}
+              className={sp.badge === b ? "on" : ""}
+              prefetch={false}
+            >
+              {BADGE_LABEL[b]}
+            </Link>
+          ))}
+        </span>
+        <span className="sortlbl" aria-hidden>
+          Sort by
+        </span>
         <SortSelect value={sort} options={SORT_LABEL} />
       </div>
+
+      {/* O que está filtrando agora, e como sair. Sem isto, quem chega
+          por link com ?badge= não descobre por que a lista é curta. */}
+      {(query || sp.badge) && (
+        <div className="chips wide-only">
+          {query && (
+            <Link href={keep({ q: null, cursor: null })} prefetch={false}>
+              <b>Search</b> “{query}”
+            </Link>
+          )}
+          {sp.badge && (
+            <Link href={keep({ badge: null, cursor: null })} prefetch={false}>
+              <b>Offer</b> {BADGE_LABEL[sp.badge as "promo" | "new" | "outlet"]}
+            </Link>
+          )}
+        </div>
+      )}
 
       {items.length === 0 ? (
         <div className="empty">
@@ -119,12 +160,21 @@ export default async function ShopPage({
       )}
 
       {nextCursor && (
-        <div className="stack" style={{ paddingTop: 6 }}>
+        <div className="stack">
+          {/* "Load 24 more" mentia: a paginação é keyset, então a página
+              seguinte SUBSTITUI as 24 anteriores, não soma. */}
+          {sp.cursor && (
+            <Link className="btn ghost back" href={keep({ cursor: null })} prefetch={false}>
+              ← Back to start
+            </Link>
+          )}
           <Link className="btn ghost" href={keep({ cursor: nextCursor })} prefetch={false}>
-            Load {PAGE_SIZE} more
+            Next {PAGE_SIZE} →
           </Link>
         </div>
       )}
+        </div>
+      </div>
     </main>
   );
 }
