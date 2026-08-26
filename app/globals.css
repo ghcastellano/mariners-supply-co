@@ -34,6 +34,33 @@
   --font-body: Inter, system-ui, -apple-system, "Segoe UI", sans-serif;
   --font-mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
   --shell-w: 430px;
+
+  /* ---- escala de espaço ----------------------------------------
+     Uma escala de 8 pontos, e nenhum número solto fora dela. Antes o
+     espaço era decidido bloco a bloco — 30px no herói, 22 no título,
+     14 na faixa do Captain, 4 na grade — e quando duas margens
+     vizinhas discordavam, uma vencia. Era daí que vinha o
+     "componente grudado", e não de nenhum componente em especial.
+
+     --gut é o recuo lateral da PÁGINA. Cada grade carregava o seu
+     (14, 16 ou 20px, conforme quem escreveu), então nada alinhava com
+     nada. Agora quem recua é o <main>; quem precisa sangrar até a
+     borda usa .bleed.
+
+     --stack é o compasso entre blocos empilhados. Ele existe num
+     lugar só, e tests/ritmo.test.mjs falha se algum intervalo da
+     página sair dele. */
+  --sp-1:  4px;
+  --sp-2:  8px;
+  --sp-3: 12px;
+  --sp-4: 16px;
+  --sp-5: 24px;
+  --sp-6: 32px;
+  --sp-7: 48px;
+  --sp-8: 64px;
+  --sp-9: 96px;
+  --gut:   16px;
+  --stack: var(--sp-6);
 }
 
 /* tablet: coluna um pouco mais generosa */
@@ -93,6 +120,33 @@ button { font-family: inherit; }
 @media (min-width: 500px) {
   .shell { border-left: 1px solid var(--line); border-right: 1px solid var(--line); }
 }
+
+/* ---- a pilha da página --------------------------------------------
+   É AQUI que o espaço vertical mora, e em nenhum componente.
+
+   <main> empilha em grade com um row-gap só. Filho nenhum declara
+   margem vertical própria, e filho nenhum declara recuo lateral: os
+   dois vêm daqui. Quem precisa encostar na borda pede .bleed, que é
+   uma exceção declarada em vez de um padding a menos por descuido.
+
+   `align-content: start` porque grade com uma coluna e conteúdo curto
+   distribui a sobra entre as fileiras — o carrinho vazio abriria vãos
+   de 200px entre os blocos. */
+.shell > main {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  align-content: start;
+  row-gap: var(--stack);
+  padding: var(--sp-5) var(--gut) var(--sp-8);
+}
+/* Sem isto, um filho de conteúdo largo (trilho, tabela) estica a
+   coluna em vez de rolar dentro dela. */
+.shell > main > * { min-width: 0; }
+
+/* Sangra até a borda da casca e devolve o recuo por dentro. É o único
+   jeito de um trilho horizontal terminar rente à borda sem que o
+   primeiro card fique colado nela. */
+.bleed { margin-inline: calc(var(--gut) * -1); }
 
 /* conteúdo que convive com barras fixas embaixo */
 .pb-nav  { padding-bottom: calc(96px + env(safe-area-inset-bottom)); }
@@ -308,7 +362,7 @@ button { font-family: inherit; }
 .cta .mono { font-size: 13px; }
 
 /* ===== formulários / auth ===== */
-.stack { padding: 8px 16px; display: grid; gap: 12px; }
+.stack { display: grid; gap: var(--sp-3); }
 .field { display: grid; gap: 6px; }
 .field label {
   font-size: 11px; letter-spacing: .1em; text-transform: uppercase;
@@ -679,7 +733,7 @@ input:-webkit-autofill:focus {
 }
 
 /* ===== grade de categorias ===== */
-.catgrid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 9px; padding: 4px 14px 10px; }
+.catgrid { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--sp-2); }
 @media (min-width: 560px) { .catgrid { grid-template-columns: repeat(3, 1fr); } }
 .catcard {
   display: flex; align-items: center; gap: 10px;
@@ -1158,10 +1212,19 @@ input:-webkit-autofill:focus {
   color: var(--muted); font-size: 13px; text-decoration: none; line-height: 1.5;
 }
 .sunfoot-body a:hover { color: var(--amber); }
-.paywall { display: flex; flex-wrap: wrap; gap: 7px; justify-content: center; padding: 18px 18px 6px; }
-.paywall span {
-  background: #FFFFFF; border-radius: 6px; padding: 6px 9px;
-  font-size: 10px; font-weight: 800; color: #0B1B30; letter-spacing: .02em;
+/* Uma linha discreta, não cinco pastilhas brancas.
+   As pastilhas eram o elemento MAIS CLARO de uma página escura inteira,
+   e o menos importante dela. Selo de pagamento serve para tranquilizar
+   quem já decidiu comprar; gritando mais que o produto, ele faz o
+   efeito contrário. */
+.paywall {
+  margin: 0; padding: 18px var(--gut) 4px;
+  display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px;
+  font-family: var(--font-mono); font-size: 11px; letter-spacing: .04em;
+  color: var(--muted);
+}
+.paywall .lb {
+  font-size: 9.5px; letter-spacing: .18em; text-transform: uppercase; color: var(--faint);
 }
 .sunfoot-legal {
   text-align: center; padding: 12px 18px calc(24px + env(safe-area-inset-bottom));
@@ -1172,7 +1235,7 @@ input:-webkit-autofill:focus {
 /* --- migalha de pão --- */
 .crumb {
   display: flex; align-items: center; gap: 7px; flex-wrap: wrap;
-  padding: 12px 16px 0; font-size: 12px; color: var(--faint);
+  font-size: 12px; color: var(--faint);
 }
 .crumb a { color: var(--faint); text-decoration: none; }
 .crumb a:hover { color: var(--amber); }
@@ -1184,8 +1247,8 @@ input:-webkit-autofill:focus {
    como promoção ensina a ignorar. O código é o maior texto do bloco
    porque é ele que a pessoa vai ditar para o colega no refeitório. */
 .capstrip {
-  display: grid; gap: 14px;
-  margin: 14px 14px 4px; padding: 16px 16px 17px;
+  display: grid; gap: var(--sp-4);
+  padding: var(--sp-4);
   border-radius: 14px;
   background: linear-gradient(135deg, rgba(255,182,72,.10), rgba(255,182,72,.03) 62%), var(--card);
   box-shadow: inset 0 0 0 1px rgba(255,182,72,.22);
@@ -1243,7 +1306,7 @@ input:-webkit-autofill:focus {
    ============================================================== */
 .pgrid {
   display: grid; grid-template-columns: repeat(2, 1fr);
-  gap: 10px; padding: 12px 14px 4px;
+  gap: var(--sp-3);
 }
 @media (min-width: 620px) { .pgrid { grid-template-columns: repeat(3, 1fr); gap: 12px; } }
 /* Acima de 768 o regime de tablet troca por auto-fill: a grade passa a
@@ -1426,7 +1489,11 @@ input:-webkit-autofill:focus {
 /* Trilho horizontal das faixas da home (promo, novidades). */
 .rail {
   display: grid; grid-auto-flow: column; grid-auto-columns: 74%;
-  gap: 10px; overflow-x: auto; padding: 4px 14px 12px;
+  gap: var(--sp-3); overflow-x: auto;
+  /* Sangra e devolve o recuo por DENTRO: assim o trilho rola de borda a
+     borda e o primeiro card ainda começa alinhado com o resto da
+     página. Padding só nos lados — o vão vertical é da pilha. */
+  margin-inline: calc(var(--gut) * -1); padding-inline: var(--gut);
   scroll-snap-type: x mandatory; scrollbar-width: none;
   -webkit-overflow-scrolling: touch;
 }
@@ -1436,16 +1503,28 @@ input:-webkit-autofill:focus {
 @media (min-width: 900px) { .rail { grid-auto-columns: 30%; } }
 
 /* Título de seção centralizado, como o "Categories" deles. */
+/* À esquerda em TODA largura. Era centralizado no celular e à esquerda
+   no desktop — dois tratamentos para o mesmo elemento, o que faz a mesma
+   loja parecer dois projetos. E título centralizado sobre grade alinhada
+   à esquerda não tem eixo comum com nada.
+
+   Sem margem superior: quem separa do bloco de cima é o row-gap da
+   página. Só a margem de BAIXO fica, porque ela não separa seções — ela
+   prende o título ao conteúdo dele. */
 .secttl {
-  text-align: center; font-family: var(--font-disp); font-weight: 800;
-  font-size: 21px; color: var(--ink); margin: 22px 0 12px; letter-spacing: -.01em;
+  text-align: left; font-family: var(--font-disp); font-weight: 800;
+  font-size: 21px; color: var(--ink); margin: 0; letter-spacing: -.01em;
 }
-.secttl.left { text-align: left; padding: 0 16px; }
+/* A margem de baixo existe para PRENDER o título ao conteúdo dele, e só
+   faz sentido quando os dois estão na mesma <section>. Solto como filho
+   direto do <main> — que é o caso do título de /shop — ela vira um vão
+   fora do compasso, somado ao row-gap da página. */
+:is(section, .sec) > .secttl { margin-bottom: var(--sp-3); }
 
 /* Aviso azul-claro do Sunny (pedido mínimo, wishlist vazia). */
 .infobox {
   display: flex; align-items: flex-start; gap: 10px;
-  margin: 12px 16px; padding: 12px 14px; border-radius: 11px;
+  padding: var(--sp-3) var(--sp-4); border-radius: 11px;
   background: rgba(46,230,200,.08); border: 1px solid rgba(46,230,200,.34);
   color: var(--ink); font-size: 13px; line-height: 1.5;
 }
@@ -1630,7 +1709,10 @@ input:-webkit-autofill:focus {
 /* Hero sem foto: não temos direito de uso de imagem de navio, e foto
    genérica de banco pesa mais do que a promessa que ilustra. */
 .homehero {
-  padding: 30px 20px 26px;
+  /* Sangra até a borda: painel de abertura com recuo lateral lê como
+     cartão solto, não como abertura da página. */
+  margin-inline: calc(var(--gut) * -1);
+  padding: var(--sp-7) var(--gut) var(--sp-6);
   background:
     radial-gradient(120% 90% at 0% 0%, rgba(255,182,72,.16), transparent 62%),
     radial-gradient(110% 100% at 100% 100%, rgba(46,230,200,.12), transparent 60%),
@@ -1669,7 +1751,7 @@ input:-webkit-autofill:focus {
    CELULAR: cartão de largura cheia, os dados em duas colunas, o prazo
    embaixo. Nada de esconder informação atrás de toque. */
 .vpanel {
-  margin: 10px 16px; padding: 16px 18px;
+  padding: var(--sp-4) var(--sp-5);
   background: var(--card); border: 1px solid var(--line);
   border-left: 3px solid var(--amber); border-radius: 16px;
   display: grid; gap: 12px;
@@ -2063,7 +2145,7 @@ svg.ic { flex: none; color: var(--amber); }
   }
   .sunfoot-body { padding: 0 0 26px; gap: 11px; }
   .sunfoot-body a, .sunfoot-body span { font-size: 13.5px; }
-  .paywall, .sunfoot-legal { grid-column: 1 / -1; }
+  .sunfoot-base { grid-column: 1 / -1; }
   .paywall { justify-content: flex-start; padding: 20px 0 0; border-top: 1px solid var(--line); }
   .sunfoot-legal { text-align: left; padding: 14px 0 30px; }
 
@@ -2082,29 +2164,31 @@ svg.ic { flex: none; color: var(--amber); }
   /* ================= HOME ================= */
   .pg-home {
     display: grid; grid-template-columns: repeat(12, minmax(0, 1fr));
-    column-gap: var(--gut);
+    column-gap: var(--gut); row-gap: var(--stack);
     /* O topo era 0 e o herói encostava na barra de categorias. Painel
        com canto arredondado colado na barra lê como elemento cortado,
        não como elemento no lugar — a borda superior some contra a
        barra e o arredondamento fica pendurado. */
-    padding: 22px var(--gut) 34px;
+    padding: var(--sp-5) var(--gut) var(--sp-8);
   }
   /* min-width:0 é obrigatório: sem ele o .rail com overflow-x estoura
      a faixa da grade em vez de rolar dentro dela. */
   .pg-home > * { grid-column: 1 / -1; min-width: 0; }
-  .pg-home .catgrid, .pg-home .rail { padding-left: 0; padding-right: 0; }
+  /* No desktop a página já recua; o trilho não sangra mais. Sem zerar,
+     o margin negativo do escopo base o jogaria para fora da coluna. */
+  .pg-home .catgrid, .pg-home .rail { margin-inline: 0; padding-inline: 0; }
   /* Só o herói e as duas laterais recebem linha explícita: são a
      fileira de abertura. Do Captain para baixo a grade coloca na ordem
      do DOM, que agora é a ordem de leitura — foi o grid-row fixo do
      .capstrip que o jogava para dentro da seção de categorias. */
   .pg-home > .homehero { grid-row: 1; }
   .pg-home > .vpanel   { grid-row: 1; grid-column: 9 / -1; align-self: stretch; margin: 0; }
-  .pg-home > .capstrip { margin: 22px 0 0; padding: 20px 22px 21px; }
+  .pg-home > .capstrip { margin: 0; padding: var(--sp-5) var(--sp-5) var(--sp-5); }
   .pg-home .capstrip h3 { font-size: clamp(18px, 1.5vw, 22px); }
 
   .pg-home .homehero {
     margin: 0 calc(var(--gut) * -1);      /* full-bleed até a borda da casca */
-    padding: 46px var(--gut) 42px;
+    padding: var(--sp-9) var(--gut) var(--sp-8);
   }
   .pg-home .homehero .kicker { font-size: 11.5px; margin-bottom: 14px; }
   /* o clamp de 1507 satura em 32px porque 7.2vw de 1440 é 103px.
@@ -2133,7 +2217,7 @@ svg.ic { flex: none; color: var(--amber); }
 
   .pg-home .secttl {
     display: flex; align-items: center; gap: 18px;
-    text-align: left; margin: 44px 0 18px; font-size: clamp(22px, 1.9vw, 28px);
+    text-align: left; margin: 0 0 var(--sp-4); font-size: clamp(22px, 1.9vw, 28px);
   }
   .pg-home .secttl::after { content: ""; order: 2; flex: 1; height: 1px; background: var(--line); }
   .pg-home .secttl .allx {
@@ -2142,7 +2226,6 @@ svg.ic { flex: none; color: var(--amber); }
     color: var(--amber); letter-spacing: 0;
   }
   .pg-home .secttl .allx:hover { color: var(--amber-hi); }
-  .pg-home > .secttl:first-of-type { margin-top: 36px; }
 
   .pg-home .catcard { padding: 17px 16px; gap: 13px; border-radius: 14px; }
   .pg-home .catcard .nm { font-size: 15px; }
@@ -2156,16 +2239,11 @@ svg.ic { flex: none; color: var(--amber); }
      no toque. 3,4 cards por tela — a fração é a afordância. */
   .pg-home .rail { grid-auto-columns: calc((100% - 40px) / 3.4); gap: 12px; padding-bottom: 16px; }
 
-  /* ================= LISTAGEM E CATEGORIA ================= */
-  .pg-list .crumb,
-  .pg-list .secttl.left { padding-left: var(--gut); padding-right: var(--gut); }
-  .shop-body { padding: 0 var(--gut); }
-  .pg-list .listbar, .pg-list .pgrid, .pg-list .stack,
-  .pg-list .catgrid, .pg-list .subhead, .pg-list .cats-tabs { padding-left: 0; padding-right: 0; }
-
-  .pg-list .crumb { padding-top: 20px; font-size: 13px; }
-  .pg-list .secttl.left { font-size: 30px; margin: 12px 0 6px; }
-  .pg-list .pgrid { padding-top: 0; padding-bottom: 10px; }
+  /* ================= LISTAGEM E CATEGORIA =================
+     O recuo lateral é do <main>; aqui não se repete. Antes cada bloco
+     carregava o seu var(--gut) e o resultado era recuo em dobro. */
+  .pg-list .crumb { font-size: 13px; }
+  .pg-list .secttl.left { font-size: 30px; }
 
   .pg-list .listbar {
     padding-top: 14px; padding-bottom: 12px; gap: 10px; row-gap: 10px; flex-wrap: wrap;
@@ -2324,16 +2402,17 @@ svg.ic { flex: none; color: var(--amber); }
   .catbar-list > .catwrap:nth-child(n + 7) { display: none; }
   .minicart { width: 420px; }
 
-  /* ---- rodapé em 4 colunas ---- */
-  .sunfoot { grid-template-columns: repeat(4, minmax(0, 1fr)); column-gap: 28px; }
-  .paywall {
-    grid-column: 1 / 3; grid-row: 2; align-self: center;
+  /* ---- rodapé em três colunas ----
+     Eram quatro seções de 3, 5, 4 e 2 links. Viraram três de 4, 3 e 3:
+     coluna que termina muito antes da vizinha lê como lista de sobras. */
+  .sunfoot { grid-template-columns: repeat(3, minmax(0, 1fr)); column-gap: 28px; }
+  .sunfoot-base {
+    grid-column: 1 / -1; display: flex; flex-wrap: wrap;
+    align-items: baseline; justify-content: space-between; gap: 12px 28px;
     padding: 22px 0 30px; border-top: 1px solid var(--line);
   }
-  .sunfoot-legal {
-    grid-column: 3 / -1; grid-row: 2; align-self: center;
-    text-align: right; padding: 22px 0 30px; border-top: 1px solid var(--line);
-  }
+  .paywall       { padding: 0; }
+  .sunfoot-legal { padding: 0; text-align: right; }
 
   /* ---- CADASTRO: duas colunas ----
      Dez campos numa coluna só é o formulário de celular exibido no
@@ -2586,7 +2665,7 @@ svg.ic { flex: none; color: var(--amber); }
 
   /* coluna de marca abrindo o rodapé: porto, e-mail e a regra dos 30%
      visíveis sem abrir nada — hoje escondidos atrás de "Our Offices" */
-  .sunfoot { grid-template-columns: 1.5fr repeat(4, minmax(0, 1fr)); column-gap: 34px; }
+  .sunfoot { grid-template-columns: 1.4fr repeat(3, minmax(0, 1fr)); column-gap: 34px; }
   .sunfoot-brand { display: block; padding-bottom: 26px; }
   .sunfoot-brand .bl {
     font-family: var(--font-disp); font-weight: 800; font-size: 17px;
@@ -2596,8 +2675,7 @@ svg.ic { flex: none; color: var(--amber); }
   .sunfoot-brand p { margin: 0 0 10px; color: var(--muted); font-size: 13.5px; line-height: 1.6; max-width: 32ch; }
   .sunfoot-brand a { color: var(--amber); font-size: 13.5px; }
   .sunfoot-brand a:hover { color: var(--amber-hi); }
-  .paywall       { grid-column: 1 / 4; }
-  .sunfoot-legal { grid-column: 4 / -1; }
+
 
   .pg-list .secttl.left { font-size: 36px; }
 

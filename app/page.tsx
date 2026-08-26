@@ -241,20 +241,27 @@ export default async function Home() {
         />
       )}
 
-      <h2 className="secttl">
-            Categories
-            <Link href="/shop" className="allx" prefetch={false}>
-              Browse all ›
-            </Link>
-          </h2>
+      {/* Título e grade dentro da MESMA <section>, como já estavam as
+          faixas de promoção e novidades. É o que faz o título ficar
+          preso ao conteúdo dele: o vão entre blocos é o compasso da
+          página, e dentro da seção o título usa a margem curta. Solto,
+          o título era um filho direto do <main> e recebia o mesmo vão
+          da grade — por isso parecia flutuar entre duas seções. */}
+      <section>
+        <h2 className="secttl">
+          Categories
+          <Link href="/shop" className="allx" prefetch={false}>
+            Browse all ›
+          </Link>
+        </h2>
 
-      {shown.length === 0 ? (
-        <div className="empty">
-          <div className="i">🧭</div>
-          The shelves are being stocked. Check back shortly.
-        </div>
-      ) : (
-        <div className="catgrid">
+        {shown.length === 0 ? (
+          <div className="empty">
+            <div className="i">🧭</div>
+            The shelves are being stocked. Check back shortly.
+          </div>
+        ) : (
+          <div className="catgrid">
           {shown.map((c) => {
             const n = store.counts[c.id] ?? 0;
             return (
@@ -272,9 +279,9 @@ export default async function Home() {
               </Link>
             );
           })}
-        </div>
-      )}
-
+          </div>
+        )}
+      </section>
 
       {crew?.kind === "invite" && (
         <Link href="/account" className="vstrip">

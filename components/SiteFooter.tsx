@@ -10,23 +10,34 @@ import { CONTACT_EMAIL } from "@/lib/env";
  * abre mesmo antes de o React hidratar e funciona com leitor de tela
  * sem nenhuma aria extra.
  */
+/**
+ * Três colunas de peso parecido, e não cinco desiguais.
+ *
+ * Estavam 3, 5, 4 e 2 links — a última com um endereço postal
+ * disfarçado de link para a home, que é afordância mentirosa: clicar
+ * num endereço tem de fazer algo com o endereço, ou não ser link.
+ * Rodapé com colunas de alturas muito diferentes lê como lista de
+ * sobras, não como mapa do site.
+ *
+ * "Photo credits" saiu daqui e foi para a linha legal: é obrigação de
+ * licença, e mora junto de termos e privacidade.
+ */
 const SECTIONS = [
   {
-    title: "Customer Service",
+    title: "Shop",
+    links: [
+      { label: "Catalog & flyers", href: "/brochures" },
+      { label: "New arrivals", href: "/shop?sort=newest" },
+      { label: "Promotions", href: "/shop?badge=promo" },
+      { label: "Captain rewards", href: "/captain" },
+    ],
+  },
+  {
+    title: "Help",
     links: [
       { label: "FAQ", href: "/faq" },
       { label: "Ports & delivery schedule", href: "/ports" },
       { label: "Contact us", href: `mailto:${CONTACT_EMAIL}` },
-    ],
-  },
-  {
-    title: "Relevant Links",
-    links: [
-      { label: "Catalog & flyers", href: "/brochures" },
-      { label: "Photo credits", href: "/attributions" },
-      { label: "Promotions", href: "/shop?badge=promo" },
-      { label: "New arrivals", href: "/shop?badge=new" },
-      { label: "Captain rewards", href: "/captain" },
     ],
   },
   {
@@ -35,17 +46,20 @@ const SECTIONS = [
       { label: "My orders", href: "/orders" },
       { label: "My wish list", href: "/wishlist" },
       { label: "Account information", href: "/account" },
-      { label: "Sign in", href: "/login" },
-    ],
-  },
-  {
-    title: "Our Offices",
-    links: [
-      { label: "Mariner's Bar — Porto de Santos, Brazil", href: "/" },
-      { label: CONTACT_EMAIL, href: `mailto:${CONTACT_EMAIL}` },
     ],
   },
 ];
+
+/**
+ * Marcas de pagamento em uma linha discreta.
+ *
+ * Eram cinco retângulos BRANCOS com texto preto — o elemento mais claro
+ * de uma página escura inteira, e o menos importante dela. Selo de
+ * pagamento é para tranquilizar quem já decidiu comprar; quando ele
+ * grita mais que o produto, o efeito se inverte e a página passa a
+ * parecer aquelas lojas que precisam provar que aceitam cartão.
+ */
+const PAGAMENTO = ["Apple Pay", "Google Pay", "Mastercard", "VISA", "PIX"];
 
 export default function SiteFooter() {
   return (
@@ -76,18 +90,23 @@ export default function SiteFooter() {
         </details>
       ))}
 
-      <div className="paywall" aria-label="Accepted payment methods">
-        <span>Apple&nbsp;Pay</span>
-        <span>G&nbsp;Pay</span>
-        <span>Mastercard</span>
-        <span>VISA</span>
-        <span>PIX</span>
-      </div>
+      {/* Pagamento e linha legal num bloco só. Eram dois itens da grade,
+          cada um com o próprio border-top, e o column-gap abria um corte
+          visível no meio do fio — um traço partido lê como defeito de
+          renderização. */}
+      <div className="sunfoot-base">
+      <p className="paywall">
+        <span className="lb">We accept</span>
+        {PAGAMENTO.join(" · ")}
+      </p>
 
       <div className="sunfoot-legal">
         © {new Date().getFullYear()} Mariners Supply — by Mariner&apos;s Bar, Porto de Santos.
         <br />
-        <Link href="/terms">Terms &amp; Conditions</Link> · <Link href="/privacy">Privacy Policy</Link>
+        <Link href="/terms">Terms &amp; Conditions</Link> ·{" "}
+        <Link href="/privacy">Privacy Policy</Link> ·{" "}
+        <Link href="/attributions">Photo credits</Link>
+      </div>
       </div>
     </footer>
   );
