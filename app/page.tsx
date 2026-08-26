@@ -1,4 +1,5 @@
 import Link from "next/link";
+import HeroSteps from "@/components/HeroSteps";
 import { unstable_cache } from "next/cache";
 import { createClient as createAnonClient } from "@supabase/supabase-js";
 import CategoryIcon from "@/components/CategoryIcon";
@@ -188,6 +189,12 @@ export default async function Home() {
           })}
         </div>
       )}
+
+      {/* A fileira do herói divide-se em dois no desktop. Quem tem navio
+          vê o painel do navio; quem não tem via 40% de preto — e é o
+          estado de todo visitante novo, inclusive o que chega pelo
+          Google. Os dois nunca aparecem juntos. */}
+      {!crew && <HeroSteps />}
 
       {crew?.kind === "vessel" && (
         <Link href="/account" className="vstrip">
