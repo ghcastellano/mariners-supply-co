@@ -179,3 +179,5 @@ export function priceRange(p: Pick<ProductCard, "price_cents" | "max_price_cents
 }
 
 export const inStock = (p: Pick<ProductCard, "stock_qty">) => p.stock_qty > 0;
+
+export type BrandOption = { id: string; slug: string; name: string };

@@ -869,7 +869,10 @@ input:-webkit-autofill:focus {
 }
 .buydock .pr { color: var(--amber); font-size: 14px; font-weight: 700; }
 .buydock .btn { margin: 0; flex: none; width: auto; padding: 11px 20px; }
-.pb-dock { padding-bottom: 96px; }
+/* A área segura tem de voltar: esta regra sobrescrevia a da linha 99 e
+   perdia o env(), então no iPhone com home indicator os últimos 34px da
+   página ficavam debaixo da barra do sistema. */
+.pb-dock { padding-bottom: calc(96px + env(safe-area-inset-bottom)); }
 
 /* miniatura real no lugar do emoji na linha do carrinho */
 .ci-thumb {
@@ -2257,3 +2260,12 @@ svg.ic { flex: none; color: var(--amber); }
   .pg-home .herocta,
   .pg-home .secttl .allx { display: none; }
 }
+
+/* Linhas do "Your order" no checkout. Antes era só "Products: 4" — a
+   pessoa tinha de voltar ao carrinho para conferir o que ia pagar. */
+.sumlines { list-style: none; margin: 0 0 4px; padding: 0; display: grid; gap: 7px; }
+.sumlines li { display: flex; align-items: baseline; gap: 10px; font-size: 13px; }
+.sumlines .nm { flex: 1; min-width: 0; color: var(--muted); }
+.sumlines .op { color: var(--faint); }
+.sumlines .qt { color: var(--faint); font-family: var(--font-mono); }
+.sumlines b { color: var(--ink); font-size: 13px; white-space: nowrap; }

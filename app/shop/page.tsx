@@ -2,6 +2,7 @@ import Link from "next/link";
 import Breadcrumb from "@/components/Breadcrumb";
 import ProductCardView from "@/components/ProductCard";
 import FacetRail from "@/components/FacetRail";
+import { listBrandsInUse } from "@/lib/brands";
 import { createClient } from "@/lib/supabase/server";
 import { wishedProductIds } from "@/lib/wishlist";
 import {
@@ -23,12 +24,19 @@ export const revalidate = 300;
 export default async function ShopPage({
   searchParams,
 }: {
-  searchParams: Promise<{ q?: string; sort?: string; cursor?: string; badge?: string }>;
+  searchParams: Promise<{ q?: string; sort?: string; cursor?: string; badge?: string; brand?: string }>;
 }) {
   const sp = await searchParams;
   const supabase = await createClient();
   const sort = (sp.sort as SortKey) ?? "featured";
   const query = sp.q?.trim() || null;
+
+  // As marcas vêm antes dos produtos porque a RPC recebe o UUID, não o
+  // slug — a URL carrega slug (legível e estável) e a tradução acontece
+  // aqui. Slug inexistente vira null: o filtro é ignorado em vez de
+  // estourar tipo no Postgres.
+  const brands = await listBrandsInUse();
+  const brandId = sp.brand ? (brands.find((b) => b.slug === sp.brand)?.id ?? null) : null;
 
   const [{ items, nextCursor }, cats] = await Promise.all([
     listProducts(supabase, {
@@ -36,6 +44,7 @@ export default async function ShopPage({
       sort,
       cursor: sp.cursor ?? null,
       badge: sp.badge ?? null,
+      brand: brandId,
     }),
     supabase
       .from("categories")
@@ -53,6 +62,7 @@ export default async function ShopPage({
     if (query) p.set("q", query);
     if (sort !== "featured") p.set("sort", sort);
     if (sp.badge) p.set("badge", sp.badge);
+    if (sp.brand) p.set("brand", sp.brand);
     for (const [k, v] of Object.entries(extra)) v ? p.set(k, v) : p.delete(k);
     const s = p.toString();
     return s ? `/shop?${s}` : "/shop";
@@ -75,7 +85,13 @@ export default async function ShopPage({
           esquerda, lista à direita. Abaixo disso o CSS achata tudo de
           volta numa coluna e o trilho some — o celular não muda. */}
       <div className="shop-body">
-        <FacetRail tree={roots} activeSlug={null} />
+        <FacetRail
+          tree={roots}
+          activeSlug={null}
+          brands={brands}
+          activeBrand={brandId ? (sp.brand ?? null) : null}
+          brandHref={(b) => keep({ brand: b, cursor: null })}
+        />
         <div className="listcol">
 
       {!query && !sp.cursor && !sp.badge && (
@@ -123,7 +139,7 @@ export default async function ShopPage({
 
       {/* O que está filtrando agora, e como sair. Sem isto, quem chega
           por link com ?badge= não descobre por que a lista é curta. */}
-      {(query || sp.badge) && (
+      {(query || sp.badge || brandId) && (
         <div className="chips wide-only">
           {query && (
             <Link href={keep({ q: null, cursor: null })} prefetch={false}>
@@ -133,6 +149,11 @@ export default async function ShopPage({
           {sp.badge && (
             <Link href={keep({ badge: null, cursor: null })} prefetch={false}>
               <b>Offer</b> {BADGE_LABEL[sp.badge as "promo" | "new" | "outlet"]}
+            </Link>
+          )}
+          {brandId && (
+            <Link href={keep({ brand: null, cursor: null })} prefetch={false}>
+              <b>Brand</b> {brands.find((b) => b.id === brandId)?.name}
             </Link>
           )}
         </div>

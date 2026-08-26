@@ -195,7 +195,16 @@ export default function ProductBuy({
 
           <div className="pdp-actions">
             <div className="qty">
-              <button onClick={() => setQty((q) => Math.max(1, q - 1))} aria-label="Less">−</button>
+              {/* O piso é o min_qty do produto, não 1. Um item com
+                  mínimo de 6 descia até 1 no botão −, e o pedido saía
+                  abaixo do que o fornecedor aceita. */}
+              <button
+                onClick={() => setQty((q) => Math.max(product.min_qty || 1, q - 1))}
+                disabled={qty <= (product.min_qty || 1)}
+                aria-label="Less"
+              >
+                −
+              </button>
               <span className="mono">{qty}</span>
               <button onClick={() => setQty((q) => Math.min(max, q + 1))} aria-label="More">+</button>
             </div>

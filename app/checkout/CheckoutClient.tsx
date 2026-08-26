@@ -14,7 +14,8 @@ type Line = {
   id: string;
   price_cents: number;
   active: boolean;
-  products: { active: boolean } | null;
+  option_label: string | null;
+  products: { active: boolean; name: string } | null;
 };
 
 /**
@@ -55,13 +56,17 @@ export default function CheckoutClient({
       setLines([]);
       return;
     }
-    // Só as variantes do carrinho, e só as colunas que entram na conta:
-    // preço e os dois "active". Nome e foto já foram conferidos no
-    // carrinho — repetir a listagem aqui é wifi de navio gasto à toa.
+    // Só as variantes do carrinho, e só as colunas que entram na conta.
+    // O NOME entrou junto: "Products: 4" e nada mais obriga a pessoa a
+    // voltar ao carrinho para conferir o que está prestes a pagar — e
+    // no desktop, com a coluna larga, lê como tela quebrada. Uma coluna
+    // de texto na mesma consulta não custa outra ida ao banco.
     const supabase = createClient();
     supabase
       .from("product_variants")
-      .select("id, price_cents, active, products!product_variants_product_id_fkey!inner(active)")
+      .select(
+        "id, price_cents, active, option_label, products!product_variants_product_id_fkey!inner(active, name)"
+      )
       .in("id", ids)
       .then(({ data }) => setLines((data ?? []) as unknown as Line[]));
   }, [ready, ids.join(",")]);
@@ -131,10 +136,18 @@ export default function CheckoutClient({
 
       {/* "Products" com a mesma contagem do carrinho: o número não pode
           mudar de uma tela para a outra sem nada ter mudado. */}
-      <div className="sumrow">
-        <span>Products:</span>
-        <b>{rows.length}</b>
-      </div>
+      <ul className="sumlines">
+        {rows.map((l) => (
+          <li key={l.id}>
+            <span className="nm">
+              {l.products?.name}
+              {l.option_label ? <span className="op"> · {l.option_label}</span> : null}
+              {l.qty > 1 ? <span className="qt"> ×{l.qty}</span> : null}
+            </span>
+            <b className="mono">{usd(l.price_cents * l.qty)}</b>
+          </li>
+        ))}
+      </ul>
 
       <div className="sumrow">
         <span>Subtotal</span>

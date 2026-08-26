@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import Breadcrumb from "@/components/Breadcrumb";
 import ProductCardView from "@/components/ProductCard";
 import FacetRail from "@/components/FacetRail";
+import { listBrandsInUse } from "@/lib/brands";
 import SortSelect from "@/components/SortSelect";
 import { createClient } from "@/lib/supabase/server";
 import {
@@ -46,7 +47,7 @@ export default async function CategoryPage({
   searchParams,
 }: {
   params: Promise<{ slug: string }>;
-  searchParams: Promise<{ sort?: string; cursor?: string; badge?: string }>;
+  searchParams: Promise<{ sort?: string; cursor?: string; badge?: string; brand?: string }>;
 }) {
   const { slug } = await params;
   const sp = await searchParams;
@@ -73,10 +74,16 @@ export default async function CategoryPage({
     ? (planas.find((c) => c.id === category.parent_id) ?? null)
     : null;
 
+  // A RPC recebe UUID; a URL carrega slug. Slug inexistente vira null
+  // e o filtro some, em vez de estourar tipo no Postgres.
+  const brands = await listBrandsInUse();
+  const brandId = sp.brand ? (brands.find((b) => b.slug === sp.brand)?.id ?? null) : null;
+
   const { items, nextCursor } = await listProducts(supabase, {
     category: category.path,
     sort,
     badge: (sp.badge as "promo" | "new" | "outlet" | undefined) ?? null,
+    brand: brandId,
     cursor: sp.cursor ?? null,
   });
 
@@ -91,6 +98,7 @@ export default async function CategoryPage({
     const atual: Record<string, string | null> = {
       sort: sort !== "featured" ? sort : null,
       badge: sp.badge ?? null,
+      brand: sp.brand ?? null,
       cursor: sp.cursor ?? null,
       ...extra,
     };
@@ -111,7 +119,13 @@ export default async function CategoryPage({
       <h1 className="secttl left">{category.name}</h1>
 
       <div className="shop-body">
-        <FacetRail tree={roots as CategoryNode[]} activeSlug={slug} />
+        <FacetRail
+          tree={roots as CategoryNode[]}
+          activeSlug={slug}
+          brands={brands}
+          activeBrand={brandId ? (sp.brand ?? null) : null}
+          brandHref={(b) => keep({ brand: b, cursor: null })}
+        />
         <div className="listcol">
 
       {(children ?? []).length > 0 && (
@@ -148,11 +162,18 @@ export default async function CategoryPage({
         <SortSelect value={sort} options={SORT_LABEL} />
       </div>
 
-      {sp.badge && (
+      {(sp.badge || brandId) && (
         <div className="chips wide-only">
-          <Link href={keep({ badge: null, cursor: null })} prefetch={false}>
-            <b>Offer</b> {BADGE_LABEL[sp.badge as "promo" | "new" | "outlet"]}
-          </Link>
+          {sp.badge && (
+            <Link href={keep({ badge: null, cursor: null })} prefetch={false}>
+              <b>Offer</b> {BADGE_LABEL[sp.badge as "promo" | "new" | "outlet"]}
+            </Link>
+          )}
+          {brandId && (
+            <Link href={keep({ brand: null, cursor: null })} prefetch={false}>
+              <b>Brand</b> {brands.find((b) => b.id === brandId)?.name}
+            </Link>
+          )}
         </div>
       )}
 

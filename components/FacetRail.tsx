@@ -1,5 +1,5 @@
 import Link from "next/link";
-import type { CategoryNode } from "@/lib/catalog";
+import type { BrandOption, CategoryNode } from "@/lib/catalog";
 
 /**
  * Trilho de categorias da listagem, à esquerda, a partir de 1024px.
@@ -23,10 +23,18 @@ function ramoAberto(root: CategoryNode, activeSlug: string | null): boolean {
 export default function FacetRail({
   tree,
   activeSlug,
+  brands = [],
+  activeBrand = null,
+  brandHref,
 }: {
   tree: CategoryNode[];
   /** Slug da categoria aberta; null em /shop. */
   activeSlug: string | null;
+  /** Só marcas com produto ativo — filtro que devolve vazio é armadilha. */
+  brands?: BrandOption[];
+  activeBrand?: string | null;
+  /** Monta a URL preservando o resto dos filtros. */
+  brandHref?: (slug: string | null) => string;
 }) {
   if (tree.length === 0) return null;
 
@@ -64,6 +72,31 @@ export default function FacetRail({
           ))}
         </ul>
       </div>
+
+      {/* Some inteira quando não há marca cadastrada — seção vazia lê
+          como filtro quebrado. */}
+      {brands.length > 0 && brandHref && (
+        <div className="facet">
+          <h2 className="facet-t">Brands</h2>
+          <ul className="facet-l">
+            {activeBrand && (
+              <li>
+                <Link href={brandHref(null)}>All brands</Link>
+              </li>
+            )}
+            {brands.map((b) => (
+              <li key={b.id}>
+                <Link
+                  href={brandHref(b.slug === activeBrand ? null : b.slug)}
+                  className={b.slug === activeBrand ? "on" : ""}
+                >
+                  {b.name}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
     </aside>
   );
 }
