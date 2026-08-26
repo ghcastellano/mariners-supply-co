@@ -53,7 +53,8 @@ export default async function AttributionsPage() {
       <Breadcrumb trail={[{ label: "Photo credits" }]} />
       <h1 className="pagettl">Photo credits</h1>
       <p className="pagelead">
-        Some catalogue photos are placeholders from Wikimedia Commons while we
+        Photos of packaged goods come from the open Open Food Facts archives,
+        matched to the exact barcode we stock. The rest are placeholders while we
         collect our suppliers&apos; own shots. Each one is credited below, as its
         licence requires.
       </p>
@@ -93,7 +94,7 @@ export default async function AttributionsPage() {
                         rel="noopener noreferrer"
                         target="_blank"
                       >
-                        Source on Wikimedia Commons
+                        Source on {r.source_title ?? "the original archive"}
                       </a>
                     </div>
                   )}
@@ -123,8 +124,9 @@ export default async function AttributionsPage() {
         </ul>
         <p className="pdp-text" style={{ marginTop: 10 }}>
           Brand names and product shapes in these photos belong to their
-          manufacturers. They illustrate the category, not a specific item we
-          stock — the supplier&apos;s own photo replaces each one as it arrives.
+          manufacturers. Where a photo was matched by barcode it shows the exact
+          item we stock; the remaining ones illustrate the category and are
+          replaced by the supplier&apos;s own photo as it arrives.
           If you own an image here and want it removed,{" "}
           <Link className="alink" href="/faq">
             write to us

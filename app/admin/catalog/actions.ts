@@ -7,6 +7,7 @@ import { buildImportPlan, diffAgainstExisting, type ImportProduct } from "@/lib/
 import { toCents } from "@/lib/money";
 import { PRODUCT_BUCKET } from "@/lib/catalog";
 import { lookup } from "node:dns/promises";
+import { creditoDaFoto } from "@/lib/fotolicenca";
 
 async function adminClient() {
   const supabase = await createClient();
@@ -300,11 +301,19 @@ async function fetchImageToStorage(
       .upload(path, buf, { contentType: type, upsert: false });
     if (error) return null;
 
+    // Crédito junto com a foto, na mesma gravação: se a origem é um
+    // acervo aberto, a licença exige crédito publicado, e crédito que
+    // depende de alguém lembrar de preencher depois não é cumprido.
+    const credito = creditoDaFoto(parsed.toString());
     await supabase.from("product_images").insert({
       product_id: productId,
       path,
       alt: null,
       sort_order: 0,
+      license: credito?.license ?? null,
+      attribution: credito?.attribution ?? null,
+      source_url: credito?.sourceUrl ?? null,
+      source_title: credito?.sourceTitle ?? null,
     });
     return path;
   } catch {

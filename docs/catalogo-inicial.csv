@@ -1,0 +1,32 @@
+sku,name,brand,category,price,stock,ean,image_url,short_description,active
+EAN-7896089011982,Café Pilão Tradicional 250 g,Pilão,coffee-tea,6.00,0,7896089011982,https://images.openfoodfacts.org/images/products/789/608/901/1982/front_pt.3.full.jpg,,true
+EAN-7896089012019,Café Pilão Tradicional 500 g,Pilão,coffee-tea,11.00,0,7896089012019,https://images.openfoodfacts.org/images/products/789/608/901/2019/front_pt.7.full.jpg,,true
+EAN-7891021006125,Café Melitta Tradicional 500 g,Melitta,coffee-tea,10.00,0,7891021006125,https://images.openfoodfacts.org/images/products/789/102/100/6125/front_pt.38.full.jpg,Café Melitta,true
+EAN-7891021005517,Café Melitta Sabor da Fazenda 500 g,Melitta,coffee-tea,10.00,0,7891021005517,https://images.openfoodfacts.org/images/products/789/102/100/5517/front_pt.4.full.jpg,,true
+EAN-7891021001885,Filtro de papel Melitta 30 un,Melitta,coffee-tea,4.00,0,7891021001885,https://images.openfoodfacts.org/images/products/789/102/100/1885/front_pt.4.full.jpg,,true
+EAN-7896005800010,Café 3 Corações Tradicional 500 g,3 Corações,coffee-tea,10.00,0,7896005800010,https://images.openfoodfacts.org/images/products/789/600/580/0010/front_pt.18.full.jpg,,true
+EAN-7896005801826,Café 3 Corações Extraforte a vácuo 500 g,3 Corações,coffee-tea,11.00,0,7896005801826,https://images.openfoodfacts.org/images/products/789/600/580/1826/front_pt.3.full.jpg,,true
+EAN-7896005802625,Cappuccino 3 Corações Classic 10 un,3 Corações,coffee-tea,7.00,0,7896005802625,https://images.openfoodfacts.org/images/products/789/600/580/2625/front_pt.3.full.jpg,,true
+EAN-7896005804391,Achocolatado Chocolatto 3 Corações 300 g,3 Corações,coffee-tea,6.00,0,7896005804391,https://images.openfoodfacts.org/images/products/789/600/580/4391/front_pt.3.full.jpg,,true
+EAN-7891098010476,Chá Leão Erva-doce 15 un,Leão,coffee-tea,4.00,0,7891098010476,https://images.openfoodfacts.org/images/products/789/109/801/0476/front_pt.3.full.jpg,,true
+EAN-7891098040909,"Chá Leão Ice Tea Pêssego 1,5 L",Leão,coffee-tea,4.00,0,7891098040909,https://images.openfoodfacts.org/images/products/789/109/804/0909/front_pt.3.full.jpg,,true
+EAN-7891000379691,Nescau 370 g,Nestlé,coffee-tea,5.00,0,7891000379691,https://images.openfoodfacts.org/images/products/789/100/037/9691/front_pt.24.full.jpg,Achocolatado em pó,true
+EAN-7891000360156,Nescau com canela 180 g,Nescau,coffee-tea,5.00,0,7891000360156,https://images.openfoodfacts.org/images/products/789/100/036/0156/front_pt.3.full.jpg,,true
+EAN-7891000338162,Nescau 730 g,Nescau,coffee-tea,7.00,0,7891000338162,https://images.openfoodfacts.org/images/products/789/100/033/8162/front_pt.3.full.jpg,,true
+EAN-7891991014861,Guaraná Antarctica 3 L,Guaraná Antarctica,soft-drinks,5.00,0,7891991014861,https://images.openfoodfacts.org/images/products/789/199/101/4861/front_pt.8.full.jpg,,true
+EAN-7891991010252,Guaraná Antarctica lata,Guaraná Antarctica,soft-drinks,3.00,0,7891991010252,https://images.openfoodfacts.org/images/products/789/199/101/0252/front_pt.3.full.jpg,,true
+EAN-7898919902897,Suco Do Bem Caju 1 L,Do Bem,soft-drinks,6.00,0,7898919902897,https://images.openfoodfacts.org/images/products/789/891/990/2897/front_pt.9.full.jpg,Suco de caju,true
+EAN-7898919902194,Suco Do Bem Laranja 200 ml,Do Bem,soft-drinks,3.00,0,7898919902194,https://images.openfoodfacts.org/images/products/789/891/990/2194/front_pt.3.full.jpg,,true
+EAN-7891962045160,Biscoito Bauducco Cereale Cacau 170 g,Bauducco,snacks,4.00,0,7891962045160,https://images.openfoodfacts.org/images/products/789/196/204/5160/front_pt.10.full.jpg,,true
+EAN-7896058500219,Bala de gelatina Dori Urso 60 g,Dori,snacks,2.00,0,7896058500219,https://images.openfoodfacts.org/images/products/789/605/850/0219/front_pt.3.full.jpg,,true
+EAN-7892840814342,Cheetos Pipoca doce caramelizada 45 g,Elma Chips,snacks,3.00,0,7892840814342,https://images.openfoodfacts.org/images/products/789/284/081/4342/front_pt.11.full.jpg,,true
+EAN-7892840817763,Cheetos Lua Parmesão 125 g,Elma Chips,snacks,5.00,0,7892840817763,https://images.openfoodfacts.org/images/products/789/284/081/7763/front_pt.15.full.jpg,,true
+EAN-7892840816261,Cheetos Onda Requeijão 140 g,Elma Chips,snacks,5.00,0,7892840816261,https://images.openfoodfacts.org/images/products/789/284/081/6261/front_pt.14.full.jpg,,true
+EAN-7891008119831,Garoto Talento Dark 50% cacau 75 g,Garoto,snacks,4.00,0,7891008119831,https://images.openfoodfacts.org/images/products/789/100/811/9831/front_pt.19.full.jpg,chocolate amargo com 50% de cacau e crocante de café.,true
+EAN-7891000388709,Baton Algodão-doce 16 g,Garoto,snacks,2.00,0,7891000388709,https://images.openfoodfacts.org/images/products/789/100/038/8709/front_pt.3.full.jpg,,true
+EAN-7891079008058,Nissin Cup Noodles Legumes 64 g,Nissin,snacks,3.00,0,7891079008058,https://images.openfoodfacts.org/images/products/789/107/900/8058/front_pt.3.full.jpg,,true
+EAN-7891079012758,Nissin Cup Noodles Calabresa 68 g,Nissin,snacks,3.00,0,7891079012758,https://images.openfoodfacts.org/images/products/789/107/901/2758/front_pt.3.full.jpg,,true
+EAN-7891150096783,Desodorante Dove Creme Sérum,Dove,personal-care,8.00,0,7891150096783,https://images.openbeautyfacts.org/images/products/789/115/009/6783/front_pt.3.full.jpg,,true
+EAN-7791293035826,Desodorante Rexona Cotton Dry 200 ml,Rexona,personal-care,8.00,0,7791293035826,https://images.openbeautyfacts.org/images/products/779/129/303/5826/front_pt.3.full.jpg,Rexona Cotton Dry 200ml,true
+EAN-7891024134405,Creme dental Colgate 100 g,Colgate,personal-care,4.00,0,7891024134405,https://images.openbeautyfacts.org/images/products/789/102/413/4405/front_pt.3.full.jpg,Creme Dental Colgate,true
+EAN-4005808257669,Nivea Pearl & Beauty 50 ml,Nivea,personal-care,7.00,0,4005808257669,https://images.openbeautyfacts.org/images/products/400/580/825/7669/front_en.13.full.jpg,roll on antitranspirante de extracto de perlas y aceite de palta.,true
