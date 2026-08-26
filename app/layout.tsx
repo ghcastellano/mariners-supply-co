@@ -21,6 +21,15 @@ export const metadata: Metadata = {
     description:
       "Your order rides with your vessel's ETA. Pre-order before docking, pay a 30% deposit, receive at the gangway.",
     type: "website",
+    // O cartão que o WhatsApp mostra. O link do Captain viaja colado em
+    // grupo de tripulação, e link sem imagem lê como link suspeito —
+    // justamente no canal que é o programa inteiro de indicação.
+    images: [{ url: "/og.png", width: 1200, height: 630, alt: "Mariners Supply — delivered to your gangway at Porto de Santos" }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Mariners Supply — gangway delivery at Porto de Santos",
+    images: ["/og.png"],
   },
   appleWebApp: {
     capable: true,
