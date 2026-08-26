@@ -1651,6 +1651,9 @@ input:-webkit-autofill:focus {
    logo abaixo e três parágrafos empurrariam a loja para fora da
    primeira dobra. É conteúdo de desktop, onde havia espaço sobrando. */
 .herosteps { display: none; }
+/* No celular a tela já é curta e as categorias vêm logo abaixo: a faixa
+   de fatos empurraria a grade para a segunda rolagem. */
+.herofacts { display: none; }
 
 /* ===== painel do navio =====
    Era uma tira de ícone + nome + "Alongside now". No desktop ela
@@ -2102,7 +2105,24 @@ svg.ic { flex: none; color: var(--amber); }
   .pg-home .homehero .kicker { font-size: 11.5px; margin-bottom: 14px; }
   /* o clamp de 1507 satura em 32px porque 7.2vw de 1440 é 103px.
      Reescala pela largura do bloco, não pela viewport. */
-  .pg-home .homehero h1 { font-size: clamp(32px, 3.4vw, 46px); max-width: 17ch; margin-top: 8px; }
+  /* 22ch e não 17ch: com o painel do navio ao lado o herói tem 8 das 12
+     colunas, e 17ch quebrava o título em TRÊS linhas curtas dentro de um
+     painel largo — o que faz o bloco parecer uma coluna solta no canto
+     em vez de o assunto da página. */
+  .pg-home .homehero h1 { font-size: clamp(32px, 3.4vw, 46px); max-width: 22ch; margin-top: 8px; }
+  .pg-home .homehero .herofacts {
+    display: grid; grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 22px; margin: 30px 0 0; padding-top: 20px;
+    border-top: 1px solid var(--line);
+    max-width: 760px;
+  }
+  .pg-home .homehero .herofacts dt {
+    font-family: var(--font-mono); font-size: 9.5px; letter-spacing: .16em;
+    text-transform: uppercase; color: var(--faint); margin-bottom: 5px;
+  }
+  .pg-home .homehero .herofacts dd {
+    margin: 0; font-size: 13.5px; line-height: 1.4; color: var(--ink);
+  }
   .pg-home .homehero .lead { font-size: 16px; line-height: 1.6; margin-top: 14px; max-width: 50ch; }
   .pg-home .herocta { display: flex; gap: 12px; margin-top: 26px; flex-wrap: wrap; }
   .pg-home .herocta .btn { width: auto; padding: 14px 22px; min-height: 48px; }

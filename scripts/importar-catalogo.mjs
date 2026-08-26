@@ -240,7 +240,13 @@ for (const l of linhas) {
 }
 
 /**
- * O arquivo passa a ser a verdade da vitrine.
+ * O arquivo passa a ser a verdade da vitrine — NAS CATEGORIAS QUE ELE
+ * COBRE, e só nelas.
+ *
+ * Sem esse recorte, subir uma planilha de comida e higiene apagaria os
+ * chips de celular, a caixa de som e o carregador, que vivem em
+ * categorias que a planilha nem menciona. "Fora do arquivo" tem de
+ * querer dizer "fora do arquivo naquilo que o arquivo trata".
  *
  * DESATIVA, não apaga. Produto apagado leva junto o histórico: item de
  * pedido antigo aponta para a variante, e o pedido de quem já comprou
@@ -249,10 +255,16 @@ for (const l of linhas) {
  */
 if (DESATIVAR_FORA) {
   const skus = new Set(linhas.map((l) => l.sku));
-  const { data: todos } = await db.from("products").select("id, sku, name").eq("active", true);
-  const fora = (todos ?? []).filter((p) => !skus.has(p.sku));
+  const catsDoArquivo = new Set(
+    linhas.map((l) => l.category).filter(Boolean).map((c) => catPorSlug.get(c)).filter(Boolean)
+  );
+  const { data: todos } = await db.from("products")
+    .select("id, sku, name, primary_category_id").eq("active", true);
+  const fora = (todos ?? []).filter(
+    (p) => !skus.has(p.sku) && catsDoArquivo.has(p.primary_category_id)
+  );
   if (fora.length === 0) {
-    console.log("\nNada a desativar: tudo que está ativo veio no arquivo.");
+    console.log("\nNada a desativar nas categorias do arquivo.");
   } else if (SECO) {
     console.log(`\n[seco] desativaria ${fora.length}:`);
     for (const p of fora) console.log(`  - ${p.sku}  ${p.name}`);
@@ -260,7 +272,7 @@ if (DESATIVAR_FORA) {
     const ids = fora.map((p) => p.id);
     await db.from("products").update({ active: false }).in("id", ids);
     await db.from("product_variants").update({ active: false }).in("product_id", ids);
-    console.log(`\n${fora.length} produto(s) fora do arquivo, desativado(s).`);
+    console.log(`\n${fora.length} produto(s) fora do arquivo nas categorias dele, desativado(s).`);
   }
 }
 

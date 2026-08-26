@@ -10,35 +10,44 @@ const { parseCsvRows } = await import("../lib/csv.ts");
 const { buildImportPlan } = await import("../lib/import.ts");
 
 /**
- * Dois arquivos, não três: catalogo-demo.csv foi removido.
- * Ele nasceu antes do filtro "vendido no Brasil" e trazia Indomie,
- * Lucky Me e Century Tuna com código do país de origem — a comida que a
- * tripulação quer, mas que nenhum distribuidor de Santos entrega. Pior:
- * disputava SKU com o catálogo novo, e SKU repetido em dois arquivos
- * deixa a ORDEM da importação decidir o preço, em silêncio.
+ * UM arquivo, não três.
+ *
+ * catalogo-demo.csv saiu primeiro: nasceu antes do filtro "vendido no
+ * Brasil" e trazia Indomie, Lucky Me e Century Tuna com código do país
+ * de origem — a comida que a tripulação quer, mas que nenhum
+ * distribuidor de Santos entrega.
+ *
+ * catalogo-inicial.csv saiu depois, por três motivos que se somam:
+ * disputava quatro SKUs com este (SKU repetido em dois arquivos deixa a
+ * ORDEM da importação decidir o preço, em silêncio); trazia nome de
+ * produto em português numa loja que é toda em inglês; e o preço era
+ * ad-hoc, item a item, enquanto aqui ele sai do custo por uma margem
+ * única e conferível.
+ *
+ * Sobrar um arquivo é o ponto: catálogo com duas fontes é catálogo em
+ * que ninguém sabe qual venceu.
  */
-const ARQUIVOS = [
-  ["docs/catalogo-inicial.csv", 31],
-  ["docs/catalogo-santos.csv", 36],
-];
+const ARQUIVO = "docs/catalogo-santos.csv";
+/** Seis categorias, de 10 a 15 cada. O piso e o teto são requisito. */
+const ESPERADAS = 82;
 
-const plano = buildImportPlan(
-  ARQUIVOS.flatMap(([a]) => parseCsvRows(readFileSync(a, "utf-8")))
-);
+const plano = buildImportPlan(parseCsvRows(readFileSync(ARQUIVO, "utf-8")));
 
-for (const [arquivo, quantas] of ARQUIVOS) {
-  test(`${arquivo}: as ${quantas} linhas passam sem apontamento`, () => {
-    const p = buildImportPlan(parseCsvRows(readFileSync(arquivo, "utf-8")));
-    assert.equal(p.valid.length, quantas);
-    assert.deepEqual(p.issues, []);
-    assert.deepEqual(p.duplicates, []);
-  });
-}
-
-test("os dois arquivos não disputam SKU entre si", () => {
-  // Casamento é por SKU: se o mesmo item aparecesse nos dois com preço
-  // diferente, a ordem de importação decidiria o preço — silenciosamente.
+test(`${ARQUIVO}: as ${ESPERADAS} linhas passam sem apontamento`, () => {
+  assert.equal(plano.valid.length, ESPERADAS);
+  assert.deepEqual(plano.issues, []);
   assert.deepEqual(plano.duplicates, []);
+});
+
+test("cada categoria tem de 10 a 15 produtos", () => {
+  // Requisito de negócio, não de gosto: categoria com três itens não é
+  // corredor, é prateleira vazia — e categoria com quarenta some do
+  // alcance de quem compra do celular a bordo.
+  const porCat = {};
+  for (const p of plano.valid) porCat[p.categorySlug] = (porCat[p.categorySlug] ?? 0) + 1;
+  for (const [cat, n] of Object.entries(porCat)) {
+    assert.ok(n >= 10 && n <= 15, `${cat} com ${n} produto(s), fora da faixa 10–15`);
+  }
 });
 
 test("cada item tem o que a vitrine precisa", () => {

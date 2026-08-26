@@ -192,6 +192,29 @@ export default async function Home() {
               Port line-up &amp; cut-offs
             </Link>
           </div>
+
+          {/* A faixa que fecha o herói.
+              Com o painel do navio ao lado, o herói fica com 8 das 12
+              colunas e o texto ocupava pouco mais de metade: sobrava um
+              gradiente vazio do tamanho de um card. Encher com desenho
+              seria desperdiçar o lugar mais visto da loja — estas três
+              são as perguntas que a tripulação faz antes de pedir
+              qualquer coisa, e nenhuma estava respondida acima da
+              dobra. */}
+          <dl className="herofacts">
+            <div>
+              <dt>Where</dt>
+              <dd>At your berth, gangway hand-over</dd>
+            </div>
+            <div>
+              <dt>Deposit</dt>
+              <dd>{DEPOSIT_PCT}% now, balance on delivery</dd>
+            </div>
+            <div>
+              <dt>Cut-off</dt>
+              <dd>Set by your port line-up</dd>
+            </div>
+          </dl>
       </section>
 
       <h2 className="secttl">

@@ -1,0 +1,83 @@
+sku,ean,category,brand,name,size,cost_brl,photo,photo_ref
+EAN-7891021006125,7891021006125,coffee-tea,MELITTA,Melitta Traditional Ground Coffee,500 g,22,https://images.openfoodfacts.org/images/products/789/102/100/6125/front_pt.25.full.jpg,
+EAN-7896005800010,7896005800010,coffee-tea,3 CORACOES,3 Corações Traditional Ground Coffee,500 g,20,https://images.openfoodfacts.org/images/products/789/600/580/0010/front_pt.6.full.jpg,
+EAN-7896005801819,7896005801819,coffee-tea,3 Corações,3 Corações Extra Strong Ground Coffee,250 g,13,https://images.openfoodfacts.org/images/products/789/600/580/1819/front_pt.4.full.jpg,
+EAN-7896089011357,7896089011357,coffee-tea,Pilão,Pilão Ground Coffee,500 g,23,https://images.openfoodfacts.org/images/products/789/608/901/1357/front.11.full.jpg,
+EAN-7896224814126,7896224814126,coffee-tea,Santa Clara,Santa Clara Classic Ground Coffee,250 g,26,https://images.openfoodfacts.org/images/products/789/622/481/4126/front_pt.3.full.jpg,
+EAN-7896019206785,7896019206785,coffee-tea,Iguaçu,Café Iguaçu Classic Instant Coffee,200 g,24,https://images.openfoodfacts.org/images/products/789/601/920/6785/front_pt.10.full.jpg,
+EAN-7891000286449,7891000286449,coffee-tea,Nescafé,Nescafé Original Instant Coffee,230 g,29,https://images.openfoodfacts.org/images/products/789/100/028/6449/front_es.7.full.jpg,
+EAN-7891000076392,7891000076392,coffee-tea,NESCAFE,Nescafé Instant Cappuccino,200 g,22,https://images.openfoodfacts.org/images/products/789/100/007/6392/front_pt.12.full.jpg,
+EAN-7896005808016,7896005808016,coffee-tea,3 CORACOES,3 Corações Balance Lactose-Free Cappuccino,180 g,19,https://images.openfoodfacts.org/images/products/789/600/580/8016/front_pt.8.full.jpg,
+EAN-7891098000163,7891098000163,coffee-tea,MATTE LEAO,Leão Camomile Tea Bags,10 g,6,https://images.openfoodfacts.org/images/products/789/109/800/0163/front_pt.3.full.jpg,
+EAN-7891048038123,7891048038123,coffee-tea,Dr. Oetker,Dr. Oetker Mixed Herbal Tea Bags,10 bags,5,https://images.openfoodfacts.org/images/products/789/104/803/8123/front_pt.8.full.jpg,
+EAN-7891098000170,7891098000170,coffee-tea,Leão Fuze,Leão Mint Tea Bags,10 bags,6,https://images.openfoodfacts.org/images/products/789/109/800/0170/front_pt.7.full.jpg,
+EAN-7891098040893,7891098040893,coffee-tea,LEAO FUZE,Leão Peach Iced Tea,450 ml,5,https://images.openfoodfacts.org/images/products/789/109/804/0893/front_pt.3.full.jpg,
+EAN-7891000379691,7891000379691,coffee-tea,Nescau,Nescau Chocolate Drink Powder,370 g,12,https://images.openfoodfacts.org/images/products/789/100/037/9691/front_pt.18.full.jpg,
+EAN-7891000073537,7891000073537,coffee-tea,Nestlé,Nesquik Chocolate Drink Powder,400 g,17,https://images.openfoodfacts.org/images/products/789/100/007/3537/front_en.19.full.jpg,
+EAN-78908901,78908901,soft-drinks,COCA-COLA,Coca-Cola Original,200 ml,2.5,https://images.openfoodfacts.org/images/products/78908901/front_pt.18.full.jpg,
+EAN-7894900027006,7894900027006,soft-drinks,COCA COLA MENOS AÇÚCAR,Coca-Cola Original,1.5 L,8,https://images.openfoodfacts.org/images/products/789/490/002/7006/front_pt.6.full.jpg,
+EAN-7894900027013,7894900027013,soft-drinks,COCA-COLA,Coca-Cola Original,2 L,9,https://images.openfoodfacts.org/images/products/789/490/002/7013/front_pt.26.full.jpg,
+EAN-7891098000637,7891098000637,soft-drinks,COCA COLA,Coca-Cola Glass Bottle,,4,https://images.openfoodfacts.org/images/products/789/109/800/0637/front_en.3.full.jpg,
+EAN-7894900030013,7894900030013,soft-drinks,FANTA,Fanta Orange Can,350 ml,4,https://images.openfoodfacts.org/images/products/789/490/003/0013/front_pt.13.full.jpg,
+EAN-7894900093056,7894900093056,soft-drinks,FANTA,Fanta Guaraná,2 L,8,https://images.openfoodfacts.org/images/products/789/490/009/3056/front_pt.7.full.jpg,
+EAN-7894900681000,7894900681000,soft-drinks,SPRITE,Sprite Lemon,2 L,8,https://images.openfoodfacts.org/images/products/789/490/068/1000/front_pt.12.full.jpg,
+EAN-7894900681017,7894900681017,soft-drinks,PORTINARI,Sprite Lemon Can,350 ml,4,https://images.openfoodfacts.org/images/products/789/490/068/1017/front_pt.8.full.jpg,
+EAN-7894900680508,7894900680508,soft-drinks,SPRITE,Sprite Lemon Fresh Zero Sugar,510 ml,5,https://images.openfoodfacts.org/images/products/789/490/068/0508/front_pt.15.full.jpg,
+EAN-7891991016124,7891991016124,soft-drinks,ANTARCTICA,Guaraná Antarctica Zero Sugar,200 ml,3,https://images.openfoodfacts.org/images/products/789/199/101/6124/front_pt.3.full.jpg,
+EAN-7892840800000,7892840800000,soft-drinks,PEPSI,Pepsi Cola,2 L,7,https://images.openfoodfacts.org/images/products/789/284/080/0000/front_pt.3.full.jpg,
+EAN-7894900530056,7894900530056,soft-drinks,Crystal,Crystal Still Mineral Water,5 L,3,https://images.openfoodfacts.org/images/products/789/490/053/0056/front.5.full.jpg,
+EAN-0070847038979,0070847038979,soft-drinks,Monster Energy,Monster Energy Mango Loco,473 ml,11,https://images.openfoodfacts.org/images/products/007/084/703/8979/front_es.4.full.jpg,
+EAN-7892840808174,7892840808174,soft-drinks,GATORADE,Gatorade Strawberry & Passion Fruit,500 ml,7,https://images.openfoodfacts.org/images/products/789/284/080/8174/front_pt.11.full.jpg,
+EAN-7898919902897,7898919902897,soft-drinks,Do bem,Do Bem Cashew Juice,1 L,9,https://images.openfoodfacts.org/images/products/789/891/990/2897/front_pt.9.full.jpg,
+EAN-7622300862282,7622300862282,snacks,LACTA,Lacta Diamante Negro Milk Chocolate,20 g,2,https://images.openfoodfacts.org/images/products/762/230/086/2282/front_pt.15.full.jpg,
+EAN-7899970400056,7899970400056,snacks,HERSHEYS,Hershey's Extra Creamy Milk Chocolate,92 g,9,https://images.openfoodfacts.org/images/products/789/997/040/0056/front_pt.13.full.jpg,
+EAN-7899970400452,7899970400452,snacks,HERSHEYS,Hershey's Air Aerated Milk Chocolate,85 g,9,https://images.openfoodfacts.org/images/products/789/997/040/0452/front_pt.18.full.jpg,
+EAN-78918566,78918566,snacks,Garoto,Talento Intense Almond Chocolate,25 g,8,https://images.openfoodfacts.org/images/products/78918566/front.5.full.jpg,
+EAN-7898292888993,7898292888993,snacks,Hershey's,Hershey's Kisses Milk Chocolate,200 g,18,https://images.openfoodfacts.org/images/products/789/829/288/8993/front_pt.8.full.jpg,
+EAN-7891000329665,7891000329665,snacks,SUFLAIR,Suflair Duo Aerated Chocolate,80 g,9,https://images.openfoodfacts.org/images/products/789/100/032/9665/front_pt.16.full.jpg,
+EAN-7622300991456,7622300991456,snacks,LACTA,Lacta Milk Chocolate,90 g,9,https://images.openfoodfacts.org/images/products/762/230/099/1456/front_pt.19.full.jpg,
+EAN-7622300988517,7622300988517,snacks,BIS,Bis Xtra Oreo White Chocolate Wafer,45 g,6,https://images.openfoodfacts.org/images/products/762/230/098/8517/front_pt.15.full.jpg,
+EAN-7899970400865,7899970400865,snacks,AMENDOIM,Reese's Peanut Butter Cups,42 g,8,https://images.openfoodfacts.org/images/products/789/997/040/0865/front_pt.18.full.jpg,
+EAN-7896004006277,7896004006277,snacks,PRINGLES,Pringles Original,104 g,13,https://images.openfoodfacts.org/images/products/789/600/400/6277/front_pt.3.full.jpg,
+EAN-7892840817916,7892840817916,snacks,DORITOS,Doritos Nacho Cheese,210 g,17,https://images.openfoodfacts.org/images/products/789/284/081/7916/front_pt.19.full.jpg,
+EAN-7892840814472,7892840814472,snacks,Ruffles,Ruffles Original Crisps,300 g,10,https://images.openfoodfacts.org/images/products/789/284/081/4472/front_pt.4.full.jpg,
+EAN-7892840252748,7892840252748,snacks,Elma Chips,Cheetos Onda Cream Cheese,150 g,8,https://images.openfoodfacts.org/images/products/789/284/025/2748/front_pt.9.full.jpg,
+EAN-7896058507188,7896058507188,snacks,Dori,Dori Japanese-Style Salted Peanuts,700 g,9,https://images.openfoodfacts.org/images/products/789/605/850/7188/front_pt.3.full.jpg,
+EAN-7891095030767,7891095030767,snacks,YOKI,Yoki Ready-Made Butter Popcorn,28 g,4,https://images.openfoodfacts.org/images/products/789/109/503/0767/front_pt.10.full.jpg,
+EAN-7891079000229,7891079000229,taste-of-home,Nissin,Nissin Lámen Free-Range Chicken Instant Noodles,85 g,3,https://images.openfoodfacts.org/images/products/789/107/900/0229/front.7.full.jpg,
+EAN-7891079000205,7891079000205,taste-of-home,AJINOMOTO,Nissin Lámen Beef Instant Noodles,85 g,3,https://images.openfoodfacts.org/images/products/789/107/900/0205/front_pt.9.full.jpg,
+EAN-7891079000434,7891079000434,taste-of-home,AJINOMOTO,Nissin Talharim Chicken Instant Noodles,99 g,4,https://images.openfoodfacts.org/images/products/789/107/900/0434/front_pt.3.full.jpg,
+EAN-7891079013335,7891079013335,taste-of-home,Nissin,Nissin Ramen Beef Rib Instant Noodles,85 g,5,https://images.openfoodfacts.org/images/products/789/107/901/3335/front_es.4.full.jpg,
+EAN-7891079012208,7891079012208,taste-of-home,Nissin,Nissin Ramen Chicken Instant Noodles,85 g,5,https://images.openfoodfacts.org/images/products/789/107/901/2208/front_es.19.full.jpg,
+EAN-7893500018490,7893500018490,taste-of-home,TIO JOAO,Tio João Wholegrain Rice,500 g,8,https://images.openfoodfacts.org/images/products/789/350/001/8490/front_pt.3.full.jpg,
+EAN-7896901200235,7896901200235,taste-of-home,BROTO LEGAL,Broto Legal White Rice Type 1,1 kg,7,https://images.openfoodfacts.org/images/products/789/690/120/0235/front_pt.3.full.jpg,
+EAN-7896290300189,7896290300189,taste-of-home,PRATO FINO,Prato Fino White Rice,1 kg,8,https://images.openfoodfacts.org/images/products/789/629/030/0189/front_pt.7.full.jpg,
+EAN-7896196069371,7896196069371,taste-of-home,LA PASTINA,La Pastina Basmati Rice,500 g,18,https://images.openfoodfacts.org/images/products/789/619/606/9371/front_pt.3.full.jpg,
+EAN-7896247400122,7896247400122,taste-of-home,Kikkoman,Kikkoman Soy Sauce,150 ml,22,https://images.openfoodfacts.org/images/products/789/624/740/0122/front_pt.3.full.jpg,
+EAN-7891167011847,7891167011847,taste-of-home,Gomes da Costa,Gomes da Costa Tuna Pâté,,7,https://images.openfoodfacts.org/images/products/789/116/701/1847/front_pt.4.full.jpg,
+EAN-7891167011731,7891167011731,taste-of-home,Gomes da Costa,Gomes da Costa Solid Tuna in Oil,170 g,11,https://images.openfoodfacts.org/images/products/789/116/701/1731/front_pt.10.full.jpg,
+EAN-7898943163035,7898943163035,taste-of-home,ROBINSON CRUSOE,Robinson Crusoe Solid Tuna in Oil,120 g,11,https://images.openfoodfacts.org/images/products/789/894/316/3035/front_pt.18.full.jpg,
+EAN-7891167021037,7891167021037,taste-of-home,Gomes da Costa,Gomes da Costa Sardines in Lemon,125 g,8,https://images.openfoodfacts.org/images/products/789/116/702/1037/front_pt.6.full.jpg,
+EAN-7896213000011,7896213000011,taste-of-home,VITARELLA,Vitarella Thin Spaghetti,500 g,5,https://images.openfoodfacts.org/images/products/789/621/300/0011/front_pt.7.full.jpg,
+EAN-7891024134610,7891024134610,personal-care,Colgate,Colgate Máxima Proteção Anticavity Toothpaste,180 g,6,https://images.openbeautyfacts.org/images/products/789/102/413/4610/front_es.4.full.jpg,
+EAN-7891528038568,7891528038568,personal-care,Colgate,Sorriso Fresh Gel Menthol Toothpaste,90 g,4,https://images.openbeautyfacts.org/images/products/789/152/803/8568/front_pt.7.full.jpg,
+EAN-7891024034095,7891024034095,personal-care,colgate,Colgate Toothpaste,,8,https://images.openbeautyfacts.org/images/products/789/102/403/4095/front_en.5.full.jpg,estrangeira
+EAN-8720182256836,8720182256836,personal-care,Dove,Dove Original Beauty Cream Bar Soap,360 g,11,https://images.openbeautyfacts.org/images/products/872/018/225/6836/front_en.6.full.jpg,estrangeira
+EAN-8683130036099,8683130036099,personal-care,Dove,Dove Coconut & Almond Liquid Hand Soap,450 ml,16,https://images.openbeautyfacts.org/images/products/868/313/003/6099/front_en.8.full.jpg,estrangeira
+EAN-8683130093436,8683130093436,personal-care,Dove,Dove Original Antiperspirant Spray,150 ml,15,https://images.openbeautyfacts.org/images/products/868/313/009/3436/front_en.8.full.jpg,estrangeira
+EAN-8720181594823,8720181594823,personal-care,Dove,Dove Raspberry & Rose Deodorant Stick,75 ml,18,https://images.openbeautyfacts.org/images/products/872/018/159/4823/front_nl.3.full.jpg,estrangeira
+EAN-8720181375194,8720181375194,personal-care,Dove,Dove Clean Comfort Shower Gel,,14,https://images.openbeautyfacts.org/images/products/872/018/137/5194/front_de.5.full.jpg,estrangeira
+EAN-8683130020265,8683130020265,personal-care,Rexona,Rexona Invisible 72h Antiperspirant Spray,150 ml,15,https://images.openbeautyfacts.org/images/products/868/313/002/0265/front_en.6.full.jpg,estrangeira
+EAN-8683130019290,8683130019290,personal-care,Rexona,Rexona Shower Fresh Antiperspirant Spray,150 ml,15,https://images.openbeautyfacts.org/images/products/868/313/001/9290/front_en.8.full.jpg,estrangeira
+EAN-8683130019269,8683130019269,personal-care,Rexona,Rexona Sexy Bouquet Antiperspirant Spray,150 ml,15,https://images.openbeautyfacts.org/images/products/868/313/001/9269/front_en.6.full.jpg,estrangeira
+EAN-7501054500193,7501054500193,personal-care,nivea,Nivea Creme Moisturiser,200 ml,24,https://images.openbeautyfacts.org/images/products/750/105/450/0193/front_es.12.full.jpg,estrangeira
+EAN-0079656026078,0079656026078,sun-protection,Banana Boat,Banana Boat Sunscreen Lotion SPF 50,,39,https://images.openbeautyfacts.org/images/products/007/965/602/6078/front_fr.3.full.jpg,estrangeira
+EAN-0079656049718,0079656049718,sun-protection,Banana Boat,Banana Boat Sport Performance Sunscreen SPF 30,236 ml,42,https://images.openbeautyfacts.org/images/products/007/965/604/9718/front_en.4.full.jpg,estrangeira
+EAN-4005900998996,4005900998996,sun-protection,Nivea sun,Nivea Sun UV Anti-Spot Fluid SPF 50+,40 ml,55,https://images.openbeautyfacts.org/images/products/400/590/099/8996/front_nl.7.full.jpg,estrangeira
+EAN-42429128,42429128,sun-protection,Nivea sun,Nivea Sun Kids Protect & Hydrate SPF 50+,50 ml,29,https://images.openbeautyfacts.org/images/products/000/004/242/9128/front_nl.7.full.jpg,estrangeira
+EAN-42429111,42429111,sun-protection,Nivea sun,Nivea Sun Protect & Hydrate SPF 30,50 ml,29,https://images.openbeautyfacts.org/images/products/000/004/242/9111/front_nl.7.full.jpg,estrangeira
+EAN-4005900717191,4005900717191,sun-protection,Nivea sun,Nivea Sun After Sun Bronze Lotion,200 ml,33,https://images.openbeautyfacts.org/images/products/400/590/071/7191/front_nl.11.full.jpg,estrangeira
+EAN-4006000142296,4006000142296,sun-protection,Nivea Sun,Nivea Sun Kids Protect & Hydrate SPF 50+,270 ml,46,https://images.openbeautyfacts.org/images/products/400/600/014/2296/front_fr.3.full.jpg,estrangeira
+EAN-40062075,40062075,sun-protection,Nivea,Nivea Sun Protect & Moisture SPF 50,100 ml,44,https://images.openbeautyfacts.org/images/products/000/004/006/2075/front_it.5.full.jpg,estrangeira
+EAN-40061337,40061337,sun-protection,Nivea,Nivea Sun Protect & Moisture SPF 30,100 ml,41,https://images.openbeautyfacts.org/images/products/000/004/006/1337/front_it.6.full.jpg,estrangeira
+EAN-4006000056784,4006000056784,sun-protection,Nivea Sun,Nivea Sun Protect & Moisture SPF 50+,200 ml,48,https://images.openbeautyfacts.org/images/products/400/600/005/6784/front_sv.5.full.jpg,estrangeira
