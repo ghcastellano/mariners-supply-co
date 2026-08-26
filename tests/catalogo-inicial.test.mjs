@@ -9,9 +9,17 @@ import { readFileSync } from "node:fs";
 const { parseCsvRows } = await import("../lib/csv.ts");
 const { buildImportPlan } = await import("../lib/import.ts");
 
+/**
+ * Dois arquivos, não três: catalogo-demo.csv foi removido.
+ * Ele nasceu antes do filtro "vendido no Brasil" e trazia Indomie,
+ * Lucky Me e Century Tuna com código do país de origem — a comida que a
+ * tripulação quer, mas que nenhum distribuidor de Santos entrega. Pior:
+ * disputava SKU com o catálogo novo, e SKU repetido em dois arquivos
+ * deixa a ORDEM da importação decidir o preço, em silêncio.
+ */
 const ARQUIVOS = [
   ["docs/catalogo-inicial.csv", 31],
-  ["docs/catalogo-demo.csv", 47],
+  ["docs/catalogo-santos.csv", 73],
 ];
 
 const plano = buildImportPlan(
