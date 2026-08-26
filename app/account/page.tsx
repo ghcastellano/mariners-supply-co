@@ -251,7 +251,13 @@ export default function AccountPage() {
             número salvo aparece aqui embaixo: sem ele, campo vazio parece
             cadastro perdido, e a ação de salvar mantém o antigo quando
             ninguém digita nada. */}
-        <PhoneInput value={phone} onChange={setPhone} required label="Telephone" />
+        <PhoneInput
+          value={phone}
+          onChange={setPhone}
+          required
+          label="Telephone"
+          countryHint={nationality}
+        />
         {savedPhone && !phone && (
           <p className="finehint" style={{ marginTop: -6 }}>
             Currently saved: <span className="mono">{savedPhone}</span> — leave the field empty to

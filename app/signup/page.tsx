@@ -351,7 +351,13 @@ function SignupInner() {
           />
         </div>
 
-        <PhoneInput value={phone} onChange={setPhone} required label="Telephone number" />
+        <PhoneInput
+          value={phone}
+          onChange={setPhone}
+          required
+          label="Telephone number"
+          countryHint={nationality}
+        />
 
         {/* deferCreate: aqui ainda não há sessão, então o navio novo fica
             em texto e nasce depois do signUp. */}

@@ -158,3 +158,58 @@ export function buildPhone(countryCode: string, local: string): string | null {
   if (full.length < 8 || full.length > 15) return null;
   return "+" + full;
 }
+
+/**
+ * Separa um E.164 salvo em país + parte local.
+ *
+ * Casa pelo prefixo MAIS LONGO, e é por isso que existe uma função em
+ * vez de um find: "+380…" da Ucrânia começa com "+38", e um find
+ * ingênuo devolveria o primeiro da lista que casasse. Onde dois países
+ * dividem o mesmo DDI (+7 Rússia e Cazaquistão, +1 EUA e Canadá) a
+ * ordem da lista decide — e a lista começa pelas nações que mais
+ * embarcam, que é a aposta certa aqui.
+ */
+export function splitE164(e164: string): { code: string; local: string } | null {
+  const raw = (e164 ?? "").trim();
+  if (!raw.startsWith("+")) return null;
+  const digits = "+" + raw.slice(1).replace(/\D/g, "");
+
+  let best: Country | null = null;
+  for (const c of COUNTRIES) {
+    if (!digits.startsWith(c.dial)) continue;
+    if (!best || c.dial.length > best.dial.length) best = c;
+  }
+  if (!best) return null;
+  return { code: best.code, local: digits.slice(best.dial.length) };
+}
+
+/**
+ * De onde sai o DDI mostrado, em ordem de prioridade. Pura de
+ * propósito: a regra é o que importa, e ela precisa de teste.
+ *
+ *   número salvo > escolha manual > nacionalidade > aparelho
+ *
+ * A nacionalidade entra em terceiro porque é palpite: russo embarcado
+ * costuma carregar chip brasileiro. Ela ajuda quem ainda não digitou e
+ * sai do caminho de quem digitou.
+ */
+export function resolveDialCountry(input: {
+  savedE164?: string | null;
+  manualPick?: string | null;
+  nationality?: string | null;
+  deviceCountry?: string | null;
+}): string {
+  const known = (code: string | null | undefined) =>
+    code && COUNTRIES.some((c) => c.code === code.toUpperCase())
+      ? code.toUpperCase()
+      : null;
+
+  const fromSaved = input.savedE164 ? splitE164(input.savedE164)?.code : null;
+  return (
+    fromSaved ??
+    known(input.manualPick) ??
+    known(input.nationality) ??
+    known(input.deviceCountry) ??
+    "BR"
+  );
+}

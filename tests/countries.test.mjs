@@ -78,3 +78,74 @@ test("nações que mais fornecem tripulação aparecem no topo da lista", () => 
   const top5 = COUNTRIES.slice(0, 5).map((c) => c.code);
   assert.deepEqual(top5, ["PH", "IN", "CN", "ID", "RU"]);
 });
+
+// ---- DDI que segue a nacionalidade ----
+// O bug: dava para declarar Rússia no cadastro e o telefone continuar
+// em +55, porque o país vinha do fuso do aparelho — e o aparelho está
+// em Santos.
+const { splitE164, resolveDialCountry, COUNTRIES: TODOS } = await import("../lib/countries.ts");
+
+test("separa E.164 pelo prefixo mais longo, não pelo primeiro que casa", () => {
+  // +380 da Ucrânia começa com +38: um find ingênuo erraria
+  assert.deepEqual(splitE164("+380671234567"), { code: "UA", local: "671234567" });
+  assert.deepEqual(splitE164("+5511970561448"), { code: "BR", local: "11970561448" });
+  assert.deepEqual(splitE164("+639171234567"), { code: "PH", local: "9171234567" });
+  assert.deepEqual(splitE164("+79161234567"), { code: "RU", local: "9161234567" });
+});
+
+test("aceita número salvo com espaço e traço", () => {
+  assert.deepEqual(splitE164("+55 11 97056-1448"), { code: "BR", local: "11970561448" });
+});
+
+test("entrada que não é E.164 devolve null em vez de chutar país", () => {
+  for (const v of ["", "11970561448", "abc", null, undefined, "0055119"]) {
+    assert.equal(splitE164(v), null, String(v));
+  }
+});
+
+test("o número salvo vence tudo — inclusive a nacionalidade", () => {
+  // Russo com chip brasileiro é o caso comum a bordo. O DDI não pode
+  // trocar só porque a nacionalidade diz outra coisa.
+  assert.equal(
+    resolveDialCountry({ savedE164: "+5511970561448", nationality: "RU", deviceCountry: "PH" }),
+    "BR"
+  );
+});
+
+test("sem número salvo, a nacionalidade vence o palpite do aparelho", () => {
+  // É exatamente o caso do print: nacionalidade Rússia, aparelho em Santos.
+  assert.equal(resolveDialCountry({ nationality: "RU", deviceCountry: "BR" }), "RU");
+});
+
+test("escolha manual vence a nacionalidade", () => {
+  assert.equal(
+    resolveDialCountry({ manualPick: "PH", nationality: "RU", deviceCountry: "BR" }),
+    "PH"
+  );
+});
+
+test("nacionalidade que não está na lista não derruba o palpite do aparelho", () => {
+  assert.equal(resolveDialCountry({ nationality: "ZZ", deviceCountry: "PH" }), "PH");
+  assert.equal(resolveDialCountry({ nationality: "", deviceCountry: "IN" }), "IN");
+});
+
+test("aceita nacionalidade em minúscula", () => {
+  assert.equal(resolveDialCountry({ nationality: "ua" }), "UA");
+});
+
+test("sem nenhuma pista, cai no porto de casa", () => {
+  assert.equal(resolveDialCountry({}), "BR");
+});
+
+test("todo país da lista tem DDI válido e código de duas letras", () => {
+  const vistos = new Set();
+  for (const c of TODOS) {
+    assert.match(c.dial, /^\+\d{1,4}$/, `DDI de ${c.code}`);
+    assert.match(c.code, /^[A-Z]{2}$/, `código ${c.code}`);
+    assert.ok(!vistos.has(c.code), `país repetido: ${c.code}`);
+    vistos.add(c.code);
+    // Todo país precisa ser reencontrável a partir do próprio DDI
+    const round = splitE164(`${c.dial}912345678`);
+    assert.ok(round, `${c.code} não volta do próprio DDI`);
+  }
+});
