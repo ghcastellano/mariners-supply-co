@@ -109,6 +109,24 @@ const { data: eu } = await db.auth.getUser();
 const { data: perfil } = await db.from("profiles").select("role").eq("id", eu.user.id).single();
 if (perfil?.role !== "admin") morre(`${ADMIN_EMAIL} não é admin (role=${perfil?.role ?? "?"})`);
 
+/**
+ * Endereço público do produto.
+ *
+ * O admin monta `nome-sku`, o que numa planilha com SKU de código de
+ * barras vira /p/cafe-pilao-tradicional-250-g-ean-7896089011982. O
+ * código não ajuda ninguém a ler nem a achar; entra só quando dois
+ * produtos disputam o mesmo endereço.
+ *
+ * Produto que já existe MANTÉM o endereço que tem: trocar slug de item
+ * publicado quebra link que a tripulação já mandou por WhatsApp.
+ */
+async function enderecoDe(l, jaExiste) {
+  if (jaExiste?.slug) return jaExiste.slug;
+  const limpo = slug(l.name);
+  const { data } = await db.from("products").select("id").eq("slug", limpo).maybeSingle();
+  return data ? slug(`${l.name}-${l.sku}`) : limpo;
+}
+
 /* Categorias e marcas, resolvidas de uma vez. */
 const { data: cats } = await db.from("categories").select("id, slug");
 const catPorSlug = new Map((cats ?? []).map((c) => [c.slug, c.id]));
@@ -127,9 +145,12 @@ for (const l of linhas) {
   const catId = l.category ? catPorSlug.get(l.category) : null;
   if (l.category && !catId) { console.error(`  ✗ ${l.sku}: categoria "${l.category}" não existe`); falhas++; continue; }
 
+  const { data: atual } = await db.from("products")
+    .select("id, slug, primary_image_path").eq("sku", l.sku).maybeSingle();
+
   const { data: prod, error: e1 } = await db.from("products").upsert({
     sku: l.sku,
-    slug: slug(`${l.name}-${l.sku}`),
+    slug: await enderecoDe(l, atual),
     name: l.name,
     short_description: l.short_description || null,
     brand_id: l.brand ? (marcaPorSlug.get(slug(l.brand)) ?? null) : null,
