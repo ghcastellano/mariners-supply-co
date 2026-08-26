@@ -323,14 +323,15 @@ export default function AccountPage() {
         {saved ? (
           <p className="note" role="status">
             {missing.length === 0
-              ? "Your details are saved — checkout has everything it needs."
-              : `Saved. Checkout still needs your ${missing.join(", ")} before it can take payment.`}
+              ? "Your details are saved — the store is open to you."
+              : `Saved. Still missing your ${missing.join(", ")} — the store stays locked until they're filled.`}
           </p>
         ) : (
           missing.length > 0 && (
             <p className="note">
-              Checkout needs your {missing.join(", ")} before it can take payment. Fill them in
-              and press Save — partial saves are fine, you can come back for the rest.
+              We need your {missing.join(", ")} before you can browse and order. Your vessel and
+              home port are what set your delivery date — without them we don&apos;t know which
+              ship to meet, or when.
             </p>
           )
         )}
@@ -339,8 +340,8 @@ export default function AccountPage() {
           {busy ? "Saving…" : "Save"}
         </button>
         <p className="finehint">
-          Checkout confirms these details instead of asking again — it can&apos;t take payment
-          while the name, vessel, port or telephone is missing.
+          Checkout confirms these details instead of asking again. They are asked once, here,
+          because a delivery to a gangway needs a ship, a berth and a way to reach you.
         </p>
       </form>
       </div>

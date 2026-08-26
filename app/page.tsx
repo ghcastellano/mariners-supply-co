@@ -110,8 +110,13 @@ async function loadCrew(): Promise<Crew> {
       .maybeSingle();
 
     const row = data as CrewRow | null;
-    // ship_id sem ships significa navio inativo (já zarpou): a tira
-    // vira convite, que é mais útil que um nome de escala vencida.
+    // ship_id sem ships significa navio inativo — já zarpou. A tira vira
+    // convite para escolher a próxima escala, que é mais útil que um
+    // nome de escala vencida.
+    //
+    // Perfil SEM navio nenhum não chega mais aqui: o middleware barra
+    // cadastro incompleto antes da home. Então esta tira quer dizer uma
+    // coisa só, e o texto pode ser específico.
     if (!row?.ship_id || !row.ships) return { kind: "invite" };
     return { kind: "vessel", name: row.ships.name, hours: hoursUntil(row.ships.eta) };
   } catch {
@@ -216,9 +221,9 @@ export default async function Home() {
           </span>
           <span className="tx">
             <span className="lb">Your vessel</span>
-            <span className="nm">Add your ship to see your order cut-off</span>
+            <span className="nm">No call scheduled — pick your next vessel</span>
           </span>
-          <span className="eta">Complete profile ›</span>
+          <span className="eta">Update ›</span>
         </Link>
       )}
 

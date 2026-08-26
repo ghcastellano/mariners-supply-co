@@ -15,7 +15,6 @@ export const orderWindowOpen = (eta: string | Date, cutoffHours: number) =>
 /** Nome curto do navio para o chip (última palavra — "CMA CGM MELODY" → "MELODY"). */
 export const shortShipName = (name: string) => name.trim().split(/\s+/).slice(-1)[0];
 
-export const DEPOSIT_PCT = 0.3;
 
 /** Mínimo de senha — precisa bater com password_min_length no Supabase Auth. */
 export const PASSWORD_MIN = 8;

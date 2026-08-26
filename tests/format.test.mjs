@@ -4,6 +4,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 
 const fmt = await import("../lib/format.ts");
+const money = await import("../lib/money.ts");
 
 test("usd formata com 2 casas", () => {
   assert.equal(fmt.usd(36), "USD 36.00");
@@ -12,8 +13,13 @@ test("usd formata com 2 casas", () => {
 });
 
 test("depósito de 30% bate com o protótipo (36 → 10.80 / 25.20)", () => {
+  // A constante vem de lib/money.ts, que é a que o carrinho, o checkout,
+  // os Termos e o FAQ usam. Antes vinha de lib/format.ts, uma segunda
+  // DEPOSIT_PCT com o MESMO nome e outra unidade (0.3 contra 30) que a
+  // produção não importava: trocar os 30% no lugar certo deixaria este
+  // teste passando em 30% para sempre. A duplicata foi removida.
   const subtotal = 36;
-  const dep = subtotal * fmt.DEPOSIT_PCT;
+  const dep = (subtotal * money.DEPOSIT_PCT) / 100;
   assert.equal(fmt.usd(dep), "USD 10.80");
   assert.equal(fmt.usd(subtotal - dep), "USD 25.20");
 });

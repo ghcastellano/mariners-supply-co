@@ -4,6 +4,28 @@ import { SUPABASE_URL, SUPABASE_ANON_KEY, supabaseConfigured } from "@/lib/env";
 
 const PROTECTED_PREFIXES = ["/account", "/orders", "/checkout", "/admin", "/captain"];
 
+/**
+ * Rotas que um perfil incompleto ainda alcança.
+ *
+ * `/account` é o destino do desvio — sem ele o redirecionamento gira em
+ * círculo. `/auth` e `/login` são o caminho de entrada e de saída, e
+ * `/admin` fica de fora porque o staff não tem navio nem porto de casa:
+ * exigir isso da própria equipe seria trancá-la para fora do painel.
+ */
+const LIVRES = ["/account", "/auth", "/login", "/signup", "/reset-password", "/admin", "/api"];
+
+/**
+ * Só estas colunas decidem se o cadastro está completo. É a mesma regra
+ * de lib/profile.ts, repetida aqui porque o middleware roda no runtime
+ * de borda e importar o módulo inteiro arrastaria dependências que não
+ * cabem nele.
+ */
+function faltaCadastro(p: Record<string, unknown> | null): boolean {
+  if (!p) return true;
+  const tem = (v: unknown) => typeof v === "string" && v.trim().length > 0;
+  return !(tem(p.full_name) && tem(p.vessel_name) && tem(p.port_id) && tem(p.whatsapp));
+}
+
 export async function updateSession(request: NextRequest) {
   let supabaseResponse = NextResponse.next({ request });
 
@@ -42,6 +64,43 @@ export async function updateSession(request: NextRequest) {
     url.search = "";
     url.searchParams.set("next", pathname);
     return NextResponse.redirect(url);
+  }
+
+  /**
+   * Navio, porto e telefone são obrigatórios — e agora obrigatórios de
+   * verdade.
+   *
+   * O formulário de cadastro já exigia os três, mas entrar pelo Google
+   * pula o formulário inteiro: a conta nascia só com nome e e-mail. A
+   * pessoa navegava a loja, montava o carrinho, e só descobria o que
+   * faltava no checkout, com o cartão na mão. E a home ainda mostrava um
+   * card "Add your ship" que não deveria precisar existir.
+   *
+   * Custa uma consulta por navegação de quem está logado — uma linha por
+   * chave primária. É o preço de a regra valer em todo caminho de
+   * entrada em vez de só naquele que alguém lembrou de cobrir.
+   */
+  if (user && !LIVRES.some((p) => pathname.startsWith(p))) {
+    try {
+      const { data: perfil } = await supabase
+        .from("profiles")
+        .select("full_name, vessel_name, port_id, whatsapp")
+        .eq("id", user.id)
+        .maybeSingle();
+
+      if (faltaCadastro(perfil)) {
+        const url = request.nextUrl.clone();
+        url.pathname = "/account";
+        url.search = "";
+        // De onde veio, para a tela de conta poder devolver a pessoa ao
+        // que ela estava fazendo depois de completar.
+        if (pathname !== "/") url.searchParams.set("next", pathname);
+        return NextResponse.redirect(url);
+      }
+    } catch {
+      // Banco fora do ar não pode trancar a loja: sem resposta, deixa
+      // passar. O checkout continua barrando pelo missingProfileFields.
+    }
   }
 
   return supabaseResponse;
