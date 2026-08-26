@@ -1184,9 +1184,10 @@ input:-webkit-autofill:focus {
 @media (min-width: 1180px) { .pgrid { grid-template-columns: repeat(4, 1fr); } }
 
 .pcard { border-radius: 16px; }
-.pcard-media { aspect-ratio: 4 / 3; background: #FFFFFF; }
-@media (min-width: 620px) { .pcard-media { aspect-ratio: 1 / 1; } }
-.pcard-img { padding: 14px; }
+/* Painel quadrado e padding curto: a foto normalizada já é 1:1 com
+   respiro embutido, então 4/3 aqui só somava tarja branca. */
+.pcard-media { aspect-ratio: 1 / 1; background: #FFFFFF; }
+.pcard-img { padding: 6px; }
 
 /* badge circular, como o do Sunny */
 .pbadge {

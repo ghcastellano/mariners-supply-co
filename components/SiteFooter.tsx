@@ -23,6 +23,7 @@ const SECTIONS = [
     title: "Relevant Links",
     links: [
       { label: "Catalog & flyers", href: "/brochures" },
+      { label: "Photo credits", href: "/attributions" },
       { label: "Promotions", href: "/shop?badge=promo" },
       { label: "New arrivals", href: "/shop?badge=new" },
       { label: "Captain rewards", href: "/captain" },
