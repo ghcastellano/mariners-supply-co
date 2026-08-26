@@ -235,7 +235,23 @@ export async function deleteProductImage(formData: FormData) {
 const PRIVATE_V4 =
   /^(0\.|10\.|127\.|169\.254\.|172\.(1[6-9]|2\d|3[01])\.|192\.168\.|100\.(6[4-9]|[7-9]\d|1[01]\d|12[0-7])\.)/;
 
-async function isPublicHost(hostname: string): Promise<boolean> {
+/**
+ * Uma planilha traz dezenas de fotos do mesmo servidor. Resolver o mesmo
+ * nome trinta vezes é latência à toa dentro de uma ação com prazo.
+ * O mapa vive só enquanto o processo vive — não é cache de verdade, é
+ * memória de uma importação.
+ */
+const hostConhecido = new Map<string, Promise<boolean>>();
+
+function isPublicHost(hostname: string): Promise<boolean> {
+  const visto = hostConhecido.get(hostname);
+  if (visto) return visto;
+  const p = resolvePublicHost(hostname);
+  hostConhecido.set(hostname, p);
+  return p;
+}
+
+async function resolvePublicHost(hostname: string): Promise<boolean> {
   try {
     const addrs = await lookup(hostname, { all: true });
     if (addrs.length === 0) return false;
@@ -513,10 +529,17 @@ async function applyPlan(supabase: Db, products: ImportProduct[]): Promise<numbe
         .not("primary_image_path", "is", null);
       const have = new Set((already ?? []).map((r) => r.id as string));
 
-      for (const p of needsImage) {
-        const pid = idBySku.get(p.sku)!;
-        if (have.has(pid)) continue;
-        await fetchImageToStorage(supabase, pid, p.imageUrl!);
+      // Em lotes de quatro: em sequência, trinta fotos passam do teto da
+      // ação e ela morre com os produtos gravados e nenhuma foto; todas de
+      // uma vez, abre trinta conexões de saída no mesmo instante e o
+      // servidor do outro lado começa a recusar.
+      const pendentes = needsImage.filter((p) => !have.has(idBySku.get(p.sku)!));
+      for (let j = 0; j < pendentes.length; j += 4) {
+        await Promise.all(
+          pendentes.slice(j, j + 4).map((p) =>
+            fetchImageToStorage(supabase, idBySku.get(p.sku)!, p.imageUrl!)
+          )
+        );
       }
     }
 

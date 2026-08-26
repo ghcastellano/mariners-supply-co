@@ -3,6 +3,16 @@ import ImportForm from "@/components/admin/ImportForm";
 
 export const dynamic = "force-dynamic";
 
+/**
+ * Importar catálogo baixa uma foto por produto de um servidor de fora. Um
+ * arquivo de trinta linhas são trinta requisições de saída, e no teto
+ * padrão de 15 s da Vercel a ação morre no meio — gravando parte dos
+ * produtos e nenhuma foto. Sessenta segundos com o download em paralelo
+ * cobre lote dessa ordem; acima disso a via é scripts/importar-catalogo.mjs,
+ * que roda no terminal e não tem teto.
+ */
+export const maxDuration = 60;
+
 export default function ImportPage() {
   return (
     <main className="pb-nav">
