@@ -51,15 +51,74 @@ const SECTIONS = [
 ];
 
 /**
- * Marcas de pagamento em uma linha discreta.
+ * Selos de pagamento no padrão de mercado: chips uniformes com a MARCA
+ * desenhada, mudos de cor.
  *
- * Eram cinco retângulos BRANCOS com texto preto — o elemento mais claro
- * de uma página escura inteira, e o menos importante dela. Selo de
- * pagamento é para tranquilizar quem já decidiu comprar; quando ele
- * grita mais que o produto, o efeito se inverte e a página passa a
- * parecer aquelas lojas que precisam provar que aceitam cartão.
+ * Já foram duas coisas erradas. Primeiro cinco retângulos brancos com
+ * texto preto — o elemento mais claro de uma página escura inteira.
+ * Depois, na correção, viraram texto corrido em monoespaçada, que lê
+ * como saída de terminal, não como selo. O padrão que toda loja grande
+ * usa é o meio-termo: chips do mesmo tamanho, contorno discreto, marca
+ * reconhecível pelo DESENHO (os círculos do Mastercard) ou pelo
+ * logotipo, sem a cor berrante de cada bandeira.
+ *
+ * SVG desenhado aqui em vez de imagem: cinco arquivos de logo para um
+ * rodapé é peso e pedido HTTP à toa, e currentColor deixa o conjunto
+ * inteiro no mesmo tom — que é o que o faz parecer conjunto.
  */
-const PAGAMENTO = ["Apple Pay", "Google Pay", "Mastercard", "VISA", "PIX"];
+function ChipPagamento({ nome, children }: { nome: string; children: React.ReactNode }) {
+  return (
+    <span className="paychip" role="img" aria-label={nome} title={nome}>
+      {children}
+    </span>
+  );
+}
+
+function SelosPagamento() {
+  return (
+    <p className="paywall">
+      <span className="lb">We accept</span>
+      <ChipPagamento nome="Visa">
+        <svg viewBox="0 0 44 14" width="34" height="12" aria-hidden>
+          <text x="22" y="11.5" textAnchor="middle" fontFamily="var(--font-disp)"
+            fontStyle="italic" fontWeight="800" fontSize="13" letterSpacing="1"
+            fill="currentColor">VISA</text>
+        </svg>
+      </ChipPagamento>
+      <ChipPagamento nome="Mastercard">
+        <svg viewBox="0 0 30 18" width="26" height="16" aria-hidden>
+          <circle cx="11" cy="9" r="7.5" fill="currentColor" opacity=".85" />
+          <circle cx="19" cy="9" r="7.5" fill="currentColor" opacity=".45" />
+        </svg>
+      </ChipPagamento>
+      <ChipPagamento nome="Apple Pay">
+        <svg viewBox="0 0 54 14" width="42" height="12" aria-hidden>
+          {/* a maçã: folha + corpo com a mordida recortada por um círculo do fundo */}
+          <path fill="currentColor" d="M7.3 1.6c.5-.7 1.4-1.2 2.1-1.2.1.8-.2 1.6-.7 2.2-.5.7-1.3 1.2-2.1 1.1-.1-.7.3-1.5.7-2.1zM9.3 4c-1.2-.1-2.2.7-2.8.7-.6 0-1.5-.6-2.4-.6-1.2 0-2.4.7-3 1.8-1.3 2.2-.3 5.5.9 7.3.6.9 1.3 1.9 2.3 1.8.9 0 1.3-.6 2.4-.6s1.4.6 2.4.6c1 0 1.6-.9 2.2-1.8.7-1 1-2 1-2.1 0 0-1.9-.7-1.9-2.9 0-1.8 1.5-2.7 1.6-2.7-.9-1.3-2.2-1.4-2.7-1.5z"/>
+          <text x="14" y="11.5" fontFamily="var(--font-body)" fontWeight="700"
+            fontSize="11.5" fill="currentColor">Pay</text>
+        </svg>
+      </ChipPagamento>
+      <ChipPagamento nome="Google Pay">
+        <svg viewBox="0 0 52 14" width="40" height="12" aria-hidden>
+          <text x="0" y="11.5" fontFamily="var(--font-body)" fontWeight="700"
+            fontSize="11.5" fill="currentColor">G&#8202;Pay</text>
+        </svg>
+      </ChipPagamento>
+      <ChipPagamento nome="PIX">
+        <svg viewBox="0 0 40 14" width="32" height="12" aria-hidden>
+          {/* o losango de nós do PIX, simplificado a um tom */}
+          <g fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round">
+            <path d="M7 2.2 11.8 7 7 11.8 2.2 7Z" />
+            <path d="M4.6 4.6 7 2.2l2.4 2.4M4.6 9.4 7 11.8l2.4-2.4" opacity=".55" />
+          </g>
+          <text x="15" y="11.5" fontFamily="var(--font-body)" fontWeight="700"
+            fontSize="11.5" fill="currentColor">PIX</text>
+        </svg>
+      </ChipPagamento>
+    </p>
+  );
+}
 
 export default function SiteFooter() {
   return (
@@ -95,10 +154,7 @@ export default function SiteFooter() {
           visível no meio do fio — um traço partido lê como defeito de
           renderização. */}
       <div className="sunfoot-base">
-      <p className="paywall">
-        <span className="lb">We accept</span>
-        {PAGAMENTO.join(" · ")}
-      </p>
+      <SelosPagamento />
 
       <div className="sunfoot-legal">
         © {new Date().getFullYear()} Mariners Supply — by Mariner&apos;s Bar, Porto de Santos.

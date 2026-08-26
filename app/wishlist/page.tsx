@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import AccountRail from "@/components/AccountRail";
+import { IconHeart } from "@/components/Icon";
 import { redirect } from "next/navigation";
 import Breadcrumb from "@/components/Breadcrumb";
 import ProductCardView from "@/components/ProductCard";
@@ -115,7 +116,19 @@ export default async function WishlistPage() {
       </form>
 
       {items.length === 0 ? (
-        <div className="infobox">You have no items in your wish list.</div>
+        /* Estado vazio com voz, não um aviso: aviso azul é para regra de
+           pedido; lista vazia é um convite — ensina o gesto do coração. */
+        <div className="empty">
+          <div className="i" aria-hidden><IconHeart size={26} /></div>
+          <p className="t">Nothing saved yet</p>
+          <p className="d">
+            Tap the heart on any product and it drops anchor here — easy to
+            find again on your next call.
+          </p>
+          <Link className="btn ghost" href="/shop" prefetch={false}>
+            Browse the catalog
+          </Link>
+        </div>
       ) : (
         <div className="pgrid">
           {items.map((p, i) => (

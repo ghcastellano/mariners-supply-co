@@ -23,6 +23,7 @@ function ramoAberto(root: CategoryNode, activeSlug: string | null): boolean {
 export default function FacetRail({
   tree,
   activeSlug,
+  counts = {},
   brands = [],
   activeBrand = null,
   brandHref,
@@ -30,6 +31,8 @@ export default function FacetRail({
   tree: CategoryNode[];
   /** Slug da categoria aberta; null em /shop. */
   activeSlug: string | null;
+  /** category_id → produtos ativos na subárvore (RPC category_counts). */
+  counts?: Record<string, number>;
   /** Só marcas com produto ativo — filtro que devolve vazio é armadilha. */
   brands?: BrandOption[];
   activeBrand?: string | null;
@@ -55,7 +58,12 @@ export default function FacetRail({
                   {root.icon ?? "▪"}
                 </span>
                 {root.name}
-                {root.children.length > 0 && <span className="ct">{root.children.length}</span>}
+                {/* PRODUTOS na subárvore, não subcategorias. O número
+                    antigo era children.length — "Food & Drinks 4" quando
+                    a loja tinha 60 itens lá dentro. Número num filtro é
+                    promessa do que o clique devolve; contar outra coisa
+                    é promessa quebrada. */}
+                {(counts[root.id] ?? 0) > 0 && <span className="ct">{counts[root.id]}</span>}
               </Link>
               {ramoAberto(root, activeSlug) && root.children.length > 0 && (
                 <ul className="sub">
@@ -63,6 +71,7 @@ export default function FacetRail({
                     <li key={c.id}>
                       <Link href={`/c/${c.slug}`} className={c.slug === activeSlug ? "on" : ""}>
                         {c.name}
+                        {(counts[c.id] ?? 0) > 0 && <span className="ct">{counts[c.id]}</span>}
                       </Link>
                     </li>
                   ))}

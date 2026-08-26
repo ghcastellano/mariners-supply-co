@@ -1,5 +1,6 @@
 import Link from "next/link";
 import AccountRail from "@/components/AccountRail";
+import { IconPackage } from "@/components/Icon";
 import { redirect } from "next/navigation";
 import Breadcrumb from "@/components/Breadcrumb";
 import { createClient } from "@/lib/supabase/server";
@@ -51,15 +52,15 @@ export default async function OrdersPage() {
       <div className="acct-main">
       {orders.length === 0 ? (
         <div className="empty">
-          <div className="i">📦</div>
-          No orders yet.
-          <br />
-          Your deliveries will show up here.
-          <p style={{ marginTop: 18 }}>
-            <Link className="alink" href="/shop">
-              Start your kit →
-            </Link>
+          <div className="i" aria-hidden><IconPackage size={26} /></div>
+          <p className="t">No orders yet</p>
+          <p className="d">
+            Place one and it docks here — status, cut-off and the photo
+            proof of delivery, all on the same page.
           </p>
+          <Link className="btn ghost" href="/shop" prefetch={false}>
+            Start your kit
+          </Link>
         </div>
       ) : (
         <div className="cart-list">

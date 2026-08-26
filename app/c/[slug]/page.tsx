@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import Breadcrumb from "@/components/Breadcrumb";
 import ProductCardView from "@/components/ProductCard";
 import FacetRail from "@/components/FacetRail";
+import { IconCompass } from "@/components/Icon";
 import { listBrandsInUse } from "@/lib/brands";
 import SortSelect from "@/components/SortSelect";
 import { createClient } from "@/lib/supabase/server";
@@ -57,11 +58,18 @@ export default async function CategoryPage({
   // Uma consulta só da árvore ativa, em vez de três (categoria, filhos
   // e pai): o trilho de filtros precisa da árvore inteira de qualquer
   // jeito, e pai e filhos saem dela de graça, em memória.
-  const { data: todas } = await supabase
-    .from("categories")
-    .select("id, parent_id, slug, name, icon, image_path, path, depth, active, sort_order")
-    .eq("active", true)
-    .order("sort_order");
+  const [{ data: todas }, contagens] = await Promise.all([
+    supabase
+      .from("categories")
+      .select("id, parent_id, slug, name, icon, image_path, path, depth, active, sort_order")
+      .eq("active", true)
+      .order("sort_order"),
+    supabase.rpc("category_counts"),
+  ]);
+  const counts: Record<string, number> = {};
+  for (const r of (contagens.data ?? []) as { category_id: string; product_count: number }[]) {
+    counts[r.category_id] = Number(r.product_count) || 0;
+  }
 
   const planas = (todas ?? []) as Category[];
   const roots = buildTree(planas);
@@ -122,6 +130,7 @@ export default async function CategoryPage({
         <FacetRail
           tree={roots as CategoryNode[]}
           activeSlug={slug}
+          counts={counts}
           brands={brands}
           activeBrand={brandId ? (sp.brand ?? null) : null}
           brandHref={(b) => keep({ brand: b, cursor: null })}
@@ -179,10 +188,10 @@ export default async function CategoryPage({
 
       {items.length === 0 ? (
         <div className="empty">
-          <div className="i">{category.icon ?? "📦"}</div>
-          Nothing in {category.name} yet.
-          <br />
-          <Link href="/shop" style={{ color: "var(--amber)" }}>
+          <div className="i" aria-hidden><IconCompass size={28} /></div>
+          <p className="t">Nothing in {category.name} yet</p>
+          <p className="d">This aisle is being restocked for the next call.</p>
+          <Link className="btn ghost" href="/shop" prefetch={false}>
             Browse the whole store
           </Link>
         </div>

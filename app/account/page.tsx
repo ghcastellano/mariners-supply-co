@@ -67,7 +67,6 @@ export default function AccountPage() {
   const [rank, setRank] = useState("");
   const [nationality, setNationality] = useState("");
   const [phone, setPhone] = useState("");
-  const [savedPhone, setSavedPhone] = useState("");
   const [vessel, setVessel] = useState<VesselValue | null>(null);
   const [portId, setPortId] = useState("");
 
@@ -128,7 +127,9 @@ export default function AccountPage() {
 
       setRank(p?.rank_slug ?? "");
       setNationality(p?.nationality ?? "");
-      setSavedPhone(p?.whatsapp ?? "");
+      // O campo nasce com o número salvo, como qualquer outro campo do
+      // formulário. O PhoneInput aceita a semeadura atrasada.
+      setPhone(p?.whatsapp ?? "");
       setPortId(p?.port_id ?? "");
 
       // O navio pode vir nulo mesmo com ship_id: a RLS de ships só devolve
@@ -213,7 +214,7 @@ export default function AccountPage() {
     // sabe o navio precisa poder guardar o resto. O que o checkout vai
     // cobrar depois vira aviso aqui, não trava.
     setMissing(res.missing);
-    if (phone) setSavedPhone(phone);
+
     // O cabeçalho e o checkout leem o perfil no servidor.
     router.refresh();
   }
@@ -278,10 +279,11 @@ export default function AccountPage() {
           placeholder="Search your country"
         />
 
-        {/* O PhoneInput monta o E.164 e sempre começa em branco. Por isso o
-            número salvo aparece aqui embaixo: sem ele, campo vazio parece
-            cadastro perdido, e a ação de salvar mantém o antigo quando
-            ninguém digita nada. */}
+        {/* O campo mostra o número salvo, como todo campo de edição. O
+            aviso "Currently saved" que vivia aqui era muleta da época em
+            que o PhoneInput perdia a corrida com o carregamento do
+            perfil e montava vazio — campo vazio com o valor real num
+            rodapé lê como cadastro perdido. */}
         <PhoneInput
           value={phone}
           onChange={setPhone}
@@ -289,12 +291,6 @@ export default function AccountPage() {
           label="Telephone"
           countryHint={nationality}
         />
-        {savedPhone && !phone && (
-          <p className="finehint" style={{ marginTop: -6 }}>
-            Currently saved: <span className="mono">{savedPhone}</span> — leave the field empty to
-            keep it.
-          </p>
-        )}
 
         <VesselSearch value={vessel} onChange={setVessel} />
 

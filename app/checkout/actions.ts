@@ -4,7 +4,7 @@ import { headers } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
 import { getStripe, stripeConfigured } from "@/lib/stripe";
 import { SITE_URL } from "@/lib/env";
-import { usd } from "@/lib/format";
+import { orderCloseAt, usd } from "@/lib/format";
 import { splitOrder } from "@/lib/money";
 
 export type PlaceOrderInput = {
@@ -115,9 +115,30 @@ export async function placeOrder(input: PlaceOrderInput): Promise<PlaceOrderResu
 
   const shipId = profile?.ship_id ?? input.shipId ?? null;
   let vesselName = profile?.vessel_name ?? null;
-  if (!vesselName && shipId) {
-    const { data } = await supabase.from("ships").select("name").eq("id", shipId).maybeSingle();
-    vesselName = data?.name ?? null;
+  if (shipId) {
+    // A janela fecha NO SERVIDOR, não só no painel. O cartão do navio
+    // dizia "Closed" e o checkout aceitava o pedido mesmo assim — a
+    // regra existia como informação, não como regra. Pedido aceito com
+    // a janela fechada é promessa que a operação não consegue cumprir:
+    // o chandler compra contra o pedido, e a compra precisa da janela.
+    const { data: navio } = await supabase
+      .from("ships")
+      .select("name, eta, cutoff_hours")
+      .eq("id", shipId)
+      .maybeSingle();
+    if (!vesselName) vesselName = navio?.name ?? null;
+    if (navio?.eta) {
+      const fecha = orderCloseAt(navio.eta, navio.cutoff_hours ?? 24);
+      if (fecha.getTime() <= Date.now()) {
+        return {
+          ok: false,
+          error:
+            `The order window for ${navio.name ?? "this call"} closed on ` +
+            `${fecha.toLocaleString("en-GB", { timeZone: "America/Sao_Paulo", day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" })}. ` +
+            "Pick your next call in My Account and your kit will be waiting.",
+        };
+      }
+    }
   }
 
   // Preço e estoque moram na VARIANTE. O carrinho manda ids de

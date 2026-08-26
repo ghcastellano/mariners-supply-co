@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { useMemo, useState } from "react";
 import WishButton from "./WishButton";
+import { IconPackage } from "./Icon";
 import { useCart } from "@/lib/cart";
 import { BADGE_LABEL, imageUrl, type ProductImage, type ProductVariant } from "@/lib/catalog";
 import { discountPercent, usd } from "@/lib/money";
@@ -96,7 +97,7 @@ export default function ProductBuy({
               priority
             />
           ) : (
-            <span className="pdp-noimg" aria-hidden>📦</span>
+            <span className="pdp-noimg" aria-hidden><IconPackage size={56} /></span>
           )}
           {product.badge && (
             <span className={`pbadge ${product.badge}`}>{BADGE_LABEL[product.badge]}</span>
@@ -132,7 +133,9 @@ export default function ProductBuy({
         </div>
 
         <div className="pdp-buy">
-          <div className={`stockline ${soldOut ? "out" : ""}`}>
+          {/* low ≠ in stock: estoque curto é aviso âmbar, não a mesma
+              boa notícia em teal */}
+          <div className={`stockline ${soldOut ? "out" : variant?.track_stock && stock <= 5 ? "low" : ""}`}>
             <i />
             {soldOut ? "Out of stock" : variant?.track_stock && stock <= 5
               ? `Only ${stock} left`

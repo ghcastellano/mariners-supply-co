@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import AddToCart from "./AddToCart";
 import WishButton from "./WishButton";
+import { IconPackage } from "./Icon";
 import { BADGE_LABEL, imageUrl, inStock, packSize, type ProductCard as Card } from "@/lib/catalog";
 import { discountPercent, usd } from "@/lib/money";
 
@@ -73,7 +74,7 @@ export default function ProductCardView({
             />
           ) : (
             <span className="pcard-noimg" aria-hidden>
-              📦
+              <IconPackage size={38} />
             </span>
           )}
           {soldOut && (

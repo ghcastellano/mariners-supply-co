@@ -95,3 +95,25 @@ export function IconAnchor({ size = 21, className }: Props) {
     </svg>
   );
 }
+
+/** Caixa de mantimento. Substitui o 📦 nos lugares onde falta foto:
+ *  emoji colorido sobre o painel branco lia como conteúdo, não como
+ *  ausência — e cada sistema desenhava uma caixa diferente. */
+export function IconPackage({ size = 21, className }: Props) {
+  return (
+    <svg {...base(size)} className={className}>
+      <path d="m12 3.2 8.2 4.1v9.4L12 20.8l-8.2-4.1V7.3Z" />
+      <path d="M3.8 7.3 12 11.4l8.2-4.1M12 11.4v9.4M7.9 5.3l8.2 4.1" />
+    </svg>
+  );
+}
+
+/** Bússola dos estados de busca: "nada encontrado" aponta um rumo. */
+export function IconCompass({ size = 21, className }: Props) {
+  return (
+    <svg {...base(size)} className={className}>
+      <circle cx="12" cy="12" r="8.4" />
+      <path d="m15.4 8.6-2 5-5 2 2-5Z" />
+    </svg>
+  );
+}

@@ -9,6 +9,7 @@ import { createClient } from "@/lib/supabase/client";
 import { supabaseConfigured } from "@/lib/env";
 import { imageUrl } from "@/lib/catalog";
 import { DEPOSIT_PCT, splitOrder, toCents, usd } from "@/lib/money";
+import { IconCart, IconPackage, IconTrash } from "@/components/Icon";
 
 type Line = {
   id: string;
@@ -64,7 +65,17 @@ export default function CartPage() {
          products!product_variants_product_id_fkey!inner(name, slug, primary_image_path, active)`
       )
       .in("id", ids)
-      .then(({ data }) => setLines((data ?? []) as unknown as Line[]));
+      .then(({ data }) => {
+        const linhas = (data ?? []) as unknown as Line[];
+        setLines(linhas);
+        // Mesma poda do MiniCart: id de produto desativado sai do
+        // carrinho em vez de virar um fantasma que o selo conta e a
+        // tela não mostra.
+        const vivos = new Set(linhas.filter((l) => l.active && l.products?.active).map((l) => l.id));
+        for (const id of ids) {
+          if (!vivos.has(id)) change(id, -(items[id] ?? 0));
+        }
+      });
   }, [ready, ids.join(",")]);
 
   useEffect(() => {
@@ -134,13 +145,15 @@ export default function CartPage() {
         <div className="spin" aria-label="Loading" />
       ) : rows.length === 0 ? (
         <div className="empty">
-          <div className="i">🛒</div>
-          Your kit is empty, sailor.
-          <p style={{ marginTop: 18 }}>
-            <Link className="alink" href="/shop">
-              ⚓ Browse the catalog →
-            </Link>
+          <div className="i" aria-hidden><IconCart size={28} /></div>
+          <p className="t">Your kit is empty, sailor</p>
+          <p className="d">
+            Provisions, gear and a taste of home — picked from your bunk,
+            handed over at the gangway.
           </p>
+          <Link className="btn" href="/shop">
+            Browse the catalog
+          </Link>
         </div>
       ) : (
         <>
@@ -221,7 +234,7 @@ export default function CartPage() {
                     {src ? (
                       <Image src={src} alt="" fill sizes="(min-width: 1280px) 96px, (min-width: 1024px) 84px, 62px" style={{ objectFit: "contain" }} />
                     ) : (
-                      <span aria-hidden>📦</span>
+                      <span aria-hidden><IconPackage size={26} /></span>
                     )}
                   </Link>
 
@@ -255,12 +268,14 @@ export default function CartPage() {
                           +
                         </button>
                       </div>
+                      {/* mesmo traço da gaveta: o 🗑 era o único emoji
+                          sobrando no fluxo de compra */}
                       <button
                         className="mcdel"
                         onClick={() => change(l.id, -l.qty)}
                         aria-label={`Remove ${l.products?.name ?? "item"}`}
                       >
-                        🗑
+                        <IconTrash />
                       </button>
                     </div>
                   </div>

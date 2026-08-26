@@ -2,6 +2,7 @@ import Link from "next/link";
 import Breadcrumb from "@/components/Breadcrumb";
 import ProductCardView from "@/components/ProductCard";
 import FacetRail from "@/components/FacetRail";
+import { IconCompass } from "@/components/Icon";
 import { listBrandsInUse } from "@/lib/brands";
 import { createClient } from "@/lib/supabase/server";
 import { wishedProductIds } from "@/lib/wishlist";
@@ -38,7 +39,7 @@ export default async function ShopPage({
   const brands = await listBrandsInUse();
   const brandId = sp.brand ? (brands.find((b) => b.slug === sp.brand)?.id ?? null) : null;
 
-  const [{ items, nextCursor }, cats] = await Promise.all([
+  const [{ items, nextCursor }, cats, contagens] = await Promise.all([
     listProducts(supabase, {
       query,
       sort,
@@ -51,12 +52,17 @@ export default async function ShopPage({
       .select("id, parent_id, slug, name, icon, image_path, path, depth, active, sort_order")
       .eq("active", true)
       .order("sort_order"),
+    supabase.rpc("category_counts"),
   ]);
 
   // O coração precisa nascer no estado certo, senão parece que não salvou.
   const wished = await wishedProductIds(items.map((i) => i.id));
 
   const roots = buildTree((cats.data ?? []) as Category[]);
+  const counts: Record<string, number> = {};
+  for (const r of (contagens.data ?? []) as { category_id: string; product_count: number }[]) {
+    counts[r.category_id] = Number(r.product_count) || 0;
+  }
   const keep = (extra: Record<string, string | null>) => {
     const p = new URLSearchParams();
     if (query) p.set("q", query);
@@ -88,6 +94,7 @@ export default async function ShopPage({
         <FacetRail
           tree={roots}
           activeSlug={null}
+          counts={counts}
           brands={brands}
           activeBrand={brandId ? (sp.brand ?? null) : null}
           brandHref={(b) => keep({ brand: b, cursor: null })}
@@ -161,15 +168,23 @@ export default async function ShopPage({
 
       {items.length === 0 ? (
         <div className="empty">
-          <div className="i">🧭</div>
+          <div className="i" aria-hidden><IconCompass size={28} /></div>
           {query ? (
             <>
-              Nothing matches “{query}”.
-              <br />
-              Try the brand name, or browse the categories above.
+              <p className="t">Nothing matches “{query}”</p>
+              <p className="d">
+                Check the spelling or try the brand name — or steer by
+                category from the menu.
+              </p>
+              <Link className="btn ghost" href="/shop" prefetch={false}>
+                Clear the search
+              </Link>
             </>
           ) : (
-            <>The shelves are being stocked. Check back shortly.</>
+            <>
+              <p className="t">The shelves are being stocked</p>
+              <p className="d">Check back shortly — supplies land before every call.</p>
+            </>
           )}
         </div>
       ) : (

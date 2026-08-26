@@ -61,6 +61,14 @@
   --sp-9: 96px;
   --gut:   16px;
   --stack: var(--sp-6);
+
+  /* ---- movimento -----------------------------------------------
+     UMA curva para tudo que se move (gaveta, painel, card, botão).
+     Cada animação com a própria cubic-bezier é o equivalente cinético
+     das margens soltas: perto uma da outra, a diferença lê como
+     defeito. Durações ficam entre 150 e 300ms — abaixo não se vê,
+     acima o site parece esperar por si mesmo. */
+  --ease: cubic-bezier(.22, .61, .36, 1);
 }
 
 /* tablet: coluna um pouco mais generosa */
@@ -171,7 +179,9 @@ button { font-family: inherit; }
 .back {
   background: none; border: 0; color: var(--muted); font-size: 22px;
   cursor: pointer; padding: 2px 8px 2px 0; line-height: 1;
+  transition: color .2s;
 }
+.back:hover { color: var(--amber-hi); }
 .top-side { margin-left: auto; display: flex; align-items: center; gap: 10px; }
 .iconbtn {
   background: none; border: 1px solid var(--line-hi); border-radius: 999px;
@@ -211,10 +221,10 @@ button { font-family: inherit; }
   text-align: left; width: 100%; background: var(--card); border: 1px solid var(--line);
   border-radius: 16px; padding: 17px 18px; cursor: pointer; color: var(--ink);
   display: grid; grid-template-columns: 1fr auto; gap: 4px 12px; align-items: center;
-  transition: border-color .2s, transform .2s, background .2s;
+  transition: border-color .2s, transform .2s var(--ease), background .2s;
 }
 .ship:hover { border-color: rgba(255,182,72,.5); transform: translateY(-2px); background: var(--card-hi); }
-.ship:focus-visible { outline: 2px solid var(--teal); outline-offset: 2px; }
+/* o foco vem do anel âmbar global — regra própria aqui só divergiria */
 .ship:disabled { opacity: .5; cursor: default; transform: none; }
 .ship .nm { grid-column: 1; grid-row: 1; font-family: var(--font-disp); font-weight: 700; font-size: 16.5px; }
 .ship .meta {
@@ -246,6 +256,8 @@ button { font-family: inherit; }
   font-weight: 600; font-size: 13px; border-radius: 999px;
   padding: 8px 16px; cursor: pointer; white-space: nowrap; transition: all .2s;
 }
+/* a pílula inativa responde como o resto da família âmbar */
+.tab:hover:not(.on) { border-color: rgba(255,182,72,.5); color: var(--amber-hi); }
 .tab.on { background: var(--amber); border-color: var(--amber); color: var(--amber-ink); }
 .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding: 14px 16px; }
 .prod {
@@ -334,6 +346,28 @@ button { font-family: inherit; }
 .cartslot { min-height: 300px; }
 .empty .i { font-size: 40px; margin-bottom: 12px; }
 
+/* ---- estado vazio com voz -------------------------------------
+   Emoji + uma frase era o rascunho. A anatomia agora: ícone de traço
+   da família do cabeçalho num anel fino, um título na tipografia de
+   título, uma linha de apoio e — quando existe caminho — UM botão.
+   O anel é só contorno (regra da casa: preenchimento OU contorno) e o
+   :has(svg) preserva os estados antigos de emoji, que seguem no
+   admin e nas páginas de porto sem mudar de cara. */
+.empty .i:has(svg) {
+  width: 64px; height: 64px; margin: 0 auto 16px;
+  border: 1px solid var(--line-hi); border-radius: 50%;
+  display: grid; place-items: center; color: var(--faint);
+}
+.empty .t {
+  font-family: var(--font-disp); font-weight: 700; font-size: 18px;
+  color: var(--ink); margin: 0 0 6px; text-wrap: balance;
+}
+.empty .d {
+  font-size: 13px; line-height: 1.55; color: var(--faint);
+  margin: 0 auto; max-width: 38ch;
+}
+.empty .btn { margin-top: 20px; }
+
 /* ===== CTA dock (fixo, centrado, com safe area) ===== */
 .cta-dock {
   position: fixed; left: 0; right: 0; bottom: 0; z-index: 30;
@@ -355,9 +389,10 @@ button { font-family: inherit; }
   font-weight: 700; font-size: 15px;
   background: var(--amber); color: var(--amber-ink);
   display: flex; justify-content: space-between; align-items: center; gap: 12px;
-  transition: transform .2s, box-shadow .2s;
+  transition: transform .2s var(--ease), box-shadow .2s var(--ease);
 }
 .cta:hover { transform: translateY(-2px); box-shadow: 0 12px 32px -10px rgba(255,182,72,.45); }
+.cta:active { transform: translateY(0); box-shadow: none; transition-duration: .05s; }
 .cta:disabled { opacity: .35; cursor: default; transform: none; box-shadow: none; }
 .cta .mono { font-size: 13px; }
 
@@ -371,13 +406,14 @@ button { font-family: inherit; }
 .input, .field input, .field select, .field textarea {
   width: 100%; background: var(--card); border: 1px solid var(--line-hi); border-radius: 12px;
   color: var(--ink); font-family: var(--font-mono); padding: 12px 14px;
+  caret-color: var(--amber); /* o cursor de digitação também é interação */
   appearance: none;
   /* 16px é obrigatório: fonte menor faz o iOS Safari dar zoom automático
      ao focar o campo — e o zoom fica preso na navegação, "cortando" a tela */
   font-size: 16px;
 }
 .field input:focus, .input:focus, .field select:focus, .field textarea:focus {
-  outline: 2px solid var(--teal); outline-offset: 1px; border-color: transparent;
+  outline: 2px solid var(--amber); outline-offset: 2px; border-color: transparent;
 }
 /* autofill do WebKit (iCloud/Google Password no iOS): sem flash branco */
 input:-webkit-autofill,
@@ -403,17 +439,21 @@ input:-webkit-autofill:focus {
   font-weight: 700; font-size: 14.5px;
   background: var(--amber); color: var(--amber-ink);
   display: inline-flex; align-items: center; justify-content: center; gap: 10px;
-  transition: transform .2s, box-shadow .2s, opacity .2s;
+  transition: transform .2s var(--ease), box-shadow .2s var(--ease), opacity .2s;
 }
 /* Para quando o container não é grid e o botão precisa ocupar a linha. */
 .btn.block { width: 100%; }
 .btn:hover { transform: translateY(-1px); box-shadow: 0 10px 26px -12px rgba(255,182,72,.5); }
+/* O clique devolve o botão ao chão: é o "afundou" que o dedo espera. */
+.btn:active { transform: translateY(0); box-shadow: none; transition-duration: .05s; }
 .btn:disabled { opacity: .4; cursor: default; transform: none; box-shadow: none; }
 .btn.ghost {
   background: transparent; color: var(--ink); border: 1px solid var(--line-hi);
 }
 .btn.ghost:hover { border-color: var(--amber); color: var(--amber-hi); box-shadow: none; }
 .btn.danger { background: transparent; border: 1px solid rgba(255,89,100,.5); color: var(--danger); }
+/* Perigo reforça o próprio contorno, nunca a sombra âmbar da família. */
+.btn.danger:hover { border-color: var(--danger); box-shadow: none; }
 .btn.small { width: auto; padding: 9px 14px; font-size: 12.5px; border-radius: 10px; }
 
 .gbtn {
@@ -422,7 +462,7 @@ input:-webkit-autofill:focus {
   display: inline-flex; align-items: center; justify-content: center; gap: 10px;
   transition: border-color .2s;
 }
-.gbtn:hover { border-color: var(--line-hi); background: var(--card-hi); }
+.gbtn:hover { border-color: rgba(255,182,72,.5); background: var(--card-hi); }
 
 .divider {
   display: flex; align-items: center; gap: 12px; color: var(--faint);
@@ -597,7 +637,41 @@ input:-webkit-autofill:focus {
 .center { text-align: center; }
 .mt0 { margin-top: 0; }
 
-:focus-visible { outline: 2px solid var(--teal); outline-offset: 2px; }
+/* Foco de teclado da casa: âmbar, 2px de folga, em TODO interativo.
+   Âmbar e não teal: âmbar já é a cor de "isto age" (botão, link, aba
+   ativa), e o anel de foco é exatamente essa promessa. O offset deixa
+   o fundo escuro respirar entre o elemento e o anel — é o que mantém
+   o anel legível até sobre o próprio botão âmbar. Teal segue sendo
+   cor de DADO (estoque, status, KPI), nunca de interação. */
+:focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; }
+
+/* Texto selecionado na cor da casa — o azul default do sistema é o
+   único momento em que a página deixa de parecer nossa. */
+::selection { background: var(--amber); color: var(--amber-ink); }
+
+/* Dígito de largura fixa em toda coluna de número que se compara:
+   subtotal, selo do carrinho, contador. Número que dança na vírgula
+   obriga a ler um a um em vez de conferir de relance. */
+.sumrow b, .mchead b, .disc-line b, .cartbadge, .drawer-count,
+.qty b, .qty span, .buydock .pr { font-variant-numeric: tabular-nums; }
+
+/* Barra de rolagem dos painéis internos (gaveta, mega-menu, filtros):
+   a do sistema sai larga e clara demais para um painel escuro. Fina e
+   na cor do fio, ela informa sem desenhar uma régua branca no meio. */
+.minicart-list, .drawer-list, .megapanel, .facets, .ta-panel,
+.impissues, .pdp-buy, .ptable .wrap {
+  scrollbar-width: thin;
+  scrollbar-color: var(--line-hi) transparent;
+}
+:is(.minicart-list, .drawer-list, .megapanel, .facets, .ta-panel, .impissues, .pdp-buy, .ptable .wrap)::-webkit-scrollbar {
+  width: 8px; height: 8px;
+}
+:is(.minicart-list, .drawer-list, .megapanel, .facets, .ta-panel, .impissues, .pdp-buy, .ptable .wrap)::-webkit-scrollbar-thumb {
+  background: var(--line-hi); border-radius: 4px;
+}
+:is(.minicart-list, .drawer-list, .megapanel, .facets, .ta-panel, .impissues, .pdp-buy, .ptable .wrap)::-webkit-scrollbar-track {
+  background: transparent;
+}
 
 @media (prefers-reduced-motion: reduce) {
   * { animation: none !important; transition: none !important; }
@@ -688,7 +762,7 @@ input:-webkit-autofill:focus {
   background: var(--card); border: 1px solid var(--line-hi); border-radius: 12px;
   padding: 0 12px;
 }
-.phone-number:focus-within { outline: 2px solid var(--teal); outline-offset: 1px; border-color: transparent; }
+.phone-number:focus-within { outline: 2px solid var(--amber); outline-offset: 2px; border-color: transparent; }
 .phone-dial {
   font-family: var(--font-mono); font-size: 15px; color: var(--muted); flex: none;
 }
@@ -756,7 +830,9 @@ input:-webkit-autofill:focus {
 .sortsel {
   background: var(--card); border: 1px solid var(--line-hi); border-radius: 10px;
   color: var(--ink); font-size: 13px; padding: 7px 10px; font-family: var(--font-body);
+  cursor: pointer; transition: border-color .2s;
 }
+.sortsel:hover { border-color: rgba(255,182,72,.5); }
 
 /* ===== busca ===== */
 .searchwrap { padding: 10px 14px 2px; }
@@ -765,13 +841,14 @@ input:-webkit-autofill:focus {
   background: var(--card); border: 1px solid var(--line-hi); border-radius: 12px;
   padding: 0 12px;
 }
-.searchbox:focus-within { outline: 2px solid var(--teal); outline-offset: 1px; border-color: transparent; }
+.searchbox:focus-within { outline: 2px solid var(--amber); outline-offset: 2px; border-color: transparent; }
 .searchbox input {
   flex: 1; min-width: 0; background: none; border: 0; outline: none; color: var(--ink);
   font-size: 16px; /* 16px impede o zoom automático do iOS ao focar */
   padding: 12px 0; font-family: var(--font-body);
 }
-.searchbox button { background: none; border: 0; color: var(--amber); font-size: 17px; cursor: pointer; padding: 4px; }
+.searchbox button { background: none; border: 0; color: var(--amber); font-size: 17px; cursor: pointer; padding: 4px; transition: color .15s; }
+.searchbox button:hover { color: var(--amber-hi); }
 
 /* ===== ficha do produto ===== */
 .pdp-hero {
@@ -779,7 +856,7 @@ input:-webkit-autofill:focus {
   margin: 12px 14px 0; border-radius: 16px; overflow: hidden; line-height: 0;
 }
 .pdp-img { object-fit: contain; padding: 18px; }
-.pdp-noimg { position: absolute; inset: 0; display: grid; place-items: center; font-size: 52px; opacity: .3; }
+.pdp-noimg { position: absolute; inset: 0; display: grid; place-items: center; font-size: 52px; color: #AFC0D0; }
 
 .pdp-thumbs {
   display: flex; gap: 8px; padding: 10px 14px 0; overflow-x: auto;
@@ -797,6 +874,9 @@ input:-webkit-autofill:focus {
 .pdp-head h1 {
   font-family: var(--font-disp); font-weight: 800; font-size: 23px;
   line-height: 1.15; margin: 4px 0 0; letter-spacing: -.01em; color: var(--ink);
+  /* nome de produto quebra em duas linhas parelhas, não numa longa e
+     uma órfã de "250 g" */
+  text-wrap: balance;
 }
 .pdp-head .lead { color: var(--muted); font-size: 14px; line-height: 1.5; margin: 7px 0 0; }
 
@@ -809,6 +889,10 @@ input:-webkit-autofill:focus {
   font-size: 12.5px; color: var(--teal); font-weight: 600; margin-bottom: 12px;
 }
 .stockline i { width: 8px; height: 8px; border-radius: 50%; background: var(--teal); flex: none; }
+/* "Only 3 left" em âmbar: é urgência, não a mesma boa notícia do
+   "In stock" — em teal os dois liam igual e o aviso não avisava. */
+.stockline.low { color: var(--amber); }
+.stockline.low i { background: var(--amber); }
 .stockline.out { color: var(--faint); }
 .stockline.out i { background: var(--faint); }
 
@@ -818,12 +902,24 @@ input:-webkit-autofill:focus {
   padding: 8px 0; border-top: 1px solid var(--line);
 }
 .pdp-facts > div:first-child { border-top: 0; padding-top: 0; }
-.pdp-facts dt { color: var(--faint); font-size: 12.5px; margin: 0; }
-.pdp-facts dd { color: var(--ink); font-size: 12.5px; margin: 0; text-align: right; }
+/* Rótulo na voz de rótulo da casa (mono, caixa alta, entreletra) — em
+   texto corrido "SKU" e o próprio valor disputavam o mesmo cinza. */
+.pdp-facts dt {
+  color: var(--faint); margin: 0; align-self: center;
+  font-family: var(--font-mono); font-size: 10px;
+  letter-spacing: .14em; text-transform: uppercase;
+}
+.pdp-facts dd { color: var(--ink); font-size: 12.5px; margin: 0; text-align: right; overflow-wrap: anywhere; }
 
 .pdp-price { display: flex; flex-direction: column; align-items: flex-end; gap: 1px; margin: 4px 0 12px; }
-.pdp-price .was { font-family: var(--font-mono); font-size: 13px; color: var(--faint); }
-.pdp-price .now { font-family: var(--font-mono); font-size: 26px; font-weight: 700; color: var(--ink); }
+.pdp-price .was { font-family: var(--font-mono); font-size: 13px; color: var(--faint); font-variant-numeric: tabular-nums; }
+/* Mesma voz do preço do card (display, não mono): o preço da ficha é a
+   DECISÃO da página, não mais uma linha de dado ao lado do SKU. Mono
+   fica para o que se copia e confere — SKU, EAN, código de pedido. */
+.pdp-price .now {
+  font-family: var(--font-disp); font-size: 27px; font-weight: 800;
+  color: var(--ink); letter-spacing: -.01em; font-variant-numeric: tabular-nums;
+}
 .pdp-price .alt { font-size: 11px; color: var(--faint); }
 
 .pdp-actions { display: flex; gap: 10px; align-items: stretch; }
@@ -834,14 +930,20 @@ input:-webkit-autofill:focus {
 }
 .qty button {
   width: 38px; height: 46px; background: none; border: 0; color: var(--ink);
-  font-size: 19px; cursor: pointer;
+  font-size: 19px; cursor: pointer; transition: color .15s, background .15s;
 }
+.qty button:hover:not(:disabled) { color: var(--amber-hi); background: var(--card-hi); }
+.qty button:disabled { opacity: .35; cursor: default; }
 .qty span { min-width: 26px; text-align: center; font-size: 15px; color: var(--ink); }
 
 .pdp-block { margin: 18px 16px 0; }
-.pdp-block h3 {
+/* :is(h2, h3): a ficha usa <h2> (nível certo abaixo do <h1> do produto)
+   e as páginas de texto usam <h3>. Com o seletor só em h3, os títulos
+   da ficha caíam no h2 default do navegador — o único texto do site
+   fora do sistema tipográfico, e ninguém tinha visto. */
+.pdp-block :is(h2, h3) {
   font-family: var(--font-disp); font-size: 16px; font-weight: 700;
-  color: var(--ink); margin: 0 0 9px;
+  color: var(--ink); margin: 0 0 9px; text-wrap: balance;
 }
 .pdp-text { color: var(--muted); font-size: 14px; line-height: 1.6; margin: 0; }
 .specs { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 7px; }
@@ -863,7 +965,12 @@ input:-webkit-autofill:focus {
   padding: 10px 14px calc(10px + env(safe-area-inset-bottom));
   background: rgba(4,13,26,.94); backdrop-filter: blur(12px);
   border-top: 1px solid var(--line-hi);
+  /* Sobe uma vez na chegada — anuncia que a compra viaja junto com a
+     rolagem. O translateX(-50%) da centralização precisa sobreviver
+     ao keyframe, senão a barra "entra" deslocada para a direita. */
+  animation: dockIn .3s var(--ease);
 }
+@keyframes dockIn { from { transform: translate(-50%, 105%); } to { transform: translate(-50%, 0); } }
 .buydock .thumb {
   position: relative; width: 44px; height: 44px; flex: none;
   background: #F4F7FA; border-radius: 9px; overflow: hidden;
@@ -885,6 +992,7 @@ input:-webkit-autofill:focus {
   position: relative; width: 50px; height: 50px; flex: none;
   background: #F4F7FA; border-radius: 10px; overflow: hidden;
   display: grid; place-items: center; font-size: 22px; text-decoration: none;
+  color: #AFC0D0; /* o ícone de caixa quando não há foto */
 }
 .ci .sku { font-size: 10px; color: var(--faint); letter-spacing: .06em; margin-top: 2px; }
 .ci .pr s { color: var(--faint); margin-right: 4px; }
@@ -968,7 +1076,9 @@ input:-webkit-autofill:focus {
   display: block; background: var(--amber); color: var(--amber-ink);
   text-align: center; font-size: 13px; font-weight: 700; padding: 10px 14px;
   text-decoration: underline; text-underline-offset: 2px;
+  transition: background .2s;
 }
+.announce:hover { background: var(--amber-hi); }
 
 /* --- cabeçalho fixo, duas fileiras --- */
 .sunhead {
@@ -1110,22 +1220,28 @@ input:-webkit-autofill:focus {
   flex: none; width: 52px; border: 0; cursor: pointer;
   background: var(--amber); color: var(--amber-ink);
   border-radius: 0 10px 10px 0; font-size: 17px;
+  transition: filter .15s;
 }
-.sunsearch:focus-within input { box-shadow: inset 0 0 0 2px var(--teal); }
+.sunsearch button:hover { filter: brightness(1.06); }
+.sunsearch:focus-within input { box-shadow: inset 0 0 0 2px var(--amber); }
 
 /* --- drawer de categorias, drill-down --- */
 .drawer-ovl {
   position: fixed; inset: 0; z-index: 90; background: rgba(1,6,13,.66);
   backdrop-filter: blur(2px); border: 0; padding: 0; cursor: pointer;
-  animation: fade .16s ease-out;
+  animation: fade .18s var(--ease);
 }
 @keyframes fade { from { opacity: 0 } to { opacity: 1 } }
+/* Painel que cai do topo (menu da conta, typeahead, mega-menu): mesmo
+   gesto, mesma curva. Vive no escopo base porque o menu da conta abre
+   em qualquer largura. */
+@keyframes dropIn { from { opacity: 0; transform: translateY(-6px); } }
 .drawer {
   position: fixed; top: 0; left: 0; bottom: 0; z-index: 91;
   width: min(86vw, 380px); background: var(--panel);
   border-right: 1px solid var(--line-hi);
   display: flex; flex-direction: column;
-  animation: slidein .2s cubic-bezier(.22,.61,.36,1);
+  animation: slidein .24s var(--ease);
 }
 @keyframes slidein { from { transform: translateX(-100%) } to { transform: translateX(0) } }
 .drawer-top {
@@ -1136,7 +1252,9 @@ input:-webkit-autofill:focus {
 .drawer-x {
   flex: none; width: 38px; height: 38px; border: 0; border-radius: 9px;
   background: var(--amber); color: var(--amber-ink); font-size: 17px; cursor: pointer;
+  transition: filter .15s;
 }
+.drawer-x:hover { filter: brightness(1.06); }
 .drawer-list { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; }
 .drawer-item {
   display: flex; align-items: center; gap: 10px; width: 100%;
@@ -1186,6 +1304,7 @@ input:-webkit-autofill:focus {
   min-width: 218px; background: var(--card);
   border: 1px solid var(--line-hi); border-radius: 12px;
   box-shadow: 0 18px 44px rgba(1,6,13,.6); overflow: hidden;
+  animation: dropIn .16s var(--ease);
 }
 .acctmenu a, .acctmenu button {
   display: block; width: 100%; text-align: left;
@@ -1212,19 +1331,23 @@ input:-webkit-autofill:focus {
   color: var(--muted); font-size: 13px; text-decoration: none; line-height: 1.5;
 }
 .sunfoot-body a:hover { color: var(--amber); }
-/* Uma linha discreta, não cinco pastilhas brancas.
-   As pastilhas eram o elemento MAIS CLARO de uma página escura inteira,
-   e o menos importante dela. Selo de pagamento serve para tranquilizar
-   quem já decidiu comprar; gritando mais que o produto, ele faz o
-   efeito contrário. */
+/* Chips de pagamento no padrão de mercado: mesmo tamanho, contorno
+   discreto, marca desenhada em um tom só. Nem as pastilhas brancas da
+   primeira versão (o elemento mais claro da página inteira), nem o
+   texto corrido da segunda (lia como saída de terminal). */
 .paywall {
   margin: 0; padding: 18px var(--gut) 4px;
-  display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px;
-  font-family: var(--font-mono); font-size: 11px; letter-spacing: .04em;
-  color: var(--muted);
+  display: flex; flex-wrap: wrap; align-items: center; gap: 8px;
 }
 .paywall .lb {
-  font-size: 9.5px; letter-spacing: .18em; text-transform: uppercase; color: var(--faint);
+  font-family: var(--font-mono); font-size: 9.5px; letter-spacing: .18em;
+  text-transform: uppercase; color: var(--faint); margin-right: 4px;
+}
+.paychip {
+  display: inline-flex; align-items: center; justify-content: center;
+  height: 28px; min-width: 48px; padding: 0 9px;
+  border: 1px solid var(--line-hi); border-radius: 6px;
+  color: var(--muted);
 }
 .sunfoot-legal {
   text-align: center; padding: 12px 18px calc(24px + env(safe-area-inset-bottom));
@@ -1240,6 +1363,9 @@ input:-webkit-autofill:focus {
 .crumb a { color: var(--faint); text-decoration: none; }
 .crumb a:hover { color: var(--amber); }
 .crumb .sep { opacity: .5; }
+/* a página atual meio tom acima dos ancestrais: o olho acha "onde
+   estou" sem ler a trilha inteira */
+.crumb [aria-current="page"] { color: var(--muted); }
 
 /* ===== cartão de departamento =====
    Substitui a fileira de cartõezinhos com seta. Com dois departamentos
@@ -1291,6 +1417,19 @@ input:-webkit-autofill:focus {
 .dept-sub .ct {
   font-family: var(--font-mono); font-size: 11.5px; color: var(--faint);
   font-variant-numeric: tabular-nums;
+}
+
+/* ===== admin: fila de revisão do line-up =====
+   Linhas com colunas alinhadas: nome+atraso | ETA | ação. No celular o
+   .queue-row original (flex) continua valendo; a partir do regime largo
+   a fileira vira grade para duzentos navios serem varridos em coluna,
+   com o botão sempre no mesmo lugar. */
+@media (min-width: 768px) and (min-height: 520px) {
+  .queue-row {
+    display: grid; grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center; gap: var(--sp-4);
+  }
+  .queue-row .meta { font-variant-numeric: tabular-nums; }
 }
 
 /* ===== faixa do Captain na home =====
@@ -1370,7 +1509,7 @@ input:-webkit-autofill:focus {
 .pcard {
   display: flex; flex-direction: column;
   background: var(--card); border-radius: 14px; overflow: hidden;
-  transition: background .18s ease, transform .18s ease;
+  transition: background .18s var(--ease), transform .18s var(--ease);
 }
 .pcard.out { opacity: .55; }
 @media (hover: hover) {
@@ -1389,10 +1528,13 @@ input:-webkit-autofill:focus {
      visível atrás de cada JPEG. */
   background: #FFFFFF; line-height: 0; overflow: hidden;
 }
-.pcard-img { object-fit: contain; padding: 4px; transition: transform .3s ease; }
+.pcard-img { object-fit: contain; padding: 4px; transition: transform .3s var(--ease); }
+/* Sem foto: o ícone de caixa da família, num cinza-ardósia que
+   sussurra sobre o painel branco. O emoji que morava aqui saía colorido
+   e diferente em cada sistema — lia como produto, não como falta dele. */
 .pcard-noimg {
   position: absolute; inset: 0; display: grid; place-items: center;
-  font-size: 34px; opacity: .3;
+  font-size: 34px; color: #AFC0D0;
 }
 
 /* Empilhados: um item pode ser promo E ter desconto, e dois selos
@@ -1470,6 +1612,7 @@ input:-webkit-autofill:focus {
   transition: filter .15s, background .15s;
 }
 .padd:hover { filter: brightness(1.06); }
+.padd:active { filter: brightness(.94); }
 /* Contorno por box-shadow e não por border: com border o botão fantasma
    nasce 2px mais alto que o cheio e a fileira desalinha. */
 .padd.ghost { background: transparent; box-shadow: inset 0 0 0 1px var(--line-hi); color: var(--ink); }
@@ -1494,6 +1637,7 @@ input:-webkit-autofill:focus {
   display: grid; place-items: center; transition: background .14s;
 }
 .pstep-b:hover { background: rgba(255,182,72,.16); }
+.pstep-b:active { background: rgba(255,182,72,.26); }
 .pstep-n {
   display: grid; place-items: center;
   font-family: var(--font-disp); font-size: 14px; font-weight: 700;
@@ -1524,7 +1668,7 @@ input:-webkit-autofill:focus {
   width: 34px; height: 34px; border-radius: 50%; border: 0;
   background: rgba(255,255,255,.84); color: #46617A; font-size: 15px;
   -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px);
-  transition: background .15s, color .15s, transform .15s;
+  transition: background .15s, color .15s, transform .15s var(--ease);
 }
 .pcard-top > .wish:hover { color: var(--danger); background: #FFFFFF; transform: scale(1.08); }
 .pcard-top > .wish.on { color: var(--danger); background: #FFFFFF; border: 0; }
@@ -1566,6 +1710,7 @@ input:-webkit-autofill:focus {
 .secttl {
   text-align: left; font-family: var(--font-disp); font-weight: 800;
   font-size: 21px; color: var(--ink); margin: 0; letter-spacing: -.01em;
+  text-wrap: balance;
 }
 /* A margem de baixo existe para PRENDER o título ao conteúdo dele, e só
    faz sentido quando os dois estão na mesma <section>. Solto como filho
@@ -1609,6 +1754,9 @@ input:-webkit-autofill:focus {
 .sumcard .btn.navy {
   background: var(--card-hi); color: var(--ink); border: 1px solid var(--line-hi);
 }
+/* botão secundário não ganha o brilho âmbar do primário no hover —
+   dois botões brilhando igual anulam a hierarquia que os separa */
+.sumcard .btn.navy:hover { box-shadow: none; border-color: rgba(255,182,72,.5); color: var(--amber-hi); }
 
 /* Ficha de dados do perfil no checkout. */
 .factrow { padding: 10px 0; border-top: 1px solid var(--line); }
@@ -1637,6 +1785,7 @@ input:-webkit-autofill:focus {
   position: absolute; top: calc(100% + 4px); left: 0; right: 0; z-index: 40;
   background: var(--card); border: 1px solid var(--line-hi); border-radius: 12px;
   max-height: 264px; overflow-y: auto; box-shadow: 0 16px 40px rgba(1,6,13,.6);
+  animation: dropIn .16s var(--ease);
 }
 .ta-opt {
   display: flex; align-items: center; gap: 9px; width: 100%;
@@ -1678,7 +1827,7 @@ input:-webkit-autofill:focus {
 }
 .switch input:checked + .track { background: var(--amber); }
 .switch input:checked + .track::after { transform: translateX(18px); background: var(--amber-ink); }
-.switch input:focus-visible + .track { outline: 2px solid var(--teal); outline-offset: 2px; }
+.switch input:focus-visible + .track { outline: 2px solid var(--amber); outline-offset: 2px; }
 .switch .lbl { color: var(--muted); font-size: 13px; line-height: 1.45; }
 
 /* Tabela da página de portos. */
@@ -1697,7 +1846,7 @@ input:-webkit-autofill:focus {
 .ptable .wrap { overflow-x: auto; }
 
 /* Título "Description / NOME" da ficha, como o deles. */
-.pdp-block h3 .slash { color: var(--faint); font-weight: 500; }
+.pdp-block :is(h2, h3) .slash { color: var(--faint); font-weight: 500; }
 .pdp-block .prodname {
   color: var(--amber); font-size: 14px; font-weight: 700; margin: 0 0 10px;
   text-transform: uppercase; letter-spacing: .01em;
@@ -1711,7 +1860,7 @@ input:-webkit-autofill:focus {
   width: min(90vw, 400px); background: var(--panel);
   border-left: 1px solid var(--line-hi);
   display: flex; flex-direction: column;
-  animation: slideright .2s cubic-bezier(.22,.61,.36,1);
+  animation: slideright .24s var(--ease);
 }
 @keyframes slideright { from { transform: translateX(100%) } to { transform: translateX(0) } }
 .minicart-top {
@@ -1724,7 +1873,9 @@ input:-webkit-autofill:focus {
 .minicart-x {
   width: 34px; height: 34px; border: 0; border-radius: 50%;
   background: var(--card-hi); color: var(--ink); font-size: 14px; cursor: pointer;
+  transition: color .15s, background .15s;
 }
+.minicart-x:hover { color: var(--amber-hi); background: var(--line-hi); }
 .minicart-list { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; padding: 6px 0; }
 .mcline { display: flex; gap: 11px; padding: 12px 16px; border-bottom: 1px solid var(--line); }
 .mcbody { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px; }
@@ -1742,6 +1893,7 @@ input:-webkit-autofill:focus {
 .mcdel {
   width: 34px; height: 34px; border-radius: 50%; cursor: pointer;
   background: none; border: 1px solid var(--line-hi); color: var(--faint); font-size: 13px;
+  transition: color .15s, border-color .15s;
 }
 .mcdel:hover { color: var(--danger); border-color: rgba(255,89,100,.45); }
 /* Grid, e não bloco solto com margem.
@@ -1924,6 +2076,7 @@ input:-webkit-autofill:focus {
   font-family: var(--font-disp); font-weight: 800; font-size: 26px;
   line-height: 1.12; letter-spacing: -.01em; color: var(--ink);
   position: relative; margin: 12px 16px 0; padding-bottom: 11px;
+  text-wrap: balance;
 }
 .pagettl::after {
   content: ""; position: absolute; left: 0; bottom: 0;
@@ -2022,6 +2175,13 @@ svg.ic { flex: none; color: var(--amber); }
      borda, viram coluna de leitura centrada. --shell-w ganha este
      segundo emprego e continua intacto para .buydock. */
   .shell > main { max-width: var(--shell-w); margin-inline: auto; width: 100%; }
+  /* O painel de operação NÃO é página de leitura. A retaguarda acima o
+     engolia: main.stack caía na coluna de 500px e o admin virava uma
+     tela de celular pendurada num monitor — fila de 200 navios num
+     corredor de meio palmo. O :has(.admin-wide) já alarga a casca; o
+     main tem de acompanhar. 1180px e não none: linha de revisão de 1500px
+     separa o nome do botão além do alcance do olho. */
+  .shell:has(.admin-wide) > main { max-width: 1180px; }
   /* as seis superfícies desenhadas saem do teto */
   .shell > main.pg-form,
   .shell > main.pg-home,
@@ -2159,9 +2319,8 @@ svg.ic { flex: none; color: var(--amber); }
     box-shadow: 0 30px 60px -22px rgba(1, 6, 13, .92);
     padding: 22px 24px 18px;
     max-height: min(64vh, 520px); overflow-y: auto;
-    animation: megaIn .14s ease-out;
+    animation: dropIn .16s var(--ease);
   }
-  @keyframes megaIn { from { opacity: 0; transform: translateY(-6px); } }
   .megagrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 6px 26px; }
   .megacol { display: flex; flex-direction: column; padding-bottom: 12px; }
   .megahead {
@@ -2401,7 +2560,7 @@ svg.ic { flex: none; color: var(--amber); }
   .pg-pdp .pdp-thumb  { width: 72px; height: 72px; border-radius: 12px; }
   .pg-pdp .pdp-thumb:hover { border-color: var(--line-hi); }
   .pg-pdp .pdp-thumb.on:hover { border-color: var(--amber); }
-  .pg-pdp .pdp-thumb:focus-visible { outline: 2px solid var(--teal); outline-offset: 2px; }
+  .pg-pdp .pdp-thumb:focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; }
 
   .pg-pdp .pdp-head { padding: 0; }
   .pg-pdp .pdp-head h1 { font-size: clamp(26px, 2vw, 34px); margin-top: 6px; }
@@ -2613,8 +2772,11 @@ svg.ic { flex: none; color: var(--amber); }
      lado é um painel branco com uma lata de tinta no meio. */
   .pg-pdp { --left-w: 560px; --buy-w: 360px; --pdp-gap: 36px; }
   .pg-pdp .pdp-thumb { width: 76px; height: 76px; }
-  .pg-pdp .pdp-facts dt, .pg-pdp .pdp-facts dd { font-size: 13.5px; }
-  .pg-pdp .pdp-block h3 { font-size: 18px; margin-bottom: 11px; }
+  /* o rótulo mono cresce meio ponto, o valor cresce um — a diferença
+     de escala entre os dois é o que os mantém rótulo e valor */
+  .pg-pdp .pdp-facts dt { font-size: 10.5px; }
+  .pg-pdp .pdp-facts dd { font-size: 13.5px; }
+  .pg-pdp .pdp-block :is(h2, h3) { font-size: 18px; margin-bottom: 11px; }
   .pg-pdp .specs li { font-size: 14.5px; }
   .pg-pdp .pdp-text { font-size: 15px; line-height: 1.65; }
   /* page.tsx renderiza exatamente related.slice(0,4): 4 trilhas dão

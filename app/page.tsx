@@ -1,6 +1,7 @@
 import Link from "next/link";
 import CaptainStrip from "@/components/CaptainStrip";
 import HeroSteps from "@/components/HeroSteps";
+import { IconCompass } from "@/components/Icon";
 import VesselPanel, { type VesselFacts } from "@/components/VesselPanel";
 import { unstable_cache } from "next/cache";
 import { createClient as createAnonClient } from "@supabase/supabase-js";
@@ -270,8 +271,9 @@ export default async function Home() {
 
         {shown.length === 0 ? (
           <div className="empty">
-            <div className="i">🧭</div>
-            The shelves are being stocked. Check back shortly.
+            <div className="i" aria-hidden><IconCompass size={28} /></div>
+            <p className="t">The shelves are being stocked</p>
+            <p className="d">Check back shortly — supplies land before every call.</p>
           </div>
         ) : (
           <div className="deptgrid">

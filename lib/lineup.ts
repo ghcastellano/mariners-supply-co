@@ -56,7 +56,17 @@ export async function fetchLineupHtml(
     const meta = ascii.match(/charset=["']?([\w-]+)/i)?.[1];
     const charset = (declared || meta || "utf-8").toLowerCase();
     const enc = /8859|latin|windows-1252|cp1252/.test(charset) ? "windows-1252" : "utf-8";
-    return { ok: res.ok, status: res.status, html: new TextDecoder(enc).decode(buf), charset: enc };
+    let html = new TextDecoder(enc).decode(buf);
+    // A CODESP às vezes DECLARA utf-8 e serve latin-1 mesmo assim. O
+    // sintoma é U+FFFD no lugar de cada acento — foi assim que JATOBÁ
+    // virou "JATOB�" no line-up e ficou seis navios com nome quebrado
+    // na fila de revisão. Byte de latin-1 nunca produz U+FFFD ao ser
+    // decodificado como windows-1252, então o fallback é seguro: se o
+    // utf-8 produziu caractere de substituição, a declaração mentiu.
+    if (enc === "utf-8" && html.includes("\uFFFD")) {
+      html = new TextDecoder("windows-1252").decode(buf);
+    }
+    return { ok: res.ok, status: res.status, html, charset: enc };
   } catch (e) {
     return { ok: false, status: 0, html: "", error: (e as Error).message };
   } finally {

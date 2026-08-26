@@ -52,10 +52,17 @@ export default function PhoneInput({
 
   useEffect(() => {
     // Num formulário de EDIÇÃO o campo precisa nascer com o número
-    // salvo. Sem isto o componente montava vazio e disparava
-    // onChange("") — quem entrasse só para trocar o porto apagaria o
-    // telefone sem perceber.
-    if (seeded) return;
+    // salvo — e o número salvo chega DEPOIS da primeira montagem,
+    // porque o perfil vem do banco. A primeira versão semeava uma vez
+    // só ("if (seeded) return"), então a corrida era sempre perdida: o
+    // campo montava vazio, o perfil chegava, e nada acontecia. A tela
+    // da conta mostrava um telefone em branco com o número salvo num
+    // aviso embaixo — e "salvei e continua vazio" lê como não salvou.
+    //
+    // A regra agora: enquanto a pessoa não DIGITOU, valor que chega e
+    // parseia semeia o campo, cedo ou tarde. Digitou, acabou — nada
+    // sobrescreve o que ela está escrevendo.
+    if (touched) return;
     const parsed = splitE164(value ?? "");
     if (parsed) {
       setCountry(parsed.code);
@@ -64,9 +71,11 @@ export default function PhoneInput({
       setSeeded(true);
       return;
     }
-    setCountry(detectCountry());
-    setSeeded(true);
-  }, [value, seeded]);
+    if (!seeded) {
+      setCountry(detectCountry());
+      setSeeded(true);
+    }
+  }, [value, seeded, touched]);
 
   useEffect(() => {
     // O perfil carrega depois do primeiro render, então a nacionalidade

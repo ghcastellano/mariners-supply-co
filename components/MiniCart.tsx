@@ -8,7 +8,7 @@ import { createClient } from "@/lib/supabase/client";
 import { supabaseConfigured } from "@/lib/env";
 import { imageUrl } from "@/lib/catalog";
 import { usd } from "@/lib/money";
-import { IconClose, IconTrash } from "./Icon";
+import { IconCart, IconClose, IconPackage, IconTrash } from "./Icon";
 
 type Line = {
   id: string;
@@ -49,7 +49,19 @@ export default function MiniCart({ open, onClose }: { open: boolean; onClose: ()
          products!product_variants_product_id_fkey!inner(name, slug, primary_image_path, active)`
       )
       .in("id", ids)
-      .then(({ data }) => setLines((data ?? []) as unknown as Line[]));
+      .then(({ data }) => {
+        const linhas = (data ?? []) as unknown as Line[];
+        setLines(linhas);
+        // O carrinho vive no aparelho; o catálogo, no banco. Quando um
+        // produto é desativado, o id guardado continua lá — e o selo do
+        // cabeçalho dizia "1" sobre uma gaveta vazia, porque o selo
+        // conta o localStorage e a gaveta conta o que ainda existe.
+        // Item que o banco não devolve vivo sai do carrinho na hora.
+        const vivos = new Set(linhas.filter((l) => l.active && l.products?.active).map((l) => l.id));
+        for (const id of ids) {
+          if (!vivos.has(id)) change(id, -(items[id] ?? 0));
+        }
+      });
   }, [open, ids.join(",")]);
 
   useEffect(() => {
@@ -93,8 +105,12 @@ export default function MiniCart({ open, onClose }: { open: boolean; onClose: ()
             <div className="spin" aria-label="Loading" />
           ) : rows.length === 0 ? (
             <div className="empty" style={{ padding: "48px 24px" }}>
-              <div className="i">🛒</div>
-              Your cart is empty.
+              <div className="i" aria-hidden><IconCart size={26} /></div>
+              <p className="t">Your cart is empty</p>
+              <p className="d">Whatever you add waits here, all the way to the gangway.</p>
+              <Link className="btn small ghost" href="/shop" onClick={onClose}>
+                Start shopping
+              </Link>
             </div>
           ) : (
             rows.map((l) => {
@@ -103,7 +119,7 @@ export default function MiniCart({ open, onClose }: { open: boolean; onClose: ()
                 <div className="mcline" key={l.id}>
                   <Link href={`/p/${l.products?.slug}`} className="ci-thumb" onClick={onClose}>
                     {src ? <Image src={src} alt="" fill sizes="52px" style={{ objectFit: "contain" }} />
-                         : <span aria-hidden>📦</span>}
+                         : <span aria-hidden><IconPackage size={22} /></span>}
                   </Link>
                   <div className="mcbody">
                     <div className="mchead">
@@ -133,23 +149,27 @@ export default function MiniCart({ open, onClose }: { open: boolean; onClose: ()
           )}
         </div>
 
-        <div className="minicart-foot">
-          <div className="sumrow">
-            <span>Subtotal</span>
-            <b>{usd(subtotal)}</b>
+        {/* O rodapé só existe com item dentro: "Checkout" sobre carrinho
+            vazio é um beco sem saída oferecido como ação primária. */}
+        {rows.length > 0 && (
+          <div className="minicart-foot">
+            <div className="sumrow">
+              <span>Subtotal</span>
+              <b>{usd(subtotal)}</b>
+            </div>
+            <Link className="btn" href="/checkout" onClick={onClose}>
+              Checkout
+            </Link>
+            <Link className="btn navy" href="/cart" onClick={onClose}>
+              View and Edit Cart
+            </Link>
+            {count > 0 && (
+              <p className="finehint" style={{ textAlign: "center", margin: "8px 0 0" }}>
+                30% deposit now · balance at the gangway
+              </p>
+            )}
           </div>
-          <Link className="btn" href="/checkout" onClick={onClose}>
-            Checkout
-          </Link>
-          <Link className="btn navy" href="/cart" onClick={onClose}>
-            View and Edit Cart
-          </Link>
-          {count > 0 && (
-            <p className="finehint" style={{ textAlign: "center", margin: "8px 0 0" }}>
-              30% deposit now · balance at the gangway
-            </p>
-          )}
-        </div>
+        )}
       </div>
     </>
   );
