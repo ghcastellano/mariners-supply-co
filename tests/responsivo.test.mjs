@@ -136,11 +136,25 @@ async function medir(rota, tela) {
       }
 
       const conteudo = document.querySelector(".shell > main") ?? document.querySelector("main");
+      // O BLOCO de conteúdo, não o <main>.
+      //
+      // Medir só o <main> deixou passar uma regressão inteira: uma regra
+      // base `.shell > main` com grid de UMA coluna venceu, por
+      // especificidade, a grade de 12 colunas da home. O <main> continuou
+      // com 1518px e o teste seguiu verde — mas tudo abaixo do herói se
+      // espremeu na primeira trilha, encostado à esquerda, com metade da
+      // tela vazia. Largura de container não prova largura de conteúdo.
+      // A MAIOR visível, não a primeira do DOM: /shop tem grade escondida
+      // no trilho de filtros, e querySelector devolvia uma de 0px.
+      const bloco = [...document.querySelectorAll(".pgrid, .deptgrid, .catgrid, .rail")]
+        .map((e) => e.getBoundingClientRect().width)
+        .reduce((maior, w) => Math.max(maior, w), 0);
       return {
         rolagemH: doc.scrollWidth > larguraTela + 1,
         scrollWidth: doc.scrollWidth,
         vazando: [...new Set(vazando)].slice(0, 5),
         larguraConteudo: conteudo ? Math.round(conteudo.getBoundingClientRect().width) : 0,
+        larguraBloco: Math.round(bloco),
         colados,
         larguraPagina: (() => {
           const shell = document.querySelector(".shell");
@@ -199,6 +213,16 @@ describe("responsividade", () => {
           assert.ok(
             m.larguraConteudo >= tela.w * 0.7,
             `${rota}: vitrine com ${m.larguraConteudo}px numa tela de ${tela.w}px — menos de 70%`
+          );
+          // E a grade DENTRO dele. O container largo com a grade estreita
+          // é o estado que passou batido: <main> em 1518px e a vitrine
+          // espremida em 828px, encostada à esquerda. 60% do <main> é
+          // folgado de propósito — /shop tem trilho de filtros comendo
+          // uma faixa fixa, e o que se quer proibir é a grade colapsar
+          // para uma fração da página.
+          assert.ok(
+            m.larguraBloco >= m.larguraConteudo * 0.6,
+            `${rota}: grade com ${m.larguraBloco}px dentro de um <main> de ${m.larguraConteudo}px em ${tela.w}px — a página é larga e o conteúdo não`
           );
         }
       });

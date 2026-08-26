@@ -1241,6 +1241,58 @@ input:-webkit-autofill:focus {
 .crumb a:hover { color: var(--amber); }
 .crumb .sep { opacity: .5; }
 
+/* ===== cartão de departamento =====
+   Substitui a fileira de cartõezinhos com seta. Com dois departamentos
+   ativos, aquela fileira deixava mil pixels vazios à direita numa tela
+   de 16" — e o que ela dizia (o nome da categoria) a barra de cima já
+   dizia. O cartão de departamento usa a mesma largura para dizer algo
+   novo: quais corredores existem lá dentro e quantos itens cada um tem.
+   É a informação que decide o clique. */
+.deptgrid { display: grid; gap: var(--sp-3); }
+@media (min-width: 620px) { .deptgrid { grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); } }
+
+.dept {
+  display: flex; flex-direction: column;
+  background: var(--card); border-radius: 14px; overflow: hidden;
+}
+.dept-top {
+  display: flex; align-items: center; gap: var(--sp-3);
+  padding: var(--sp-4) var(--sp-4) var(--sp-3);
+  color: var(--ink); text-decoration: none;
+}
+.dept-top .nm { font-family: var(--font-disp); font-weight: 700; font-size: 16px; letter-spacing: -.01em; }
+.dept-top .ct {
+  margin-left: auto; font-family: var(--font-mono); font-size: 11px; color: var(--faint);
+  white-space: nowrap;
+}
+.dept-top:hover .nm { color: var(--amber); }
+.dept-top svg { color: var(--amber); flex: none; }
+
+/* Os corredores em quantas colunas couberem.
+   Com dois departamentos numa tela de 16", cada cartão fica com 700px —
+   e uma lista de uma coluna ali deixa 500px entre o nome e a contagem,
+   que é o mesmo defeito de fileira vazia, só que dentro do cartão. Em
+   duas colunas o cartão fica cheio de informação em vez de cheio de ar. */
+.dept-sub {
+  list-style: none; margin: 0; padding: 0 var(--sp-2) var(--sp-2);
+  display: grid; gap: 1px var(--sp-2);
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+}
+.dept-sub a {
+  display: flex; align-items: center; gap: var(--sp-3);
+  min-height: 44px; padding: 0 var(--sp-2) 0 var(--sp-3);
+  border-radius: 9px; color: var(--muted); font-size: 13.5px;
+  transition: background .14s, color .14s;
+}
+.dept-sub a:hover { background: var(--card-hi); color: var(--ink); }
+/* Contagem em coluna própria, alinhada à direita: é número que se
+   compara entre linhas, e número que não alinha obriga a ler um por um. */
+.dept-sub .nm { flex: 1; min-width: 0; }
+.dept-sub .ct {
+  font-family: var(--font-mono); font-size: 11.5px; color: var(--faint);
+  font-variant-numeric: tabular-nums;
+}
+
 /* ===== faixa do Captain na home =====
    Âmbar contido, não âmbar de faixa promocional: o programa é uma
    condição permanente da conta, não uma oferta que expira, e tratar
@@ -2162,7 +2214,13 @@ svg.ic { flex: none; color: var(--amber); }
   .catgrid { grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 12px; }
 
   /* ================= HOME ================= */
-  .pg-home {
+  /* `.shell > main.pg-home` e não `.pg-home`: a regra base da pilha é
+     `.shell > main`, que pesa mais que uma classe sozinha e engolia esta
+     grade de 12 colunas. O sintoma era discreto e feio — o herói ficava
+     largo, mas TODO o resto da home se espremia na primeira trilha e
+     encostava à esquerda, com meia tela vazia à direita. Regra de página
+     tem de pesar pelo menos o mesmo que a regra da pilha. */
+  .shell > main.pg-home {
     display: grid; grid-template-columns: repeat(12, minmax(0, 1fr));
     column-gap: var(--gut); row-gap: var(--stack);
     /* O topo era 0 e o herói encostava na barra de categorias. Painel
@@ -2177,6 +2235,10 @@ svg.ic { flex: none; color: var(--amber); }
   /* No desktop a página já recua; o trilho não sangra mais. Sem zerar,
      o margin negativo do escopo base o jogaria para fora da coluna. */
   .pg-home .catgrid, .pg-home .rail { margin-inline: 0; padding-inline: 0; }
+  .pg-home .deptgrid { gap: var(--sp-4); }
+  .pg-home .dept-top { padding: var(--sp-5) var(--sp-5) var(--sp-4); }
+  .pg-home .dept-top .nm { font-size: 18px; }
+  .pg-home .dept-sub { padding: 0 var(--sp-3) var(--sp-3); }
   /* Só o herói e as duas laterais recebem linha explícita: são a
      fileira de abertura. Do Captain para baixo a grade coloca na ordem
      do DOM, que agora é a ordem de leitura — foi o grid-row fixo do
@@ -2591,7 +2653,7 @@ svg.ic { flex: none; color: var(--amber); }
   .pg-cart .cart-list .mcactions { margin-top: 12px; gap: 14px; }
 
   /* ---- CHECKOUT: ficha à esquerda, Your order sticky à direita ---- */
-  .pg-checkout {
+  .shell > main.pg-checkout {
     display: grid; grid-template-columns: minmax(0, 1fr) 320px;
     column-gap: 24px; align-items: start; padding: 0 var(--gut) 8px;
   }
@@ -2619,7 +2681,7 @@ svg.ic { flex: none; color: var(--amber); }
   }
 
   /* ---- CONTA: rail de seções à esquerda ---- */
-  .pg-acct {
+  .shell > main.pg-acct {
     display: grid; grid-template-columns: 244px minmax(0, 1fr);
     column-gap: 32px; align-items: start; padding: 0 var(--gut) 8px;
   }
@@ -2682,7 +2744,7 @@ svg.ic { flex: none; color: var(--amber); }
   .pg-pdp { --left-w: 620px; --buy-w: 380px; --pdp-gap: 48px; }
   .pg-pdp .pdp-thumb { width: 84px; height: 84px; }
 
-  .pg-cart .cartslot, .pg-checkout { grid-template-columns: minmax(0, 1fr) 360px; column-gap: 32px; }
+  .pg-cart .cartslot, .shell > main.pg-checkout { grid-template-columns: minmax(0, 1fr) 360px; column-gap: 32px; }
   .pg-cart .cart-list .mcline   { grid-template-columns: 96px minmax(0, 1fr); gap: 18px; }
   .pg-cart .cart-list .ci-thumb { width: 96px; height: 96px; }
   .pg-cart .cart-list .mchead .nm { font-size: 15px; }
@@ -2691,7 +2753,7 @@ svg.ic { flex: none; color: var(--amber); }
   .pg-checkout .sumcard.framed dl { column-gap: 44px; }
   .pg-checkout .factrow dd { font-size: 15.5px; }
 
-  .pg-acct { grid-template-columns: 260px minmax(0, 1fr); column-gap: 40px; }
+  .shell > main.pg-acct { grid-template-columns: 260px minmax(0, 1fr); column-gap: 40px; }
   .pg-acct .acct-main form.stack { max-width: 600px; }
 }
 

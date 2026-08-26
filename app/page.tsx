@@ -25,7 +25,10 @@ import { DEPOSIT_PCT } from "@/lib/money";
  */
 export const dynamic = "force-dynamic";
 
-type RootCat = Pick<Category, "id" | "slug" | "name" | "icon">;
+type RootCat = Pick<Category, "id" | "slug" | "name" | "icon"> & {
+  /** Corredores dentro do departamento. Vazio = departamento folha. */
+  filhos: Pick<Category, "id" | "slug" | "name">[];
+};
 
 type Storefront = {
   roots: RootCat[];
@@ -51,11 +54,15 @@ const loadStorefront = unstable_cache(
       });
 
       const [cats, counts, promo, fresh] = await Promise.all([
+        // Dois níveis, não um: o cartão de departamento lista os
+        // corredores que tem dentro. Com dois departamentos, uma fileira
+        // de dois cartõezinhos com uma seta deixava mil pixels vazios à
+        // direita — e não dizia nada que a barra de cima já não diga.
         db
           .from("categories")
-          .select("id, slug, name, icon")
+          .select("id, slug, name, icon, parent_id, depth")
           .eq("active", true)
-          .eq("depth", 0)
+          .lte("depth", 1)
           .order("sort_order"),
         db.rpc("category_counts"),
         listProducts(db, { badge: "promo", limit: 8 }),
@@ -69,8 +76,14 @@ const loadStorefront = unstable_cache(
         byId[r.category_id] = Number(r.product_count) || 0;
       }
 
+      type Nivel = RootCat & { parent_id: string | null; depth: number };
+      const todas = (cats.data ?? []) as Nivel[];
+      const raizes = todas
+        .filter((c) => c.depth === 0)
+        .map((c) => ({ ...c, filhos: todas.filter((f) => f.parent_id === c.id) }));
+
       return {
-        roots: (cats.data ?? []) as RootCat[],
+        roots: raizes as RootCat[],
         counts: byId,
         promo: promo.items,
         fresh: fresh.items,
@@ -261,24 +274,36 @@ export default async function Home() {
             The shelves are being stocked. Check back shortly.
           </div>
         ) : (
-          <div className="catgrid">
-          {shown.map((c) => {
-            const n = store.counts[c.id] ?? 0;
-            return (
-              <Link key={c.id} href={`/c/${c.slug}`} className="catcard" prefetch={false}>
-<CategoryIcon slug={c.slug} fallback={c.icon} />
-                <span className="tx">
-                  <span className="nm">{c.name}</span>
-                  {n > 0 && (
-                    <span className="ct">{n === 1 ? "1 item" : `${n} items`}</span>
+          <div className="deptgrid">
+            {shown.map((c) => {
+              const n = store.counts[c.id] ?? 0;
+              return (
+                <article key={c.id} className="dept">
+                  <Link href={`/c/${c.slug}`} className="dept-top" prefetch={false}>
+                    <CategoryIcon slug={c.slug} fallback={c.icon} size={22} />
+                    <span className="nm">{c.name}</span>
+                    {n > 0 && <span className="ct">{n === 1 ? "1 item" : `${n} items`}</span>}
+                  </Link>
+
+                  {/* Os corredores por extenso, com a contagem de cada um.
+                      É o que a pessoa quer saber antes de clicar — e é o
+                      que enche o cartão com informação em vez de com uma
+                      seta. */}
+                  {c.filhos.length > 0 && (
+                    <ul className="dept-sub">
+                      {c.filhos.map((f) => (
+                        <li key={f.id}>
+                          <Link href={`/c/${f.slug}`} prefetch={false}>
+                            <span className="nm">{f.name}</span>
+                            <span className="ct">{store.counts[f.id] ?? 0}</span>
+                          </Link>
+                        </li>
+                      ))}
+                    </ul>
                   )}
-                </span>
-                <span className="chev" aria-hidden>
-                  ›
-                </span>
-              </Link>
-            );
-          })}
+                </article>
+              );
+            })}
           </div>
         )}
       </section>
