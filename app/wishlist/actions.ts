@@ -38,8 +38,64 @@ export async function toggleWish(productId: string): Promise<WishResult> {
   const { error } = await supabase
     .from("wishlists")
     .insert({ user_id: user.id, product_id: productId });
-  if (error) return { ok: false, wished: false };
+  // Falha silenciosa aqui foi o que impediu de enxergar o problema da
+  // primeira vez: o coração voltava atrás e não sobrava rastro nenhum
+  // no log para dizer por quê.
+  if (error) {
+    console.error(
+      JSON.stringify({ at: "wish_insert", user: user.id, product: productId, code: error.code, message: error.message })
+    );
+    return { ok: false, wished: false };
+  }
 
   revalidatePath("/wishlist");
   return { ok: true, wished: true };
+}
+
+/**
+ * Grava de uma vez os corações marcados antes do login.
+ *
+ * O botão guarda o id no aparelho quando não há sessão e manda para o
+ * login; quem chama aqui é o WishClaim, assim que a sessão existe.
+ * Vale para cadastro por e-mail e para o Google — nos dois o item
+ * aparece na lista sem a pessoa precisar procurar o produto de novo.
+ */
+export async function claimWishes(
+  productIds: string[]
+): Promise<{ ok: boolean; saved: number; needsAuth?: boolean }> {
+  const ids = [...new Set((productIds ?? []).filter((s) => typeof s === "string" && s))].slice(0, 50);
+  if (ids.length === 0) return { ok: true, saved: 0 };
+
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  // Ainda sem sessão: devolve sem apagar a fila, para tentar de novo.
+  if (!user) return { ok: false, saved: 0, needsAuth: true };
+
+  // Um id morto na fila (produto saiu do catálogo) derrubaria o lote
+  // inteiro pela chave estrangeira, e a pessoa perderia os outros
+  // junto. Confere antes o que ainda existe e grava só isso.
+  const { data: alive } = await supabase
+    .from("products")
+    .select("id")
+    .in("id", ids)
+    .eq("active", true);
+
+  const rows = (alive ?? []).map((p) => ({ user_id: user.id, product_id: p.id as string }));
+  if (rows.length === 0) return { ok: true, saved: 0 };
+
+  const { error } = await supabase
+    .from("wishlists")
+    .upsert(rows, { onConflict: "user_id,product_id", ignoreDuplicates: true });
+
+  if (error) {
+    console.error(
+      JSON.stringify({ at: "wish_claim", user: user.id, count: rows.length, code: error.code, message: error.message })
+    );
+    return { ok: false, saved: 0 };
+  }
+
+  revalidatePath("/wishlist");
+  return { ok: true, saved: rows.length };
 }
