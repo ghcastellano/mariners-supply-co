@@ -335,13 +335,24 @@ input:-webkit-autofill:focus {
   caret-color: var(--ink);
   transition: background-color 99999s ease-out;
 }
+/* Largura do botão vem do CONTAINER, não do botão.
+   Era `width: 100%` fixo, e isso é a regra de celular escrita como se
+   fosse regra de componente: no desktop "Deposit paid" e "Cancel"
+   empilhavam um sobre o outro dentro de um card de 340px, cada um
+   ocupando a linha toda, porque o botão insistia em 100%.
+   Como .stack e .field são grid, o botão dentro deles continua
+   esticando por conta do stretch do grid — o full-width de celular
+   segue de pé onde deve. Em flex (.actions, .rowline) ele passa a ter
+   o tamanho do próprio rótulo, que é o certo. */
 .btn {
   border: 0; border-radius: 13px; padding: 14px 16px; cursor: pointer;
-  font-weight: 700; font-size: 14.5px; width: 100%;
+  font-weight: 700; font-size: 14.5px;
   background: var(--amber); color: var(--amber-ink);
   display: inline-flex; align-items: center; justify-content: center; gap: 10px;
   transition: transform .2s, box-shadow .2s, opacity .2s;
 }
+/* Para quando o container não é grid e o botão precisa ocupar a linha. */
+.btn.block { width: 100%; }
 .btn:hover { transform: translateY(-1px); box-shadow: 0 10px 26px -12px rgba(255,182,72,.5); }
 .btn:disabled { opacity: .4; cursor: default; transform: none; box-shadow: none; }
 .btn.ghost {
@@ -482,15 +493,44 @@ input:-webkit-autofill:focus {
 .foot a { color: var(--muted); font-size: 12.5px; }
 .foot a:hover { color: var(--amber-hi); }
 
-/* ===== admin em telas grandes: painel largo ===== */
+/* ===== admin em telas grandes: painel largo =====
+   O cap era 960px fixo, e como `.shell:has(.admin-wide)` tem
+   especificidade maior que `.shell`, ele vencia o --page-w do bloco de
+   desktop em QUALQUER largura. Num notebook de 16" o painel virava uma
+   coluna estreita no meio da tela: os quatro KPIs quebravam o rótulo em
+   três linhas, o resumo do pedido quebrava em três, e "Deposit paid" e
+   "Cancel" empilhavam por falta de 40px.
+
+   Agora o painel acompanha a largura da página, e a grade de pedidos é
+   auto-fill: o número de colunas sai da largura disponível em vez de
+   uma tabela de breakpoints que envelhece a cada monitor novo. */
 @media (min-width: 960px) {
-  .shell:has(.admin-wide) { max-width: 960px; }
-  .shell:has(.admin-wide) .kpis { grid-template-columns: repeat(4, 1fr); }
+  .shell:has(.admin-wide) { max-width: var(--page-w, 1180px); }
+
+  /* Os KPIs são quatro números curtos: lado a lado sempre, e o mínimo de
+     200px garante que o rótulo caiba numa linha só. */
+  .shell:has(.admin-wide) .kpis {
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  }
+
+  /* 340px é a largura em que o resumo do pedido ("1× eSIM Brasil 20 GB ·
+     1× Snack kit grande") cabe em duas linhas e os dois botões de ação
+     ficam lado a lado. Abaixo disso o card volta a empilhar. */
   .shell:has(.admin-wide) .cart-list {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
     align-items: start;
   }
-  .shell:has(.admin-wide) .adm-form { max-width: 560px; }
+
+  /* Formulário continua estreito de propósito: campo de texto largo
+     demais é mais difícil de ler e de preencher, não mais fácil. */
+  .shell:has(.admin-wide) .adm-form { max-width: 620px; }
+
+  /* Uma folga maior nas bordas quando o painel é largo — 16px num
+     container de 1400px cola o conteúdo na borda. */
+  .shell:has(.admin-wide) .kpis,
+  .shell:has(.admin-wide) .cart-list,
+  .shell:has(.admin-wide) .admtabs,
+  .shell:has(.admin-wide) .subhead { padding-inline: 24px; }
 }
 
 /* ===== util ===== */
@@ -1621,9 +1661,15 @@ svg.ic { flex: none; color: var(--amber); }
      que já é irmã, entra na MESMA fileira. É o que permite o
      cabeçalho do Sunny sem mover nada no TSX (e sem tirar o
      HeaderSearch do <Suspense>). */
+  /* minmax(0, 1fr) e não minmax(220px, 1fr): o mínimo de 220px era um
+     piso RÍGIDO, e num iPad em retrato (768px) a soma das quatro colunas
+     passava da tela — o site inteiro ganhava 28px de rolagem horizontal,
+     em TODAS as páginas. Com mínimo zero a busca cede espaço em vez de
+     empurrar o cabeçalho para fora; a largura confortável dela volta no
+     min-width de 900px logo abaixo. */
   .sunhead {
     display: grid;
-    grid-template-columns: auto auto minmax(220px, 1fr) auto;
+    grid-template-columns: auto auto minmax(0, 1fr) auto;
     align-items: center;
     column-gap: 16px;
     padding: 9px var(--gut) 0;
@@ -1648,6 +1694,14 @@ svg.ic { flex: none; color: var(--amber); }
   }
   .hamb:hover { background: var(--card-hi); border-color: var(--amber); }
   .hamb::after { width: 100%; height: 44px; }   /* o alvo acompanha a caixa nova */
+
+  /* Entre 768 e 900px o "ALL CATEGORIES" custa 120px que a busca precisa
+     mais do que ele: o ícone ☰ sozinho já é entendido, e o drawer que
+     ele abre é o mesmo. Acima de 900 o rótulo volta. */
+  @media (max-width: 899.98px) {
+    .hamb { width: 40px; padding: 0; }
+    .hamb-label { display: none; }
+  }
 
   /* logo em uma linha: com 460px de busca ao lado, duas linhas de
      12px deixariam a marca menor que o placeholder da busca */

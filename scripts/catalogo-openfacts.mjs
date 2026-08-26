@@ -37,37 +37,33 @@ const ACERVOS = [
 ];
 
 /**
- * Marcas que um ship chandler de Santos realmente entrega, com a
- * categoria da loja em que cada uma cai. Marca é vocabulário
- * controlado no acervo; termo livre não é.
+ * Marcas que um distribuidor de Santos entrega. TODAS brasileiras ou
+ * importadas e vendidas aqui — o chandler compra no Brasil, e produto
+ * que só existe no exterior não entra no estoque por mais que a
+ * tripulação queira.
  *
- * `mundo: true` desliga o corte por prefixo GS1 Brasil. É o que a
- * prateleira "Taste of home" exige: tripulação filipina quer Lucky Me e
- * Century Tuna, indonésia quer Indomie, e esses produtos NÃO têm código
- * brasileiro — são importados, e o código é do país de origem. Cortar
- * por prefixo ali esvaziaria justamente a categoria que diferencia um
- * chandler de um mercado.
+ * Isso custou uma rodada: a versão anterior buscava Indomie, Lucky Me e
+ * Nongshim pelo código do país de origem. São de fato o que a tripulação
+ * filipina e indonésia procura, mas o acervo registra ZERO Indomie
+ * vendido no Brasil. Comida asiática aqui vem por importador nacional —
+ * Sakura, Hikari, Ajinomoto — e é essa a que dá para entregar.
  */
 const MARCAS = [
-  // Café e chá — o que mais sai em navio
+  // Café e chá
   { marca: "pilao", categoria: "coffee-tea" },
   { marca: "melitta", categoria: "coffee-tea" },
   { marca: "3 coracoes", categoria: "coffee-tea" },
   { marca: "nescafe", categoria: "coffee-tea" },
   { marca: "leao", categoria: "coffee-tea" },
   { marca: "nescau", categoria: "coffee-tea" },
-  { marca: "lipton", categoria: "coffee-tea", mundo: true },
-  { marca: "twinings", categoria: "coffee-tea", mundo: true },
-  { marca: "milo", categoria: "coffee-tea", mundo: true },
 
   // Bebida
   { marca: "guarana antarctica", categoria: "soft-drinks" },
   { marca: "coca-cola", categoria: "soft-drinks" },
   { marca: "do bem", categoria: "soft-drinks" },
-  { marca: "red bull", categoria: "soft-drinks", mundo: true },
-  { marca: "monster", categoria: "soft-drinks", mundo: true },
   { marca: "gatorade", categoria: "soft-drinks" },
-  { marca: "crystal", categoria: "soft-drinks" },
+  { marca: "red bull", categoria: "soft-drinks" },
+  { marca: "monster", categoria: "soft-drinks" },
 
   // Snack
   { marca: "bauducco", categoria: "snacks" },
@@ -75,39 +71,45 @@ const MARCAS = [
   { marca: "elma chips", categoria: "snacks" },
   { marca: "garoto", categoria: "snacks" },
   { marca: "lacta", categoria: "snacks" },
-  { marca: "pringles", categoria: "snacks", mundo: true },
-  { marca: "oreo", categoria: "snacks", mundo: true },
-  { marca: "snickers", categoria: "snacks", mundo: true },
+  { marca: "nestle", categoria: "snacks" },
+  { marca: "yoki", categoria: "snacks" },
 
-  // Taste of home — a prateleira que faz o chandler ser chandler.
-  // Santos recebe tripulação filipina, indonésia, indiana e ucraniana.
-  { marca: "indomie", categoria: "taste-of-home", mundo: true },
-  { marca: "lucky me", categoria: "taste-of-home", mundo: true },
-  { marca: "nissin", categoria: "taste-of-home", mundo: true },
-  { marca: "maggi", categoria: "taste-of-home", mundo: true },
-  { marca: "knorr", categoria: "taste-of-home", mundo: true },
-  { marca: "century tuna", categoria: "taste-of-home", mundo: true },
-  { marca: "ligo", categoria: "taste-of-home", mundo: true },
-  { marca: "datu puti", categoria: "taste-of-home", mundo: true },
-  { marca: "silver swan", categoria: "taste-of-home", mundo: true },
-  { marca: "ottogi", categoria: "taste-of-home", mundo: true },
-  { marca: "nongshim", categoria: "taste-of-home", mundo: true },
-  { marca: "mtr", categoria: "taste-of-home", mundo: true },
+  // Taste of home — o que o importador nacional traz
+  { marca: "sakura", categoria: "taste-of-home" },
+  { marca: "hikari", categoria: "taste-of-home" },
+  { marca: "ajinomoto", categoria: "taste-of-home" },
+  { marca: "nissin", categoria: "taste-of-home" },
   { marca: "gomes da costa", categoria: "taste-of-home" },
   { marca: "coqueiro", categoria: "taste-of-home" },
+  { marca: "tio joao", categoria: "taste-of-home" },
+  { marca: "camil", categoria: "taste-of-home" },
 
-  // Higiene e sol — convés a 30 °C o dia inteiro
+  // Higiene e sol
   { marca: "dove", categoria: "personal-care" },
   { marca: "rexona", categoria: "personal-care" },
   { marca: "colgate", categoria: "personal-care" },
-  { marca: "gillette", categoria: "personal-care", mundo: true },
   { marca: "nivea", categoria: "personal-care" },
-  { marca: "protex", categoria: "personal-care", mundo: true },
-  { marca: "palmolive", categoria: "personal-care", mundo: true },
-  { marca: "head shoulders", categoria: "personal-care", mundo: true },
-  { marca: "sundown", categoria: "sun-protection", mundo: true },
-  { marca: "nivea sun", categoria: "sun-protection", mundo: true },
-  { marca: "banana boat", categoria: "sun-protection", mundo: true },
+  { marca: "gillette", categoria: "personal-care" },
+  { marca: "sundown", categoria: "sun-protection" },
+];
+
+/**
+ * Descoberta por categoria, que acha o que a busca por marca não acha:
+ * ninguém lembra do nome do importador de shoyu. Cada linha é uma
+ * categoria do acervo, cruzada com "vendido no Brasil", e cai numa
+ * categoria da loja.
+ */
+const CATEGORIAS = [
+  { cat: "instant-noodles", categoria: "taste-of-home", limite: 8 },
+  { cat: "rices", categoria: "taste-of-home", limite: 6 },
+  { cat: "soy-sauces", categoria: "taste-of-home", limite: 5 },
+  { cat: "hot-sauces", categoria: "taste-of-home", limite: 4 },
+  { cat: "teas", categoria: "coffee-tea", limite: 6 },
+  { cat: "instant-coffees", categoria: "coffee-tea", limite: 5 },
+  { cat: "energy-drinks", categoria: "soft-drinks", limite: 5 },
+  { cat: "waters", categoria: "soft-drinks", limite: 4 },
+  { cat: "biscuits", categoria: "snacks", limite: 8 },
+  { cat: "chocolates", categoria: "snacks", limite: 6 },
 ];
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
@@ -133,9 +135,21 @@ async function json(url, tentativas = 4) {
  */
 const brasileiro = (ean) => /^7(89|90)\d{10}$/.test(ean);
 
+/**
+ * Vendido no Brasil. Duas evidências valem, e uma basta:
+ *
+ * - EAN da faixa GS1 Brasil, que só sai para quem registra produto aqui;
+ * - o acervo listando `en:brazil` entre os países, que é como aparece o
+ *   importado que tem distribuidor nacional — shoyu Sakura, Monster,
+ *   Tabasco — e cujo código continua sendo o do país de origem.
+ */
+const vendidoNoBrasil = (ean, paises) =>
+  brasileiro(ean) || (Array.isArray(paises) && paises.includes("en:brazil"));
+
 /** Ficha completa de um EAN, no primeiro acervo que o conhecer. */
 async function ficha(ean) {
-  const campos = "code,product_name,product_name_pt,generic_name,brands,quantity,images";
+  const campos =
+    "code,product_name,product_name_pt,generic_name,brands,quantity,images,countries_tags";
   for (const a of ACERVOS) {
     const j = await json(`${a.api}/api/v2/product/${ean}.json?fields=${campos}`);
     await sleep(700);
@@ -145,6 +159,11 @@ async function ficha(ean) {
     // Só a foto de frente serve de capa, e só num idioma que a gente
     // consiga ler para conferir. Sem foto, o produto não entra: entrar
     // sem foto é o problema que este script veio resolver.
+    // O corte que importa: o chandler compra de distribuidor em Santos.
+    // Produto que o acervo não registra como vendido aqui não entra, por
+    // mais que a tripulação queira — não há como colocá-lo na lancha.
+    if (!vendidoNoBrasil(ean, p.countries_tags)) continue;
+
     const idioma = ["pt", "en", "fr"].find((l) => p.images?.[`front_${l}`]);
     if (!idioma) continue;
     const rev = p.images[`front_${idioma}`].rev;
@@ -185,17 +204,21 @@ async function ficha(ean) {
  * aí o prefixo ATRAPALHA — Nivea e Gillette vendidos no Brasil carregam
  * EAN alemão (4005…) legítimo. Quem corta é `countries_tags_en=brazil`.
  */
-async function porMarca(marca, limite = 4, mundo = false) {
-  const q = encodeURIComponent(`brands:"${marca}"`);
+async function porMarca(marca, limite = 4) {
+  // O filtro de país entra na própria consulta: pedir a marca e depois
+  // descartar o que não é vendido aqui gastava as 25 vagas da página com
+  // produto que nunca ia entrar.
+  const q = encodeURIComponent(`brands:"${marca}" AND countries_tags:"en:brazil"`);
   const comida = await json(
     `https://search.openfoodfacts.org/search?q=${q}&page_size=25&fields=code,product_name,brands`
   );
   await sleep(700);
-  const achados = (comida?.hits ?? [])
-    .map((h) => String(h.code))
-    .filter((c) => (mundo ? /^\d{8,14}$/.test(c) : brasileiro(c)));
+  const achados = (comida?.hits ?? []).map((h) => String(h.code)).filter((c) => /^\d{8,14}$/.test(c));
   if (achados.length >= limite) return achados.slice(0, limite);
 
+  // Higiene e cosmético vivem no Open Beauty Facts, que filtra país
+  // nativamente. Lá o EAN legítimo costuma ser alemão — Nivea e Gillette
+  // vendidos aqui carregam código de origem — e quem corta é o país.
   const marcaTag = marca.replace(/\s+/g, "-").toLowerCase();
   const beleza = await json(
     "https://world.openbeautyfacts.org/api/v2/search" +
@@ -209,6 +232,21 @@ async function porMarca(marca, limite = 4, mundo = false) {
   }
   return achados.slice(0, limite);
 }
+
+/** EANs de uma categoria do acervo, restrita ao que se vende no Brasil. */
+async function porCategoria(cat, limite = 6) {
+  const q = encodeURIComponent(`categories_tags:"en:${cat}" AND countries_tags:"en:brazil"`);
+  const j = await json(
+    `https://search.openfoodfacts.org/search?q=${q}&page_size=40&fields=code,product_name`
+  );
+  await sleep(700);
+  return (j?.hits ?? [])
+    .filter((h) => (h.product_name ?? "").trim().length > 3)
+    .map((h) => String(h.code))
+    .filter((c) => /^\d{8,14}$/.test(c))
+    .slice(0, limite);
+}
+
 
 /* ------------------------------------------------------------------ */
 
@@ -287,12 +325,18 @@ async function main() {
     alvos = eans.map((ean) => ({ ean, categoria: "" }));
   } else if (modo === "marcas") {
     for (const m of MARCAS) {
-      const eans = await porMarca(m.marca, 4, m.mundo === true);
+      const eans = await porMarca(m.marca);
       process.stderr.write(`${m.marca}: ${eans.length} código(s)\n`);
       alvos.push(...eans.map((ean) => ({ ean, categoria: m.categoria })));
     }
+  } else if (modo === "categorias") {
+    for (const c of CATEGORIAS) {
+      const eans = await porCategoria(c.cat, c.limite);
+      process.stderr.write(`${c.cat}: ${eans.length} código(s)\n`);
+      alvos.push(...eans.map((ean) => ({ ean, categoria: c.categoria })));
+    }
   } else {
-    erro("uso: catalogo-openfacts.mjs [eans <lista> | marcas]");
+    erro("uso: catalogo-openfacts.mjs [eans <lista> | marcas | categorias]");
   }
 
   // Um EAN pode aparecer em duas marcas parecidas.

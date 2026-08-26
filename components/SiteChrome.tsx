@@ -27,5 +27,17 @@ export default async function SiteChrome() {
   // rodar em toda tela, e é o que faz o ♡ deixar de parecer vazio.
   const wishes = await wishCount();
 
-  return <SiteHeader tree={tree} wishCount={wishes} />;
+  // O cabeçalho precisa saber se há sessão: sem isso o menu mostrava
+  // "Sign in / Sign out" como um link só, para /login, que não desloga
+  // ninguém — quem estava logado clicava e nada acontecia.
+  let signedIn = false;
+  try {
+    const supabase = await createClient();
+    const { data } = await supabase.auth.getUser();
+    signedIn = Boolean(data.user);
+  } catch {
+    signedIn = false;
+  }
+
+  return <SiteHeader tree={tree} wishCount={wishes} signedIn={signedIn} />;
 }

@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { signOut } from "@/app/account/actions";
 
 import { Suspense, useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
@@ -22,10 +23,13 @@ import type { CategoryNode } from "@/lib/catalog";
 export default function SiteHeader({
   tree,
   wishCount = 0,
+  signedIn = false,
 }: {
   tree: CategoryNode[];
   /** Favoritos da pessoa logada. Zero esconde o selo. */
   wishCount?: number;
+  /** Decide entre "Sign in" e um Sign out que desloga de verdade. */
+  signedIn?: boolean;
 }) {
   const { count, ready } = useCart();
   const [drawer, setDrawer] = useState(false);
@@ -110,12 +114,26 @@ export default function SiteHeader({
               {menu && (
                 <div className="acctmenu" role="menu">
                   <Link href="/account" role="menuitem" onClick={() => setMenu(false)}>My Account</Link>
-                  <Link href="/account" role="menuitem" onClick={() => setMenu(false)}>My Account Information</Link>
                   <Link href="/orders" role="menuitem" onClick={() => setMenu(false)}>My Orders</Link>
                   <Link href="/captain" role="menuitem" onClick={() => setMenu(false)}>Captain rewards</Link>
                   <Link href="/wishlist" role="menuitem" onClick={() => setMenu(false)}>My Wish List</Link>
                   <hr />
-                  <Link href="/login" role="menuitem" onClick={() => setMenu(false)}>Sign in / Sign out</Link>
+                  {/* Um item só, "Sign in / Sign out", era um link para
+                      /login: quem estava logado clicava e voltava para a
+                      mesma tela, sem sair. Sair é uma AÇÃO — precisa
+                      apagar o cookie no servidor, e por isso é um form,
+                      não um link. */}
+                  {signedIn ? (
+                    <form action={signOut}>
+                      <button type="submit" role="menuitem" onClick={() => setMenu(false)}>
+                        Sign out
+                      </button>
+                    </form>
+                  ) : (
+                    <Link href="/login" role="menuitem" onClick={() => setMenu(false)}>
+                      Sign in
+                    </Link>
+                  )}
                 </div>
               )}
             </div>

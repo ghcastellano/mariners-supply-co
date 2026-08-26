@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "test": "node --experimental-strip-types --test"
+    "test": "node --experimental-strip-types --test",
+    "test:responsivo": "node --experimental-strip-types --test tests/responsivo.test.mjs"
   },
   "dependencies": {
     "@supabase/ssr": "^0.7.0",
