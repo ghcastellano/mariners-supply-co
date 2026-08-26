@@ -678,94 +678,6 @@ input:-webkit-autofill:focus {
   border-top: 1px solid var(--line);
 }
 
-/* ===== catálogo v2 ===== */
-/* Grade de 2 colunas no celular. O concorrente usa 1 e gasta uma tela
-   por produto; com milhares de SKUs isso é rolagem infinita à toa. */
-.pgrid {
-  display: grid; grid-template-columns: repeat(2, 1fr);
-  gap: 10px; padding: 12px 14px 4px;
-}
-@media (min-width: 560px) { .pgrid { grid-template-columns: repeat(3, 1fr); gap: 12px; } }
-@media (min-width: 900px) { .pgrid { grid-template-columns: repeat(4, 1fr); } }
-
-.pcard {
-  display: flex; flex-direction: column;
-  background: var(--card); border: 1px solid var(--line);
-  border-radius: 14px; overflow: hidden;
-  transition: border-color .16s, transform .16s;
-}
-.pcard:hover { border-color: var(--line-hi); transform: translateY(-2px); }
-.pcard.out { opacity: .62; }
-
-.pcard-media {
-  position: relative; display: block; aspect-ratio: 1 / 1;
-  /* Foto de produto vem recortada em fundo branco pelo fornecedor:
-     manter o branco é o que faz o produto parecer produto. */
-  background: #F4F7FA; line-height: 0;
-}
-.pcard-img { object-fit: contain; padding: 8px; }
-.pcard-noimg {
-  position: absolute; inset: 0; display: grid; place-items: center;
-  font-size: 34px; opacity: .35;
-}
-
-.pbadge {
-  position: absolute; top: 7px; left: 7px; z-index: 2;
-  font-family: var(--font-mono); font-size: 9.5px; letter-spacing: .1em;
-  text-transform: uppercase; font-weight: 700;
-  padding: 4px 8px; border-radius: 999px; color: var(--amber-ink);
-}
-.pbadge.promo  { background: var(--amber); }
-.pbadge.new    { background: var(--teal); }
-.pbadge.outlet { background: #C9D6E4; }
-
-.poff {
-  position: absolute; top: 7px; right: 7px; z-index: 2;
-  font-family: var(--font-mono); font-size: 10.5px; font-weight: 700;
-  padding: 4px 7px; border-radius: 8px;
-  background: var(--danger); color: #fff;
-}
-.pout {
-  position: absolute; inset: auto 0 0 0; z-index: 2;
-  background: rgba(1,6,13,.82); color: var(--muted);
-  font-size: 10.5px; letter-spacing: .12em; text-transform: uppercase;
-  text-align: center; padding: 5px 0; font-family: var(--font-mono);
-}
-
-.pcard-body { display: flex; flex-direction: column; gap: 5px; padding: 10px 11px 11px; flex: 1; }
-.pbrand {
-  font-family: var(--font-mono); font-size: 9.5px; letter-spacing: .14em;
-  text-transform: uppercase; color: var(--faint);
-}
-.pname {
-  color: var(--ink); font-size: 13px; font-weight: 600; line-height: 1.28;
-  text-decoration: none;
-  /* Duas linhas fixas para os cards da mesma fileira terminarem
-     alinhados — grade desalinhada parece defeito. */
-  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
-  overflow: hidden; min-height: 2.56em;
-}
-.pname:hover { color: var(--amber-hi); }
-
-.pprice { margin-top: auto; padding-top: 4px; display: flex; flex-direction: column; gap: 1px; }
-.pprice .was {
-  font-family: var(--font-mono); font-size: 11px; color: var(--faint);
-  text-decoration-thickness: 1px;
-}
-.pprice .now { font-family: var(--font-mono); font-size: 16px; color: var(--ink); font-weight: 700; }
-.pprice .from { font-style: normal; font-size: 11px; color: var(--faint); font-weight: 500; }
-
-.padd {
-  margin-top: 8px; width: 100%; border: 0; border-radius: 10px;
-  background: var(--amber); color: var(--amber-ink);
-  font-family: var(--font-body); font-size: 12.5px; font-weight: 700;
-  padding: 9px 8px; cursor: pointer; transition: filter .15s, background .15s;
-}
-.padd:hover { filter: brightness(1.06); }
-.padd.in { background: var(--teal); }
-.padd.ghost { background: transparent; border: 1px solid var(--line-hi); color: var(--ink); }
-.padd:disabled { background: transparent; border: 1px solid var(--line); color: var(--faint); cursor: not-allowed; }
-
 /* ===== grade de categorias ===== */
 .catgrid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 9px; padding: 4px 14px 10px; }
 @media (min-width: 560px) { .catgrid { grid-template-columns: repeat(3, 1fr); } }
@@ -1016,10 +928,20 @@ input:-webkit-autofill:focus {
    olho lê como defeito de alinhamento. Na grade o centro é o centro. */
 .sunhead-row {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
-  align-items: center; gap: 6px;
+  /* min-content nas laterais, e NÃO minmax(0, 1fr).
+     Com 0 de mínimo a faixa dos ícones encolhe abaixo do próprio
+     conteúdo; como o item tem justify-self: end, ele mantém a borda
+     direita e transborda para a ESQUERDA — por cima do logotipo
+     centralizado. Era isso que colava o ícone de conta no "SUPPLY".
+     Com min-content a faixa nunca fica menor que o que carrega, e
+     quem cede espaço é o logotipo, que tem por onde ceder. */
+  grid-template-columns: minmax(min-content, 1fr) auto minmax(min-content, 1fr);
+  align-items: center; gap: 10px;
   padding: 7px 10px 8px; min-height: 56px;
 }
+/* O logotipo pode encolher; sem isto ele mantém a largura de conteúdo
+   e devolve o transbordo para o mesmo lugar. */
+.sunhead-row > .sunlogo { min-width: 0; }
 .sunhead-row > .hamb { justify-self: start; }
 .sunhead-row > .sunlogo { justify-self: center; }
 .sunhead-row > .headicons { justify-self: end; }
@@ -1173,6 +1095,23 @@ input:-webkit-autofill:focus {
 .drawer-item .ic { font-size: 17px; flex: none; }
 .drawer-item .nm { flex: 1; min-width: 0; }
 .drawer-item .chev { flex: none; color: var(--faint); font-size: 17px; }
+.drawer-item form { display: contents; }
+.drawer-count {
+  flex: none; min-width: 22px; padding: 2px 7px; border-radius: 999px;
+  background: rgba(255,182,72,.14); color: var(--amber);
+  font-family: var(--font-mono); font-size: 11px; font-weight: 700; text-align: center;
+}
+
+/* No celular o cabeçalho fica com hambúrguer · marca · carrinho.
+   Três ícones à direita mais a marca centralizada não cabem em 360px:
+   sobravam 4px entre o "SUPPLY" e o ícone de conta, que a olho lê como
+   colado — e era colado de fato antes da correção da grade. Conta e
+   lista de desejos passam para a gaveta, que é onde toda loja de
+   celular séria as guarda, e a marca ganha o espaço. */
+@media (max-width: 767.98px) {
+  .headicons > .acctwrap,
+  .headicons > a.headicon { display: none; }
+}
 .drawer-back {
   display: flex; align-items: center; gap: 8px; width: 100%;
   padding: 14px 18px; background: var(--card-hi); border: 0;
@@ -1239,44 +1178,168 @@ input:-webkit-autofill:focus {
 .crumb a:hover { color: var(--amber); }
 .crumb .sep { opacity: .5; }
 
-/* --- card de produto: anatomia do Sunny ---
-   Uma coluna no celular. Eu havia feito duas por densidade, mas a
-   navegação validada é esta e mudar o que a tripulação já sabe usar
-   custa mais do que a rolagem economizada. A densidade volta pelo
-   desempenho: imagem servida no tamanho certo e card sem JavaScript. */
-.pgrid { grid-template-columns: 1fr; gap: 12px; padding: 12px 14px 4px; }
-@media (min-width: 620px) { .pgrid { grid-template-columns: repeat(2, 1fr); } }
-@media (min-width: 900px) { .pgrid { grid-template-columns: repeat(3, 1fr); } }
-@media (min-width: 1180px) { .pgrid { grid-template-columns: repeat(4, 1fr); } }
+/* ===== card de produto ==========================================
+   Uma definição só. Antes eram duas: um bloco base no começo do
+   arquivo e um bloco "anatomia do Sunny" seiscentas linhas abaixo,
+   redefinindo metade das mesmas classes. Duas verdades sobre o mesmo
+   card é como nasce bug de especificidade, e este arquivo já teve
+   dois (.shell:has(.admin-wide) e .form2).
 
-.pcard { border-radius: 16px; }
-/* Painel quadrado e padding curto: a foto normalizada já é 1:1 com
-   respiro embutido, então 4/3 aqui só somava tarja branca. */
-.pcard-media { aspect-ratio: 1 / 1; background: #FFFFFF; }
-.pcard-img { padding: 6px; }
-
-/* badge circular, como o do Sunny */
-.pbadge {
-  top: 10px; left: 10px;
-  width: 42px; height: 42px; border-radius: 50%; padding: 0;
-  display: grid; place-items: center; font-size: 9px; letter-spacing: .04em;
-  box-shadow: 0 2px 10px rgba(1,6,13,.28);
+   DUAS colunas no celular. Estavam em uma, copiando a navegação do
+   Sunny — que é loja de roupa, onde a foto é o produto. Loja de
+   mantimento (Ocado, Amazon Fresh, Instacart, iFood, Zé) usa duas,
+   porque quem faz rancho compara preço entre itens vizinhos, e uma
+   coluna gasta uma tela por produto: com 10 a 15 por categoria são 15
+   telas para ver um corredor. O argumento anterior era não mexer no
+   que a tripulação já sabe usar; não existe tripulação usando ainda —
+   o banco foi zerado antes do lançamento.
+   ============================================================== */
+.pgrid {
+  display: grid; grid-template-columns: repeat(2, 1fr);
+  gap: 10px; padding: 12px 14px 4px;
 }
-.poff { top: 10px; right: 10px; font-size: 12px; padding: 5px 9px; }
+@media (min-width: 620px) { .pgrid { grid-template-columns: repeat(3, 1fr); gap: 12px; } }
+/* Acima de 768 o regime de tablet troca por auto-fill: a grade passa a
+   medir o container, não a janela. */
 
-.pcard-body { align-items: center; text-align: center; gap: 7px; padding: 13px 14px 15px; }
-.pbrand { letter-spacing: .16em; }
+/* Preenchimento OU contorno, nunca os dois. O card tem fundo, logo não
+   tem fio. Era fundo + borda + sombra — três sinais dizendo "isto é um
+   bloco", e é dessa dupla codificação que vem o peso que a tela tem. */
+.pcard {
+  display: flex; flex-direction: column;
+  background: var(--card); border-radius: 14px; overflow: hidden;
+  transition: background .18s ease, transform .18s ease;
+}
+.pcard.out { opacity: .55; }
+@media (hover: hover) {
+  .pcard:hover { background: var(--card-hi); transform: translateY(-2px); }
+  /* A foto cresce um fio dentro do painel. É o único movimento do card
+     e serve para dizer "isto abre", que o cursor sozinho não diz. */
+  .pcard:hover .pcard-img { transform: scale(1.04); }
+}
+
+.pcard-top { position: relative; }
+.pcard-media {
+  position: relative; display: block; aspect-ratio: 1 / 1;
+  /* Branco puro, não um cinza de marca: a foto normalizada já vem com
+     fundo branco e 6% de folga embutida, então painel e foto viram a
+     mesma superfície. Painel tingido deixaria um retângulo claro
+     visível atrás de cada JPEG. */
+  background: #FFFFFF; line-height: 0; overflow: hidden;
+}
+.pcard-img { object-fit: contain; padding: 4px; transition: transform .3s ease; }
+.pcard-noimg {
+  position: absolute; inset: 0; display: grid; place-items: center;
+  font-size: 34px; opacity: .3;
+}
+
+/* Empilhados: um item pode ser promo E ter desconto, e dois selos
+   disputando o mesmo canto se sobrepõem. */
+.pflags {
+  position: absolute; top: 9px; left: 9px; z-index: 2;
+  display: flex; flex-direction: column; align-items: flex-start; gap: 5px;
+}
+.pbadge, .poff {
+  font-family: var(--font-mono); font-size: 9.5px; font-weight: 700;
+  letter-spacing: .1em; text-transform: uppercase; line-height: 1.2;
+  padding: 4px 8px; border-radius: 6px;
+}
+.pbadge.promo  { background: var(--amber);  color: var(--amber-ink); }
+.pbadge.new    { background: var(--teal);   color: #04231E; }
+.pbadge.outlet { background: #C9D6E4;       color: #0B1B30; }
+.poff { background: var(--danger); color: #FFFFFF; letter-spacing: .04em; }
+
+/* Esgotado cobre o painel inteiro. Era uma tarja preta no rodapé da
+   foto, que some contra embalagem escura e ainda esconde o produto na
+   única faixa onde costuma estar o nome da marca. */
+.pout {
+  position: absolute; inset: 0; z-index: 3;
+  display: grid; place-items: center; background: rgba(4,13,26,.6);
+}
+.pout b {
+  background: rgba(4,13,26,.94); color: var(--ink);
+  font-family: var(--font-mono); font-size: 9.5px; font-weight: 700;
+  letter-spacing: .14em; text-transform: uppercase;
+  padding: 7px 12px; border-radius: 999px;
+}
+
+/* Texto à esquerda. O centralizado veio do Sunny e é o que faz a grade
+   parecer catálogo de fim de ano: com nome de uma linha ao lado de um
+   de duas, cada bloco começa num ponto diferente e o olho não tem
+   margem para descer. Alinhar é o que deixa varrer trinta itens. */
+.pcard-body { display: flex; flex-direction: column; gap: 3px; padding: 11px 12px 12px; flex: 1; }
+.pbrand {
+  font-family: var(--font-mono); font-size: 9.5px; letter-spacing: .14em;
+  text-transform: uppercase; color: var(--faint);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
 .pname {
-  font-size: 14px; font-weight: 700; text-transform: uppercase;
-  letter-spacing: .01em; line-height: 1.34; min-height: 2.68em;
+  color: var(--ink); font-size: 13.5px; font-weight: 600; line-height: 1.3;
+  letter-spacing: -.005em; text-decoration: none;
+  /* Duas linhas fixas para os cards da mesma fileira terminarem
+     alinhados — grade desalinhada parece defeito. */
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+  overflow: hidden; min-height: 2.6em;
 }
-.pprice { align-items: center; gap: 2px; }
-.pprice .was { font-size: 12.5px; }
-.pprice .now { font-size: 19px; }
+.pname:hover { color: var(--amber-hi); }
+/* Reservada mesmo vazia: sem isto o card com tamanho e o sem tamanho
+   terminam com alturas diferentes e o botão dança de coluna a coluna. */
+.punit { font-family: var(--font-mono); font-size: 11px; color: var(--faint); min-height: 1.45em; }
 
-/* linha do botão: "Add to Cart" largo + coração ao lado, como o deles */
-.paddrow { display: flex; align-items: stretch; gap: 9px; width: 100%; margin-top: 4px; }
-.paddrow .padd { margin-top: 0; flex: 1; padding: 12px 10px; font-size: 13.5px; border-radius: 11px; }
+.pprice { margin-top: auto; padding-top: 8px; display: flex; align-items: baseline; gap: 7px; flex-wrap: wrap; }
+.pprice .now {
+  font-family: var(--font-disp); font-size: 18px; font-weight: 700;
+  color: var(--ink); letter-spacing: -.01em;
+  /* Dígito de largura fixa: preço em coluna que não alinha na vírgula
+     obriga a ler número por número em vez de comparar de relance. */
+  font-variant-numeric: tabular-nums;
+}
+.pprice .was {
+  font-size: 12px; color: var(--faint); font-variant-numeric: tabular-nums;
+  text-decoration-thickness: 1px;
+}
+.pprice .from { font-style: normal; font-size: 11px; color: var(--faint); font-weight: 500; }
+
+.padd {
+  margin-top: 10px; width: 100%; border: 0; border-radius: 10px;
+  background: var(--amber); color: var(--amber-ink);
+  font-family: var(--font-body); font-size: 13px; font-weight: 700;
+  min-height: 40px; padding: 10px 12px; cursor: pointer;
+  transition: filter .15s, background .15s;
+}
+.padd:hover { filter: brightness(1.06); }
+/* Contorno por box-shadow e não por border: com border o botão fantasma
+   nasce 2px mais alto que o cheio e a fileira desalinha. */
+.padd.ghost { background: transparent; box-shadow: inset 0 0 0 1px var(--line-hi); color: var(--ink); }
+.padd.ghost:hover { background: var(--card-hi); filter: none; }
+.padd:disabled {
+  background: transparent; box-shadow: inset 0 0 0 1px var(--line);
+  color: var(--faint); cursor: not-allowed;
+}
+
+/* Contador ocupa o lugar exato do botão — mesma altura, mesmo raio,
+   mesma margem — para a grade não pular quando um card entra no
+   carrinho. */
+.pstep {
+  margin-top: 10px; width: 100%; min-height: 40px;
+  display: grid; grid-template-columns: 40px 1fr 40px; align-items: stretch;
+  border-radius: 10px; overflow: hidden;
+  background: rgba(255,182,72,.12); box-shadow: inset 0 0 0 1px rgba(255,182,72,.42);
+}
+.pstep-b {
+  border: 0; background: none; color: var(--amber);
+  font-size: 17px; line-height: 1; cursor: pointer;
+  display: grid; place-items: center; transition: background .14s;
+}
+.pstep-b:hover { background: rgba(255,182,72,.16); }
+.pstep-n {
+  display: grid; place-items: center;
+  font-family: var(--font-disp); font-size: 14px; font-weight: 700;
+  color: var(--ink); font-variant-numeric: tabular-nums;
+}
+
+/* Coração da FICHA: ao lado do botão, que é onde a decisão de "agora
+   não, mas depois" acontece com o produto já aberto. */
 .wish {
   flex: none; width: 44px; border-radius: 11px; cursor: pointer;
   background: rgba(255,182,72,.09); border: 1px solid var(--line-hi);
@@ -1286,6 +1349,23 @@ input:-webkit-autofill:focus {
 .wish:hover { color: var(--amber); border-color: rgba(255,182,72,.5); }
 .wish.on { color: var(--danger); background: rgba(255,89,100,.12); border-color: rgba(255,89,100,.4); }
 .wish:disabled { opacity: .5; cursor: default; }
+
+/* Coração da GRADE: no canto da foto. Ao lado do botão ele disputava a
+   ação primária de igual para igual, sendo secundário — e roubava
+   largura do único alvo que a pessoa quer acertar com o navio
+   balançando. Fundo claro com desfoque porque ele pousa sobre foto de
+   produto, que pode ser clara ou escura no canto.
+   `.pcard-top > .wish.on` e não `.pcard-top > .wish`: empataria em
+   especificidade com `.wish.on` acima e o vermelho não apareceria. */
+.pcard-top > .wish {
+  position: absolute; top: 8px; right: 8px; z-index: 2;
+  width: 34px; height: 34px; border-radius: 50%; border: 0;
+  background: rgba(255,255,255,.84); color: #46617A; font-size: 15px;
+  -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px);
+  transition: background .15s, color .15s, transform .15s;
+}
+.pcard-top > .wish:hover { color: var(--danger); background: #FFFFFF; transform: scale(1.08); }
+.pcard-top > .wish.on { color: var(--danger); background: #FFFFFF; border: 0; }
 
 /* Grade de categorias: uma coluna no celular, como a home do Sunny.
    Duas colunas espremem o nome de categoria longa em duas linhas. */
@@ -1707,8 +1787,9 @@ svg.ic { flex: none; color: var(--amber); }
    "classes novas" logo abaixo, que desliga markup que hoje não existe.
 
    ORDEM: este bloco tem de ser o ÚLTIMO do arquivo. Empata em
-   especificidade com .pgrid (1246), .catgrid (1291) e .rail (1306);
-   quem vence é quem vem por último.
+   especificidade com .pgrid, .catgrid e .rail do escopo base; quem
+   vence é quem vem por último. (Sem número de linha de propósito: a
+   referência anterior citava linhas e envelheceu no primeiro corte.)
    ================================================================== */
 
 /* ---- classes novas: nascem desligadas, inclusive no celular ----
@@ -1772,6 +1853,12 @@ svg.ic { flex: none; color: var(--amber); }
   .infobox button   { min-width: 44px; min-height: 44px; margin: -10px -8px -10px auto; }
   .acctmenu a,
   .acctmenu button  { padding: 13px 16px; }   /* 46px — folga, não correção */
+  /* O card cresce aqui, então o alvo cresce com ele. O contador tem de
+     acompanhar o botão: se um ficar em 44 e o outro em 40, a fileira
+     muda de altura no instante em que o item entra no carrinho. */
+  .padd, .pstep     { min-height: 44px; }
+  .pstep            { grid-template-columns: 44px 1fr 44px; }
+  .pcard-top > .wish { width: 40px; height: 40px; font-size: 16px; }
 
   /* ================= CABEÇALHO ================= */
 
@@ -1863,8 +1950,21 @@ svg.ic { flex: none; color: var(--amber); }
   .catlink.on { color: var(--ink); border-bottom-color: var(--amber); }
   .catlink.hot { color: var(--amber); }
   .catlink.hot:hover { color: var(--amber-hi); }
-  .catlink .cchev { font-size: 10px; color: var(--faint); }
-  .catlink[aria-expanded="true"] .cchev { color: var(--amber); }
+  /* Rótulo e seta são dois controles, e o sublinhado tem de correr
+     por baixo dos dois — senão a seção parece cortada ao meio. */
+  .catgroup { display: flex; align-items: stretch; }
+  .catgroup > .catlink { padding-right: 5px; }
+  .cchev {
+    display: flex; align-items: center;
+    padding: 0 11px 0 2px; min-height: 44px;
+    background: none; border: 0; border-bottom: 2px solid transparent;
+    color: var(--faint); font-size: 10px; cursor: pointer;
+  }
+  .catgroup:hover > .catlink, .catgroup:hover > .cchev,
+  .catgroup.open > .catlink, .catgroup.open > .cchev {
+    color: var(--ink); border-bottom-color: var(--amber);
+  }
+  .catgroup.open > .cchev { color: var(--amber); }
 
   .megapanel {
     position: absolute; z-index: 5;
@@ -1920,7 +2020,7 @@ svg.ic { flex: none; color: var(--amber); }
   /* ================= GRADES COMPARTILHADAS ================= */
 
   /* A grade passa a medir o CONTAINER, não a janela. É a correção do
-     defeito raiz: os @media 620/900/1180 de .pgrid (1247-1249) medem
+     defeito raiz: o @media de largura de .pgrid no escopo base mede
      o viewport, e .pgrid vive num container que muda de largura
      conforme tem trilho de filtros (/shop, /c) ou não (/wishlist,
      relacionados da ficha). auto-fill resolve os quatro casos sem
@@ -1932,7 +2032,12 @@ svg.ic { flex: none; color: var(--amber); }
   /* ================= HOME ================= */
   .pg-home {
     display: grid; grid-template-columns: repeat(12, minmax(0, 1fr));
-    column-gap: var(--gut); padding: 0 var(--gut) 34px;
+    column-gap: var(--gut);
+    /* O topo era 0 e o herói encostava na barra de categorias. Painel
+       com canto arredondado colado na barra lê como elemento cortado,
+       não como elemento no lugar — a borda superior some contra a
+       barra e o arredondamento fica pendurado. */
+    padding: 22px var(--gut) 34px;
   }
   /* min-width:0 é obrigatório: sem ele o .rail com overflow-x estoura
      a faixa da grade em vez de rolar dentro dela. */
@@ -2522,8 +2627,15 @@ svg.ic { flex: none; color: var(--amber); }
    para desligar em escopo base. Só alcançam nós que hoje NÃO existem
    no DOM: a saída pintada no celular é idêntica. */
 @media (max-width: 767.98px), (max-height: 519.98px) {
-  .pg-home .herocta,
+  /* .herocta SAIU desta lista. Ela estava desligada aqui junto com o
+     resto do que "só existe no desktop", mas não é decoração: é o
+     botão principal da loja. O celular ficava com um herói que
+     apresenta o negócio e não oferece nenhum caminho para comprar —
+     e o celular é o aparelho da tripulação. Empilhado e de largura
+     inteira, que é o alvo certo para dedo em navio balançando. */
   .pg-home .secttl .allx { display: none; }
+  .pg-home .herocta { display: grid; gap: 10px; margin-top: 22px; }
+  .pg-home .herocta .btn { width: 100%; min-height: 48px; }
 }
 
 /* Linhas do "Your order" no checkout. Antes era só "Products: 4" — a

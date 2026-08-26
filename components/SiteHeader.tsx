@@ -188,17 +188,33 @@ export default function SiteHeader({
                 <li key={c.id} className="catwrap">
                   {c.children.length > 0 ? (
                     <>
-                      <button
-                        className={cls}
-                        aria-haspopup="true"
-                        aria-expanded={mega === c.id}
-                        onClick={() => setMega((m) => (m === c.id ? null : c.id))}
-                        /* filtrado por pointerType: hover no mouse, toque
-                           no iPad, com o mesmo código e sem matchMedia */
+                      {/* Rótulo é LINK, seta é botão.
+                          Era um botão só, que abria o painel e mais nada:
+                          para ver "Connectivity" inteira era preciso abrir
+                          o painel e achar "See all Connectivity" no rodapé
+                          dele. Numa loja, clicar no nome da seção vai para
+                          a seção — é o que Amazon, Zara e Mercado Livre
+                          fazem, e é o que a pessoa espera. A seta continua
+                          existindo para quem quer o submenu sem sair da
+                          página, e é ela que carrega o aria-expanded. */}
+                      <span
+                        className={`catgroup${mega === c.id ? " open" : ""}`}
                         onPointerEnter={(e) => e.pointerType === "mouse" && setMega(c.id)}
                       >
-                        {c.name} <span className="cchev" aria-hidden>▾</span>
-                      </button>
+                        <Link className={cls} href={`/c/${c.slug}`} onClick={() => setMega(null)}>
+                          {c.name}
+                        </Link>
+                        <button
+                          type="button"
+                          className="cchev"
+                          aria-haspopup="true"
+                          aria-expanded={mega === c.id}
+                          aria-label={`${c.name} subcategories`}
+                          onClick={() => setMega((m) => (m === c.id ? null : c.id))}
+                        >
+                          <span aria-hidden>▾</span>
+                        </button>
+                      </span>
                       {mega === c.id && (
                         <div className="megapanel" role="group" aria-label={c.name}>
                           <div className="megagrid">
@@ -233,7 +249,14 @@ export default function SiteHeader({
         </nav>
       </header>
 
-      <CategoryDrawer open={drawer} onClose={() => setDrawer(false)} tree={tree} cartCount={count} />
+      <CategoryDrawer
+        open={drawer}
+        onClose={() => setDrawer(false)}
+        tree={tree}
+        cartCount={count}
+        wishCount={wishCount}
+        signedIn={signedIn}
+      />
       <MiniCart open={cart} onClose={() => setCart(false)} />
     </>
   );

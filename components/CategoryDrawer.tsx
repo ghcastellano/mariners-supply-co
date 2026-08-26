@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
+import { signOut } from "@/app/account/actions";
 import type { CategoryNode } from "@/lib/catalog";
 import { IconAnchor, IconCart, IconClose } from "./Icon";
 import CategoryIcon from "./CategoryIcon";
@@ -24,11 +25,16 @@ export default function CategoryDrawer({
   onClose,
   tree,
   cartCount,
+  wishCount = 0,
+  signedIn = false,
 }: {
   open: boolean;
   onClose: () => void;
   tree: CategoryNode[];
   cartCount: number;
+  /** Conta e lista saíram do cabeçalho no celular e vivem aqui. */
+  wishCount?: number;
+  signedIn?: boolean;
 }) {
   const [stack, setStack] = useState<CategoryNode[]>([]);
   const panel = useRef<HTMLDivElement>(null);
@@ -140,10 +146,29 @@ export default function CategoryDrawer({
                 <span className="ic" aria-hidden>🧢</span>
                 <span className="nm">Captain rewards</span>
               </Link>
+              <Link className="drawer-item" href="/wishlist" onClick={onClose}>
+                <span className="ic" aria-hidden>♡</span>
+                <span className="nm">My Wish List</span>
+                {wishCount > 0 && <span className="drawer-count">{wishCount}</span>}
+              </Link>
               <Link className="drawer-item" href="/account" onClick={onClose}>
                 <span className="ic" aria-hidden>👤</span>
                 <span className="nm">My Account</span>
               </Link>
+              {/* Sair é AÇÃO, não link: apaga o cookie no servidor. */}
+              {signedIn ? (
+                <form action={signOut}>
+                  <button type="submit" className="drawer-item" onClick={onClose}>
+                    <span className="ic" aria-hidden>⎋</span>
+                    <span className="nm">Sign out</span>
+                  </button>
+                </form>
+              ) : (
+                <Link className="drawer-item" href="/login" onClick={onClose}>
+                  <span className="ic" aria-hidden>⚓</span>
+                  <span className="nm">Sign in</span>
+                </Link>
+              )}
             </>
           )}
         </div>

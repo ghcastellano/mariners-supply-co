@@ -4,13 +4,19 @@ import { useRouter } from "next/navigation";
 import { useCart } from "@/lib/cart";
 
 /**
- * Botão de adicionar da grade.
+ * Ação primária do card.
  *
  * Produto com mais de uma variante não entra no carrinho daqui: leva
  * para a ficha, porque adicionar "um tamanho qualquer" é como o
- * pedido chega errado na prancha. Com variante única, adiciona no
- * lugar e o botão passa a mostrar a quantidade — sem tirar a pessoa
- * da grade no meio da navegação.
+ * pedido chega errado na prancha.
+ *
+ * Com variante única, adiciona no lugar — e o botão vira contador. Era
+ * um rótulo "In cart · 2" antes, que informa e não deixa fazer nada:
+ * para pedir a terceira lata a pessoa tinha de abrir a gaveta do
+ * carrinho e voltar. Toda loja de mantimento séria (Ocado, Instacart,
+ * iFood, Rappi) troca o botão por −/+ no mesmo lugar, e a compra de
+ * rancho é justamente a que repete quantidade: seis do mesmo café,
+ * doze da mesma água.
  */
 export default function AddToCart({
   variantId,
@@ -26,7 +32,7 @@ export default function AddToCart({
   soldOut: boolean;
 }) {
   const router = useRouter();
-  const { items, add } = useCart();
+  const { items, add, change } = useCart();
   const qty = variantId ? (items[variantId] ?? 0) : 0;
 
   if (soldOut) {
@@ -45,15 +51,43 @@ export default function AddToCart({
     );
   }
 
+  if (qty > 0) {
+    return (
+      <div className="pstep" role="group" aria-label={`Quantity — ${name}`}>
+        <button
+          type="button"
+          className="pstep-b"
+          onClick={() => change(variantId, -1)}
+          aria-label={qty === 1 ? `Remove ${name} from cart` : `One less ${name}`}
+        >
+          <span aria-hidden>−</span>
+        </button>
+        {/* aria-live: quem usa leitor de tela ouve a nova quantidade sem
+            precisar reencontrar o botão que acabou de tocar. */}
+        <output className="pstep-n" aria-live="polite">
+          {qty}
+        </output>
+        <button
+          type="button"
+          className="pstep-b"
+          onClick={() => change(variantId, 1)}
+          aria-label={`One more ${name}`}
+        >
+          <span aria-hidden>+</span>
+        </button>
+      </div>
+    );
+  }
+
   return (
     <button
-      className={`padd ${qty ? "in" : ""}`}
+      className="padd"
       onClick={() => add(variantId)}
       // O texto visível ("Add to cart") tem de ser prefixo do nome
       // acessível, senão comando de voz não acha o botão — WCAG 2.5.3.
       aria-label={`Add to cart — ${name}`}
     >
-      {qty ? `In cart · ${qty}` : "Add to cart"}
+      Add to cart
     </button>
   );
 }

@@ -194,4 +194,29 @@ export function priceRange(p: Pick<ProductCard, "price_cents" | "max_price_cents
 export const inStock = (p: Pick<ProductCard, "stock_qty" | "tracks_stock">) =>
   !p.tracks_stock || p.stock_qty > 0;
 
+/**
+ * Separa o tamanho da embalagem do nome.
+ *
+ * "Melitta Traditional Ground Coffee 500 g" vira título e "500 g".
+ * Loja de mantimento séria nunca mistura os dois na mesma linha: o
+ * nome serve para reconhecer o produto e o tamanho para comparar
+ * preço, e quem compra rancho compara o tempo todo — meio quilo de um
+ * ao lado de um quilo do outro, com o nome mais longo empurrando o
+ * tamanho para a segunda linha, é onde o pedido sai errado.
+ *
+ * Só o que se reconhece sem ambiguidade no fim do nome. Não casou,
+ * devolve o nome inteiro e nenhum tamanho — melhor sem a linha do que
+ * com um pedaço do nome nela.
+ */
+const TAMANHO = /\s+((?:\d+\s*[x\u00d7]\s*)?\d+(?:[.,]\d+)?\s*(?:kg|g|ml|l|cl|un|ct|pack)\b)\.?$/i;
+
+export function packSize(name: string): { title: string; unit: string | null } {
+  const m = TAMANHO.exec(name);
+  if (!m) return { title: name.trim(), unit: null };
+  const title = name.slice(0, m.index).trim();
+  // Nome que é SÓ o tamanho ("500 g") não tem título para sobrar.
+  if (!title) return { title: name.trim(), unit: null };
+  return { title, unit: m[1].replace(/\s+/g, " ").trim() };
+}
+
 export type BrandOption = { id: string; slug: string; name: string };

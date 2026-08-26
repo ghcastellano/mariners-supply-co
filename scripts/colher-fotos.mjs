@@ -36,8 +36,18 @@ const MAPA = [
                   "chocolate-powders", "cappuccinos"]],
   ["soft-drinks", ["sodas", "colas", "waters", "mineral-waters", "energy-drinks",
                    "fruit-juices", "orange-juices", "iced-teas", "sports-drinks"]],
-  ["snacks", ["biscuits", "chocolates", "chocolate-bars", "chips-and-fries", "candies",
-              "gummy-candies", "peanuts", "crackers", "wafers"]],
+  // A primeira lista de snacks devolveu 343 candidatos e QUASE TODOS
+  // biscoito: o acervo brasileiro é fundo em "biscuits" e raso nas
+  // tags genéricas "chocolates"/"candies". Uma categoria de snack com
+  // doze marcas de bolacha não é loja — tripulação compra barra de
+  // chocolate, batata frita e castanha. As tags abaixo são as que de
+  // fato têm produto brasileiro dentro.
+  ["snacks", ["biscuits", "crackers", "wafers", "chocolates", "chocolate-bars",
+              "milk-chocolates", "dark-chocolates", "filled-chocolates",
+              "chocolate-candies", "bonbons", "chips-and-fries", "potato-crisps",
+              "salty-snacks", "extruded-snacks", "popcorn", "candies",
+              "gummy-candies", "chewing-gum", "peanuts", "nuts", "cashew-nuts",
+              "roasted-peanuts", "cereal-bars", "bars"]],
   ["taste-of-home", ["instant-noodles", "rices", "soy-sauces", "hot-sauces", "canned-fishes",
                      "sardines", "tunas", "pastas", "instant-soups", "condiments"]],
   ["personal-care", ["deodorants", "toothpastes", "shampoos", "soaps", "shower-gels"]],
