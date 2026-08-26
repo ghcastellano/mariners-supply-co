@@ -12,7 +12,7 @@ export const dynamic = "force-dynamic";
 const TIERS = [
   { em: "⚓", name: "Deckhand", range: "0–4 orders", pct: 5, min: 0 },
   { em: "🧭", name: "Bosun", range: "5–14 orders", pct: 6, min: 5 },
-  { em: "🧢", name: "Captain", range: "15+ orders · brinde por escala", pct: 7, min: 15 },
+  { em: "🧢", name: "Captain", range: "15+ orders · gift on every call", pct: 7, min: 15 },
 ];
 
 export default async function CaptainPage() {

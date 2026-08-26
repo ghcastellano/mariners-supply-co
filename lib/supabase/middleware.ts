@@ -12,7 +12,18 @@ const PROTECTED_PREFIXES = ["/account", "/orders", "/checkout", "/admin", "/capt
  * `/admin` fica de fora porque o staff não tem navio nem porto de casa:
  * exigir isso da própria equipe seria trancá-la para fora do painel.
  */
-const LIVRES = ["/account", "/auth", "/login", "/signup", "/reset-password", "/admin", "/api"];
+/**
+ * Caminhos que o portão de cadastro NÃO barra.
+ *
+ * "/r" entrou depois e por um defeito: é a aterrissagem do QR do
+ * Captain, e quem escaneia o código de um colega estando logado com
+ * cadastro incompleto era mandado para /account ANTES de a página
+ * rodar. A página é quem guarda o código no aparelho — então a
+ * indicação se perdia em silêncio, justamente no fluxo que o programa
+ * inteiro existe para servir. Guardar o código não depende de cadastro
+ * completo; comprar é que depende, e /shop continua barrado.
+ */
+const LIVRES = ["/account", "/auth", "/login", "/signup", "/reset-password", "/admin", "/api", "/r/"];
 
 /**
  * Só estas colunas decidem se o cadastro está completo. É a mesma regra

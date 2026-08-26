@@ -1178,6 +1178,53 @@ input:-webkit-autofill:focus {
 .crumb a:hover { color: var(--amber); }
 .crumb .sep { opacity: .5; }
 
+/* ===== faixa do Captain na home =====
+   Âmbar contido, não âmbar de faixa promocional: o programa é uma
+   condição permanente da conta, não uma oferta que expira, e tratar
+   como promoção ensina a ignorar. O código é o maior texto do bloco
+   porque é ele que a pessoa vai ditar para o colega no refeitório. */
+.capstrip {
+  display: grid; gap: 14px;
+  margin: 14px 14px 4px; padding: 16px 16px 17px;
+  border-radius: 14px;
+  background: linear-gradient(135deg, rgba(255,182,72,.10), rgba(255,182,72,.03) 62%), var(--card);
+  box-shadow: inset 0 0 0 1px rgba(255,182,72,.22);
+}
+.capstrip .kick {
+  margin: 0 0 6px; font-family: var(--font-mono); font-size: 10px;
+  letter-spacing: .16em; text-transform: uppercase; color: var(--amber);
+}
+.capstrip h3 {
+  margin: 0; font-family: var(--font-disp); font-size: 17px; line-height: 1.28;
+  font-weight: 700; color: var(--ink); text-wrap: balance;
+}
+.capstrip h3 b { color: var(--amber); }
+.capstrip .sub { margin: 7px 0 0; color: var(--muted); font-size: 12.5px; line-height: 1.5; }
+
+.capcode {
+  display: grid; gap: 9px; justify-items: start;
+  padding: 13px 14px; border-radius: 11px;
+  background: rgba(1,6,13,.34);
+}
+.capcode .lbl {
+  font-family: var(--font-mono); font-size: 9.5px; letter-spacing: .16em;
+  text-transform: uppercase; color: var(--faint);
+}
+.capcode .code {
+  font-family: var(--font-mono); font-size: 25px; font-weight: 700;
+  letter-spacing: .12em; color: var(--ink); line-height: 1;
+  /* Quebra em tela estreita em vez de estourar a caixa. */
+  overflow-wrap: anywhere;
+}
+.capcode .share { width: 100%; }
+.capmore { color: var(--amber); font-size: 12.5px; font-weight: 600; }
+.capmore:hover { color: var(--amber-hi); }
+
+@media (min-width: 620px) {
+  .capstrip { grid-template-columns: minmax(0, 1fr) minmax(230px, 300px); align-items: center; gap: 20px; }
+  .capcode .share { width: auto; }
+}
+
 /* ===== card de produto ==========================================
    Uma definição só. Antes eram duas: um bloco base no começo do
    arquivo e um bloco "anatomia do Sunny" seiscentas linhas abaixo,
@@ -2045,6 +2092,8 @@ svg.ic { flex: none; color: var(--amber); }
   .pg-home .catgrid, .pg-home .rail { padding-left: 0; padding-right: 0; }
   .pg-home > .homehero { grid-row: 1; }
   .pg-home > .vpanel   { grid-row: 2; margin: 0; }
+  .pg-home > .capstrip { grid-row: 3; margin: 6px 0 0; padding: 20px 22px 21px; }
+  .pg-home .capstrip h3 { font-size: clamp(18px, 1.5vw, 22px); }
 
   .pg-home .homehero {
     margin: 0 calc(var(--gut) * -1);      /* full-bleed até a borda da casca */

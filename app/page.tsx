@@ -1,4 +1,5 @@
 import Link from "next/link";
+import CaptainStrip from "@/components/CaptainStrip";
 import HeroSteps from "@/components/HeroSteps";
 import VesselPanel, { type VesselFacts } from "@/components/VesselPanel";
 import { unstable_cache } from "next/cache";
@@ -8,7 +9,7 @@ import ProductCardView from "@/components/ProductCard";
 import { createClient } from "@/lib/supabase/server";
 import { listProducts, type Category, type ProductCard } from "@/lib/catalog";
 import { wishedProductIds } from "@/lib/wishlist";
-import { SUPABASE_ANON_KEY, SUPABASE_URL, supabaseConfigured } from "@/lib/env";
+import { SITE_URL, SUPABASE_ANON_KEY, SUPABASE_URL, supabaseConfigured } from "@/lib/env";
 import { DEPOSIT_PCT } from "@/lib/money";
 
 /**
@@ -83,13 +84,16 @@ const loadStorefront = unstable_cache(
   { revalidate: 300, tags: ["catalog"] }
 );
 
+type Captain = { code: string; rate: number } | null;
+
 type Crew =
-  | { kind: "vessel"; v: VesselFacts }
-  | { kind: "invite" }
+  | { kind: "vessel"; v: VesselFacts; cap: Captain }
+  | { kind: "invite"; cap: Captain }
   | null;
 
 type CrewRow = {
   ship_id: string | null;
+  referral_code: string | null;
   ships: {
     name: string; eta: string; berth: string | null; ata: string | null;
     imo: string | null; voyage: string | null; flag: string | null;
@@ -113,12 +117,21 @@ async function loadCrew(): Promise<Crew> {
     const { data } = await supabase
       .from("profiles")
       .select(
-        "ship_id, ships(name, eta, berth, ata, imo, voyage, flag, cutoff_hours, delay_hours)"
+        "ship_id, referral_code, ships(name, eta, berth, ata, imo, voyage, flag, cutoff_hours, delay_hours)"
       )
       .eq("id", user.id)
       .maybeSingle();
 
     const row = data as CrewRow | null;
+
+    // A faixa sai de referral_rate, não de uma constante na tela: quem
+    // já indicou cinco pedidos ganha 6% e a home tem de dizer 6%, senão
+    // o programa mente para justamente quem mais indica.
+    let cap: Captain = null;
+    if (row?.referral_code) {
+      const { data: rate } = await supabase.rpc("referral_rate", { p_user: user.id });
+      cap = { code: row.referral_code, rate: Number(rate ?? 5) };
+    }
     // ship_id sem ships significa navio inativo — já zarpou. A tira vira
     // convite para escolher a próxima escala, que é mais útil que um
     // nome de escala vencida.
@@ -126,10 +139,11 @@ async function loadCrew(): Promise<Crew> {
     // Perfil SEM navio nenhum não chega mais aqui: o middleware barra
     // cadastro incompleto antes da home. Então esta tira quer dizer uma
     // coisa só, e o texto pode ser específico.
-    if (!row?.ship_id || !row.ships) return { kind: "invite" };
+    if (!row?.ship_id || !row.ships) return { kind: "invite", cap };
     const s = row.ships;
     return {
       kind: "vessel",
+      cap,
       v: {
         name: s.name, berth: s.berth, eta: s.eta, ata: s.ata,
         imo: s.imo, voyage: s.voyage, flag: s.flag,
@@ -221,6 +235,17 @@ export default async function Home() {
       {!crew && <HeroSteps />}
 
       {crew?.kind === "vessel" && <VesselPanel v={crew.v} />}
+
+      {/* Logo abaixo do painel da escala, que é o bloco que a pessoa
+          logada de fato olha ao entrar. Antes do catálogo de propósito:
+          depois das faixas de produto ninguém rola até aqui. */}
+      {crew?.cap && (
+        <CaptainStrip
+          code={crew.cap.code}
+          rate={crew.cap.rate}
+          link={`${SITE_URL}/r/${crew.cap.code}`}
+        />
+      )}
 
       {crew?.kind === "invite" && (
         <Link href="/account" className="vstrip">

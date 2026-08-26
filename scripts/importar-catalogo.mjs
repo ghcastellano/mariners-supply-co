@@ -12,12 +12,24 @@
  * service_role no projeto, de propósito.
  *
  *   ADMIN_EMAIL=... ADMIN_PASSWORD=... \
- *     node scripts/importar-catalogo.mjs catalogo.csv [--seco]
+ *     node --experimental-strip-types scripts/importar-catalogo.mjs catalogo.csv [flags]
  *
- * `--seco` mostra o que faria e não grava nada.
+ *   --seco             mostra o que faria e não grava nada
+ *   --refoto           refaz a foto mesmo de quem já tem capa
+ *   --desativar-fora   desativa o que não está no arquivo
  *
- * Idempotente: casa por SKU. Rodar de novo atualiza, não duplica, e não
- * rebaixa foto de produto que já tem capa.
+ * `--experimental-strip-types` porque a normalização das fotos mora em
+ * lib/fotonormaliza.ts, que é TypeScript e é o mesmo módulo que o app
+ * usa — foto do catálogo e foto do admin saem do mesmo molde ou o
+ * padrão dura até o primeiro upload manual.
+ *
+ * Idempotente: casa por SKU. Rodar de novo atualiza, não duplica.
+ *
+ * TODA foto passa pelo mesmo molde antes de subir: 1000x1000, fundo
+ * branco, 6% de folga. Sem isso a grade fica com uma foto recortada em
+ * estúdio ao lado de outra tirada no corredor do mercado com o chão
+ * aparecendo, e a loja inteira lê como improviso — que foi exatamente o
+ * que aconteceu na primeira carga.
  */
 
 import { readFileSync, existsSync } from "node:fs";
@@ -41,9 +53,15 @@ function carregarEnv(arquivo = ".env.local") {
 }
 carregarEnv();
 import { createClient } from "@supabase/supabase-js";
+import { normalizarFoto } from "../lib/fotonormaliza.ts";
+import { avaliarFoto } from "../lib/fotoqualidade.ts";
 
 const CSV = process.argv[2];
 const SECO = process.argv.includes("--seco");
+/** Refaz a capa de quem já tem. É como as fotos ruins da primeira carga saem. */
+const REFOTO = process.argv.includes("--refoto");
+/** Desativa o que não veio no arquivo — o arquivo passa a ser a verdade. */
+const DESATIVAR_FORA = process.argv.includes("--desativar-fora");
 /**
  * Credenciais: do ambiente, ou do arquivo que conta-servico.mjs deixou.
  * Pelo arquivo é melhor — senha em variável de ambiente aparece na linha
@@ -209,15 +227,41 @@ for (const l of linhas) {
     );
   }
 
-  // Foto só quando ainda não há capa: reimportar não sobrescreve a foto
-  // do fornecedor que alguém já subiu por cima da do acervo.
-  if (l.image_url && !prod.primary_image_path) {
+  // Sem --refoto, reimportar não sobrescreve a capa que alguém já subiu
+  // por cima da do acervo. Com --refoto, sobrescreve — que é como as
+  // fotos ruins da primeira carga saem sem apagar produto.
+  if (l.image_url && (REFOTO || !prod.primary_image_path)) {
     const ok = await subirFoto(prod.id, l.image_url, l.name);
     if (ok) comFoto++;
   }
 
   gravados++;
   console.log(`  ✓ ${l.sku}  ${l.name}  $${l.price}`);
+}
+
+/**
+ * O arquivo passa a ser a verdade da vitrine.
+ *
+ * DESATIVA, não apaga. Produto apagado leva junto o histórico: item de
+ * pedido antigo aponta para a variante, e o pedido de quem já comprou
+ * passaria a mostrar linha vazia. Desativado some da loja e continua
+ * existindo para quem já comprou.
+ */
+if (DESATIVAR_FORA) {
+  const skus = new Set(linhas.map((l) => l.sku));
+  const { data: todos } = await db.from("products").select("id, sku, name").eq("active", true);
+  const fora = (todos ?? []).filter((p) => !skus.has(p.sku));
+  if (fora.length === 0) {
+    console.log("\nNada a desativar: tudo que está ativo veio no arquivo.");
+  } else if (SECO) {
+    console.log(`\n[seco] desativaria ${fora.length}:`);
+    for (const p of fora) console.log(`  - ${p.sku}  ${p.name}`);
+  } else {
+    const ids = fora.map((p) => p.id);
+    await db.from("products").update({ active: false }).in("id", ids);
+    await db.from("product_variants").update({ active: false }).in("product_id", ids);
+    console.log(`\n${fora.length} produto(s) fora do arquivo, desativado(s).`);
+  }
 }
 
 console.log(`\n${gravados} produto(s), ${comFoto} foto(s) nova(s), ${falhas} falha(s).`);
@@ -227,19 +271,38 @@ async function subirFoto(produtoId, url, alt) {
   try {
     const r = await fetch(url, { headers: { "User-Agent": "MarinersSupply/1.0 (ahoy@marinerssupplyco.com)" } });
     if (!r.ok) { console.error(`    foto HTTP ${r.status}`); return false; }
-    const tipo = (r.headers.get("content-type") || "").split(";")[0].trim();
-    const ext = { "image/jpeg": "jpg", "image/png": "png", "image/webp": "webp" }[tipo];
-    if (!ext) { console.error(`    foto de tipo ${tipo || "?"}`); return false; }
-    const buf = new Uint8Array(await r.arrayBuffer());
-    if (buf.byteLength < 5000 || buf.byteLength > 5 * 1024 * 1024) {
-      console.error(`    foto de ${buf.byteLength} bytes, fora da faixa`); return false;
+    const bruto = new Uint8Array(await r.arrayBuffer());
+    if (bruto.byteLength < 5000 || bruto.byteLength > 8 * 1024 * 1024) {
+      console.error(`    foto de ${bruto.byteLength} bytes, fora da faixa`); return false;
     }
-    const caminho = `products/${produtoId}/openfacts.${ext}`;
+
+    // Resolução é o único corte que se mede sem ambiguidade. O resto —
+    // "isto é pack shot ou foto de gôndola?" — foi tentado, medido
+    // contra 55 fotos classificadas no olho, acertou 40%, e o motivo
+    // está em lib/fotoqualidade.ts. Quem separa isso é a folha de
+    // contato antes do CSV, não o importador.
+    const laudo = await avaliarFoto(bruto);
+    if (!laudo.aprovada) { console.error(`    foto reprovada: ${laudo.motivo}`); return false; }
+
+    // O molde. Sempre, inclusive em foto que já parece boa: o valor
+    // está em TODAS terem o mesmo enquadramento, não em cada uma ser
+    // aceitável sozinha.
+    const foto = await normalizarFoto(bruto);
+    // Nome fixo e upsert: a capa de um produto é uma só, e cada carga
+    // sobrescreve em vez de acumular arquivo órfão no bucket.
+    const caminho = `products/${produtoId}/capa.jpg`;
     const { error } = await db.storage.from(BUCKET)
-      .upload(caminho, buf, { contentType: tipo, upsert: true });
+      .upload(caminho, foto.buffer, { contentType: foto.contentType, upsert: true });
     if (error) { console.error(`    upload: ${error.message}`); return false; }
 
     const c = credito(url);
+    // Apaga a capa antiga e insere, em vez de upsert. O upsert precisaria
+    // de índice ÚNICO em (product_id, sort_order), e o que existe é um
+    // índice comum — o Postgres recusa ON CONFLICT contra índice não
+    // único com 42P10, que é o mesmo erro que já custou uma rodada aqui
+    // com o índice parcial de products.sku. Sem isto, reimportar com
+    // --refoto deixaria duas capas na posição 0 disputando a vitrine.
+    await db.from("product_images").delete().eq("product_id", produtoId).eq("sort_order", 0);
     const { error: e } = await db.from("product_images").insert({
       product_id: produtoId, path: caminho, alt, sort_order: 0, ...(c ?? {}),
     });
