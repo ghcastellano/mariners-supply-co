@@ -101,6 +101,12 @@ export const SORT_LABEL: Record<SortKey, string> = {
 export function imageUrl(path: string | null | undefined): string | null {
   if (!path) return null;
   if (/^https?:\/\//.test(path)) return path; // já é absoluta (import externo)
+  // Começa com "/": é arquivo do próprio site, em public/. A carga
+  // inicial mora aí porque o Storage autoriza por sessão de usuário e a
+  // padronização das fotos não pode depender de alguém estar logado —
+  // foto de catálogo é build, não upload. Ganha o CDN da Vercel de
+  // graça e some do caminho de uma credencial a mais.
+  if (path.startsWith("/")) return path;
   return `${SUPABASE_URL}/storage/v1/object/public/${PRODUCT_BUCKET}/${path
     .split("/")
     .map(encodeURIComponent)

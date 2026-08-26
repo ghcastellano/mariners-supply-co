@@ -217,6 +217,30 @@ export default async function Home() {
           </dl>
       </section>
 
+      {/* Ordem do DOM = ordem de leitura, e ela vinha errada: estes três
+          blocos ficavam DEPOIS da grade de categorias no código e eram
+          puxados para cima por grid-row no desktop. O resultado era a
+          faixa do Captain caindo entre o título "Categories" e a própria
+          grade — colada nela, como se fizesse parte da seção. No celular,
+          onde não há grade, apareciam mesmo depois das categorias.
+
+          Agora a ordem do código é a ordem da página em qualquer
+          largura, e o CSS não precisa mais remendar posição. */}
+      {!crew && <HeroSteps />}
+
+      {crew?.kind === "vessel" && <VesselPanel v={crew.v} />}
+
+      {/* Logo abaixo do painel da escala, que é o bloco que a pessoa
+          logada de fato olha ao entrar. Antes do catálogo de propósito:
+          depois das faixas de produto ninguém rola até aqui. */}
+      {crew?.cap && (
+        <CaptainStrip
+          code={crew.cap.code}
+          rate={crew.cap.rate}
+          link={`${SITE_URL}/r/${crew.cap.code}`}
+        />
+      )}
+
       <h2 className="secttl">
             Categories
             <Link href="/shop" className="allx" prefetch={false}>
@@ -251,24 +275,6 @@ export default async function Home() {
         </div>
       )}
 
-      {/* A fileira do herói divide-se em dois no desktop. Quem tem navio
-          vê o painel do navio; quem não tem via 40% de preto — e é o
-          estado de todo visitante novo, inclusive o que chega pelo
-          Google. Os dois nunca aparecem juntos. */}
-      {!crew && <HeroSteps />}
-
-      {crew?.kind === "vessel" && <VesselPanel v={crew.v} />}
-
-      {/* Logo abaixo do painel da escala, que é o bloco que a pessoa
-          logada de fato olha ao entrar. Antes do catálogo de propósito:
-          depois das faixas de produto ninguém rola até aqui. */}
-      {crew?.cap && (
-        <CaptainStrip
-          code={crew.cap.code}
-          rate={crew.cap.rate}
-          link={`${SITE_URL}/r/${crew.cap.code}`}
-        />
-      )}
 
       {crew?.kind === "invite" && (
         <Link href="/account" className="vstrip">

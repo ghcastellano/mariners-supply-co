@@ -2093,9 +2093,13 @@ svg.ic { flex: none; color: var(--amber); }
      a faixa da grade em vez de rolar dentro dela. */
   .pg-home > * { grid-column: 1 / -1; min-width: 0; }
   .pg-home .catgrid, .pg-home .rail { padding-left: 0; padding-right: 0; }
+  /* Só o herói e as duas laterais recebem linha explícita: são a
+     fileira de abertura. Do Captain para baixo a grade coloca na ordem
+     do DOM, que agora é a ordem de leitura — foi o grid-row fixo do
+     .capstrip que o jogava para dentro da seção de categorias. */
   .pg-home > .homehero { grid-row: 1; }
-  .pg-home > .vpanel   { grid-row: 2; margin: 0; }
-  .pg-home > .capstrip { grid-row: 3; margin: 6px 0 0; padding: 20px 22px 21px; }
+  .pg-home > .vpanel   { grid-row: 1; grid-column: 9 / -1; align-self: stretch; margin: 0; }
+  .pg-home > .capstrip { margin: 22px 0 0; padding: 20px 22px 21px; }
   .pg-home .capstrip h3 { font-size: clamp(18px, 1.5vw, 22px); }
 
   .pg-home .homehero {
