@@ -114,7 +114,20 @@ button { font-family: inherit; }
 .disp { font-family: var(--font-disp); }
 .mono { font-family: var(--font-mono); }
 
-/* ===== shell: coluna mobile-first, full-bleed no celular ===== */
+/* ===== shell: coluna mobile-first, full-bleed no celular =====
+
+   Sem fio nas laterais, em largura nenhuma. Ele existia por herança do
+   desenho original, em que a casca imitava a moldura de um aparelho —
+   e sobreviveu ao refactoring em três tratamentos diferentes: fio de
+   500 a 767px, nada de 768 a 1599px, fio de novo acima de 1600px.
+   Um mesmo elemento com três identidades conforme a largura é
+   exatamente o que a onda 1 se comprometeu a não fazer.
+
+   E acima de 1600px ele ainda produzia um defeito visível: .sunhead e
+   .sunfoot sangram a janela inteira (margin-inline: calc(50% - 50vw)),
+   então o fio passava POR TRÁS do cabeçalho e do rodapé e só aparecia
+   no trecho do meio — lê como risco na tela, não como margem da
+   página. Quem delimita a página é o espaço em volta dela. */
 .shell {
   position: relative;
   width: 100%;
@@ -124,9 +137,6 @@ button { font-family: inherit; }
   background: var(--night);
   display: flex;
   flex-direction: column;
-}
-@media (min-width: 500px) {
-  .shell { border-left: 1px solid var(--line); border-right: 1px solid var(--line); }
 }
 
 /* ---- a pilha da página --------------------------------------------
@@ -2195,10 +2205,7 @@ svg.ic { flex: none; color: var(--amber); }
   }
 
   /* ---------- 2.1 a casca deixa de ser coluna de celular ---------- */
-  .shell {
-    max-width: var(--page-w);
-    border-left: 0; border-right: 0;
-  }
+  .shell { max-width: var(--page-w); }
   /* Retaguarda para o resto do site: /faq, /terms, /login, /ports,
      /captain, /brochures, /signup, /orders/[code]… nenhuma é
      superfície desenhada aqui. Em vez de virarem celular colado na
@@ -2985,10 +2992,6 @@ svg.ic { flex: none; color: var(--amber); }
 @media (min-width: 1600px) and (min-height: 520px) {
 
   :root { --page-w: 1520px; --gut: 40px; --pmin: 232px; --pgap: 20px; --rail: 252px; --colgap: 36px; }
-
-  /* aqui a casca é de fato menor que a janela: os fios voltam a ter
-     função — marcam a página, não desenham um aparelho */
-  .shell { border-left: 1px solid var(--line); border-right: 1px solid var(--line); }
 
   .catbar-list > .catwrap:nth-child(n + 9)  { display: flex; }
   .catbar-list > .catwrap:nth-child(n + 10) { display: none; }
