@@ -10,7 +10,6 @@
  * antigas) dependendo de qual consulta a trouxe.
  */
 
-import { USD_BRL_RATE } from "./env.ts";
 
 /** numeric | number | string do Postgres → centavos inteiros. */
 export function fromDb(v: number | string | null | undefined): number {
@@ -43,9 +42,9 @@ export function toCents(v: number | string | null | undefined): number {
 
 export const usd = (cents: number) => `USD ${(fromDb(cents) / 100).toFixed(2)}`;
 
-/** Referência em real para quem paga em BRL — arredonda, não é cobrança. */
-export const brl = (cents: number) =>
-  `R$ ${Math.round((fromDb(cents) / 100) * USD_BRL_RATE)}`;
+/* brl() saiu daqui. A conversão foi para lib/fx.ts, que recebe a
+   cotação do PTAX como argumento em vez de ler uma constante global:
+   função pura não pode depender de uma taxa que muda todo dia útil. */
 
 export const sumCents = (values: Array<number | string | null | undefined>) =>
   values.reduce<number>((acc, v) => acc + fromDb(v), 0);

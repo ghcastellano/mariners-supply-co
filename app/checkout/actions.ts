@@ -3,7 +3,7 @@
 import { headers } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
 import { getStripe, stripeConfigured } from "@/lib/stripe";
-import { SITE_URL, USD_BRL_RATE } from "@/lib/env";
+import { SITE_URL } from "@/lib/env";
 import { usd } from "@/lib/format";
 import { splitOrder } from "@/lib/money";
 
@@ -37,11 +37,21 @@ type SessionInput = {
   email?: string;
 };
 
-// Sessão do Stripe Checkout em BRL: o banco do tripulante faz o câmbio,
-// evitando a taxa de conversão de moeda do Stripe.
+/**
+ * Sessão do Stripe Checkout em DÓLAR.
+ *
+ * Era em real, convertido por uma constante de build. Três problemas de
+ * uma vez: a constante ficou 3% fora do câmbio real e isso virou
+ * sobrepreço; o público é estrangeiro e pensa em dólar; e a isenção
+ * federal de PIS/COFINS do fornecimento de bordo (MP 2.158-35, art. 14,
+ * IV) exige pagamento em moeda conversível — cobrar em real a perde.
+ *
+ * O preço do catálogo já é em centavos de dólar, então aqui não há
+ * conversão nenhuma: some a fonte de erro junto com o câmbio.
+ */
 async function createDepositSession(input: SessionInput, origin: string) {
   const stripe = getStripe();
-  const brlCents = Math.max(100, Math.round(input.amountUsd * USD_BRL_RATE * 100));
+  const usdCents = Math.max(50, Math.round(input.amountUsd * 100));
   return stripe.checkout.sessions.create({
     mode: "payment",
     client_reference_id: input.orderId,
@@ -50,8 +60,8 @@ async function createDepositSession(input: SessionInput, origin: string) {
       {
         quantity: 1,
         price_data: {
-          currency: "brl",
-          unit_amount: brlCents,
+          currency: "usd",
+          unit_amount: usdCents,
           product_data: {
             name: `Deposit — Order ${input.code}`,
             description: `${input.shipName} · gangway delivery in Santos · balance ${usd(
@@ -65,7 +75,6 @@ async function createDepositSession(input: SessionInput, origin: string) {
       order_id: input.orderId,
       order_code: input.code,
       amount_usd: String(input.amountUsd),
-      fx_rate: String(USD_BRL_RATE),
     },
     success_url: `${origin}/orders/${input.code}?paid=1`,
     cancel_url: `${origin}/orders/${input.code}?placed=1`,

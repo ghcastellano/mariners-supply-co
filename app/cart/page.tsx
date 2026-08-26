@@ -8,7 +8,7 @@ import { useCart } from "@/lib/cart";
 import { createClient } from "@/lib/supabase/client";
 import { supabaseConfigured } from "@/lib/env";
 import { imageUrl } from "@/lib/catalog";
-import { brl, DEPOSIT_PCT, splitOrder, toCents, usd } from "@/lib/money";
+import { DEPOSIT_PCT, splitOrder, toCents, usd } from "@/lib/money";
 
 type Line = {
   id: string;
@@ -196,8 +196,7 @@ export default function CartPage() {
             </Link>
 
             <p className="finehint">
-              {DEPOSIT_PCT}% deposit now — {usd(split.deposit)} (≈ {brl(split.deposit)}, converted
-              by your own bank, no house spread). Balance {usd(split.balance)} at the gangway;
+              {DEPOSIT_PCT}% deposit now — {usd(split.deposit)}, charged in US dollars. Balance {usd(split.balance)} at the gangway;
               delivery on board is free. If your ship skips Santos, the deposit becomes full credit
               for your next call — no paperwork.
             </p>

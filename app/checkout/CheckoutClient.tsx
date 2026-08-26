@@ -4,9 +4,10 @@ import { useEffect, useMemo, useState, useTransition } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCart } from "@/lib/cart";
+import { brlRef, type FxRate } from "@/lib/fx";
 import { createClient } from "@/lib/supabase/client";
 import { supabaseConfigured } from "@/lib/env";
-import { brl, DEPOSIT_PCT, splitOrder, toCents, usd } from "@/lib/money";
+import { DEPOSIT_PCT, splitOrder, toCents, usd } from "@/lib/money";
 import { placeOrder } from "./actions";
 
 type Line = {
@@ -29,11 +30,14 @@ export default function CheckoutClient({
   shipId,
   contactName,
   contactWhatsapp,
+  fxRate,
 }: {
   blocked: boolean;
   shipId: string | null;
   contactName: string;
   contactWhatsapp: string;
+  /** PTAX do dia, só para a referência de quem paga em PIX. Null = não mostra. */
+  fxRate: FxRate | null;
 }) {
   const router = useRouter();
   const { items, count, ready, clear } = useCart();
@@ -178,9 +182,19 @@ export default function CheckoutClient({
           "Your Captain credit covers the whole deposit — confirming places your order right away."
         ) : (
           <>
-            ≈ {brl(split.dueNow)} charged now, converted by your own bank — no house spread. Next
-            is our secure payment page: card, Apple Pay, Google Pay or PIX. If your ship skips the
-            call, the deposit becomes full credit for the next one — no paperwork.
+            {usd(split.dueNow)} charged now, in US dollars.{" "}
+            {/* A referência em real existe só por causa do PIX, que é em
+                real. Sai do PTAX do Banco Central, não de constante — e
+                some quando a cotação está velha, porque número errado é
+                pior que número nenhum. */}
+            {brlRef(split.dueNow, fxRate) ? (
+              <>
+                Paying by PIX? That&apos;s about {brlRef(split.dueNow, fxRate)} at today&apos;s
+                Banco Central rate.{" "}
+              </>
+            ) : null}
+            Next is our secure payment page: card, Apple Pay, Google Pay or PIX. If your ship
+            skips the call, the deposit becomes full credit for the next one — no paperwork.
           </>
         )}
       </p>

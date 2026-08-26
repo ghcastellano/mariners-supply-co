@@ -6,6 +6,7 @@ import Breadcrumb from "@/components/Breadcrumb";
 import { createClient } from "@/lib/supabase/server";
 import { imageUrl } from "@/lib/catalog";
 import CheckoutClient from "./CheckoutClient";
+import { currentFxRate } from "@/lib/fxrate";
 
 export const dynamic = "force-dynamic";
 
@@ -79,6 +80,12 @@ export default async function CheckoutPage() {
   const missing = { name: !name, vessel: !vessel, port: !port, phone: !phone };
   const blocked = Object.values(missing).some(Boolean);
 
+  // Cotação só para a referência em real de quem paga em PIX — a
+  // cobrança do Stripe é em dólar. Null quando o PTAX está velho
+  // demais: aí a tela simplesmente não mostra número em real.
+  const fxRate = await currentFxRate();
+
+
   return (
     <main>
       <Breadcrumb trail={[{ label: "Shopping Cart", href: "/cart" }, { label: "Checkout" }]} />
@@ -139,6 +146,7 @@ export default async function CheckoutPage() {
       </section>
 
       <CheckoutClient
+        fxRate={fxRate}
         blocked={blocked}
         shipId={row?.ship_id ?? null}
         contactName={name}

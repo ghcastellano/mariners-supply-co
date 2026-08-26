@@ -5,7 +5,7 @@ import { useMemo, useState } from "react";
 import WishButton from "./WishButton";
 import { useCart } from "@/lib/cart";
 import { BADGE_LABEL, imageUrl, type ProductImage, type ProductVariant } from "@/lib/catalog";
-import { brl, discountPercent, usd } from "@/lib/money";
+import { discountPercent, usd } from "@/lib/money";
 import { shortRegime } from "@/lib/taxregime";
 
 type Head = {
@@ -179,9 +179,11 @@ export default function ProductBuy({
           <div className="pdp-price">
             {was ? <s className="was">{usd(was)}</s> : null}
             <b className="now">{usd(price)}</b>
-            {/* O marinheiro pensa em dólar; quem paga no cais pensa em
-                real. Mostrar os dois evita a conta de cabeça. */}
-            <span className="alt">≈ {brl(price)} at today&apos;s rate</span>
+            {/* O real saiu daqui. A cobrança é em dólar, o público é
+                estrangeiro, e a linha "≈ R$ X at today's rate" vinha de
+                uma constante congelada — era a única afirmação falsa da
+                loja. A referência em real sobrou só no checkout, onde
+                alguém pode pagar em PIX, e lá sai do PTAX de verdade. */}
           </div>
 
           <div className="pdp-actions">
