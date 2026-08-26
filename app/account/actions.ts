@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { missingProfileFields } from "@/lib/profile";
 
 export async function signOut() {
   const supabase = await createClient();
@@ -88,15 +89,14 @@ export async function saveProfile(input: ProfileInput): Promise<SaveProfileResul
   // pagamento. O carimbo marca a PRIMEIRA vez que fechou — remarcar a cada
   // salvamento apagaria desde quando o cadastro vale.
   //
-  // A lista do que falta sai daqui, e não da tela, porque é a MESMA regra
-  // que o checkout aplica: dois lugares com a mesma verdade escrita duas
-  // vezes viram duas verdades diferentes na primeira mudança.
-  const missing = [
-    fullName ? null : "name",
-    vesselName ? null : "vessel",
-    portId ? null : "home port",
-    whatsapp ? null : "telephone",
-  ].filter((v): v is string => Boolean(v));
+  // A regra do que falta mora em lib/profile: a tela da conta e o
+  // retorno do Google perguntam a mesma coisa.
+  const missing = missingProfileFields({
+    full_name: fullName,
+    vessel_name: vesselName,
+    port_id: portId,
+    whatsapp,
+  });
   const complete = missing.length === 0;
   const profileCompletedAt = complete
     ? (current?.profile_completed_at ?? new Date().toISOString())

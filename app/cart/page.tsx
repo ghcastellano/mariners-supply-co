@@ -125,6 +125,11 @@ export default function CartPage() {
 
       <h1 className="secttl left">Shopping Cart</h1>
 
+      {/* O carrinho mora no aparelho, então o servidor não sabe o que
+          tem dentro e o bloco só ganha altura depois da hidratação. Sem
+          reservar espaço, o rodapé pulava ~200px — CLS de 0,13 no
+          celular, acima do limite de 0,1 do Core Web Vitals. */}
+      <div className="cartslot">
       {lines === null || !ready ? (
         <div className="spin" aria-label="Loading" />
       ) : rows.length === 0 ? (
@@ -266,6 +271,7 @@ export default function CartPage() {
           </div>
         </>
       )}
+      </div>
     </main>
   );
 }

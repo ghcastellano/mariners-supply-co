@@ -10,6 +10,7 @@ import VesselSearch, { type VesselValue } from "@/components/VesselSearch";
 import { COUNTRIES } from "@/lib/countries";
 import { CONTACT_EMAIL } from "@/lib/env";
 import { createClient } from "@/lib/supabase/client";
+import { missingProfileFields } from "@/lib/profile";
 import { saveProfile, signOut } from "./actions";
 
 /**
@@ -152,6 +153,10 @@ export default function AccountPage() {
         }))
       );
       setPorts((portRows.data ?? []) as PortRow[]);
+
+      // Quem chega aqui vindo do Google cai num formulário vazio sem
+      // saber por quê. O aviso nasce com a tela, não só depois de salvar.
+      setMissing(missingProfileFields(p));
       setLoading(false);
     })();
 
@@ -313,12 +318,19 @@ export default function AccountPage() {
             {err}
           </p>
         )}
-        {saved && (
+        {saved ? (
           <p className="note" role="status">
             {missing.length === 0
               ? "Your details are saved — checkout has everything it needs."
               : `Saved. Checkout still needs your ${missing.join(", ")} before it can take payment.`}
           </p>
+        ) : (
+          missing.length > 0 && (
+            <p className="note">
+              Checkout needs your {missing.join(", ")} before it can take payment. Fill them in
+              and press Save — partial saves are fine, you can come back for the rest.
+            </p>
+          )
         )}
 
         <button className="btn" type="submit" disabled={busy}>

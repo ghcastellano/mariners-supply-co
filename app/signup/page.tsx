@@ -30,6 +30,8 @@ const NATIONALITIES: SelectOption[] = COUNTRIES.map((c) => ({
   label: `${c.flag} ${c.name}`,
 }));
 
+type PortRow = { id: string; name: string; country_code: string };
+
 const STRENGTH = ["Too short", "Weak", "Fair", "Good", "Strong"];
 const STRENGTH_COLOR = [
   "var(--danger)",
@@ -89,9 +91,11 @@ function SignupInner() {
   const [vessel, setVessel] = useState<VesselValue | null>(null);
   const [rank, setRank] = useState("");
   const [nationality, setNationality] = useState("");
+  const [portId, setPortId] = useState("");
   const [terms, setTerms] = useState(false);
 
   const [ranks, setRanks] = useState<SelectOption[]>([]);
+  const [ports, setPorts] = useState<PortRow[]>([]);
   const [err, setErr] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [sent, setSent] = useState(false);
@@ -101,20 +105,21 @@ function SignupInner() {
   // montagem basta — não vale um Server Component só para servir 20 linhas.
   useEffect(() => {
     let alive = true;
-    createClient()
-      .from("crew_ranks")
-      .select("slug, name, department")
-      .order("sort_order")
-      .then(({ data }) => {
-        if (!alive || !data) return;
-        setRanks(
-          data.map((r) => ({
-            value: r.slug as string,
-            label: r.name as string,
-            group: DEPARTMENT[r.department as string] ?? (r.department as string),
-          }))
-        );
-      });
+    const db = createClient();
+    Promise.all([
+      db.from("crew_ranks").select("slug, name, department").order("sort_order"),
+      db.from("ports").select("id, name, country_code").eq("active", true).order("sort_order"),
+    ]).then(([rankRows, portRows]) => {
+      if (!alive) return;
+      setRanks(
+        (rankRows.data ?? []).map((r) => ({
+          value: r.slug as string,
+          label: r.name as string,
+          group: DEPARTMENT[r.department as string] ?? (r.department as string),
+        }))
+      );
+      setPorts((portRows.data ?? []) as PortRow[]);
+    });
     return () => {
       alive = false;
     };
@@ -150,6 +155,13 @@ function SignupInner() {
       setErr("Please select your nationality.");
       return;
     }
+    // O porto faltava aqui, e era o furo: o cadastro terminava "completo"
+    // sem ele, e o checkout barrava o pagamento com "Port is required" —
+    // todo cliente novo batia nessa parede pelo menos uma vez.
+    if (!portId) {
+      setErr("Please choose the port where we meet your vessel.");
+      return;
+    }
     // O botão continua habilitado sem o aceite de propósito: botão
     // desligado não conta a quem usa leitor de tela o que falta.
     if (!terms) {
@@ -175,6 +187,7 @@ function SignupInner() {
           nationality,
           vessel_name: vessel.name,
           vessel_imo: vessel.imo,
+          port_id: portId,
         },
         emailRedirectTo: `${window.location.origin}/auth/confirm?next=${encodeURIComponent(next)}`,
       },
@@ -210,6 +223,7 @@ function SignupInner() {
         rank_slug: rank,
         nationality,
         ship_id: shipId,
+        port_id: portId,
         vessel_name: vessel.name,
         vessel_imo: vessel.imo,
         vessel_flag: vessel.flag,
@@ -362,6 +376,24 @@ function SignupInner() {
         {/* deferCreate: aqui ainda não há sessão, então o navio novo fica
             em texto e nasce depois do signUp. */}
         <VesselSearch value={vessel} onChange={setVessel} required deferCreate />
+
+        {/* <select> nativo, como na conta: são três portos, e no celular
+            o nativo vira a roda do sistema. */}
+        <div className="field">
+          <label htmlFor="port">
+            Home port
+            <Req />
+          </label>
+          <select id="port" value={portId} onChange={(e) => setPortId(e.target.value)}>
+            <option value="">{ports.length ? "Select your home port" : "Loading ports…"}</option>
+            {ports.map((p) => (
+              <option key={p.id} value={p.id}>
+                {p.name} [{p.country_code.toUpperCase()}]
+              </option>
+            ))}
+          </select>
+          <p className="finehint">Where we meet your vessel — it sets your delivery date.</p>
+        </div>
 
         <SearchSelect
           label="Rank"
