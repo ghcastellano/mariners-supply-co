@@ -75,6 +75,7 @@ export default function AccountPage() {
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
   const [saved, setSaved] = useState(false);
+  const [missing, setMissing] = useState<string[]>([]);
 
   useEffect(() => {
     let alive = true;
@@ -163,6 +164,24 @@ export default function AccountPage() {
     e.preventDefault();
     setErr(null);
     setSaved(false);
+    setMissing([]);
+
+    // O formulário é noValidate: a bolha nativa do navegador barrava o
+    // envio sem deixar recado nenhum na tela. No celular ela aparece
+    // fora do campo de visão e some sozinha — a pessoa apertava Save e
+    // nada acontecia. Aqui o recado fica na tela, e o campo que falta
+    // recebe o foco.
+    const blanks: { value: string; id: string; message: string }[] = [
+      { value: first.trim(), id: "first", message: "First name is required." },
+      { value: last.trim(), id: "last", message: "Last name is required." },
+    ];
+    const blank = blanks.find((f) => !f.value);
+    if (blank) {
+      setErr(blank.message);
+      document.getElementById(blank.id)?.focus();
+      return;
+    }
+
     setBusy(true);
 
     const res = await saveProfile({
@@ -184,6 +203,10 @@ export default function AccountPage() {
       return;
     }
     setSaved(true);
+    // Salvar cadastro parcial é permitido de propósito — quem ainda não
+    // sabe o navio precisa poder guardar o resto. O que o checkout vai
+    // cobrar depois vira aviso aqui, não trava.
+    setMissing(res.missing);
     if (phone) setSavedPhone(phone);
     // O cabeçalho e o checkout leem o perfil no servidor.
     router.refresh();
@@ -205,7 +228,8 @@ export default function AccountPage() {
         Signed in as <span className="mono">{email}</span>
       </p>
 
-      <form onSubmit={submit} className="stack">
+      {/* noValidate: a validação é nossa. Ver o comentário em submit(). */}
+      <form onSubmit={submit} className="stack" noValidate>
         <div className="field">
           <label htmlFor="first">First Name</label>
           <input
@@ -291,7 +315,9 @@ export default function AccountPage() {
         )}
         {saved && (
           <p className="note" role="status">
-            Your details are saved.
+            {missing.length === 0
+              ? "Your details are saved — checkout has everything it needs."
+              : `Saved. Checkout still needs your ${missing.join(", ")} before it can take payment.`}
           </p>
         )}
 

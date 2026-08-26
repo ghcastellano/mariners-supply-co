@@ -1349,6 +1349,12 @@ input:-webkit-autofill:focus {
 .factrow.missing dt { color: var(--danger); }
 .factrow.missing dd { color: var(--danger); font-size: 13px; font-weight: 500; }
 .factrow.missing dd a { color: var(--danger); font-weight: 700; }
+/* Recomendado não é bloqueio. Em vermelho igual ao obrigatório, "Rank is
+   recommended" lê como impedimento e a pessoa acha que não vai passar
+   daqui — quando o pagamento já estava liberado. */
+.factrow.missing.soft dt { color: var(--faint); }
+.factrow.missing.soft dd { color: var(--muted); }
+.factrow.missing.soft dd a { color: var(--amber); }
 .factship { display: flex; align-items: center; gap: 10px; }
 .factship .ph {
   position: relative; width: 52px; height: 40px; flex: none; border-radius: 8px;

@@ -36,7 +36,9 @@ export type ProfileInput = {
   vesselFlag: string | null;
 };
 
-export type SaveProfileResult = { ok: true; complete: boolean } | { ok: false; error: string };
+export type SaveProfileResult =
+  | { ok: true; complete: boolean; /** O que o checkout ainda vai cobrar, na ordem da tela. */ missing: string[] }
+  | { ok: false; error: string };
 
 const clean = (v: string | null | undefined, max: number) =>
   (v ?? "").trim().slice(0, max) || null;
@@ -85,7 +87,17 @@ export async function saveProfile(input: ProfileInput): Promise<SaveProfileResul
   // "Completo" é exatamente o que o checkout exige para liberar o
   // pagamento. O carimbo marca a PRIMEIRA vez que fechou — remarcar a cada
   // salvamento apagaria desde quando o cadastro vale.
-  const complete = Boolean(fullName && vesselName && portId && whatsapp);
+  //
+  // A lista do que falta sai daqui, e não da tela, porque é a MESMA regra
+  // que o checkout aplica: dois lugares com a mesma verdade escrita duas
+  // vezes viram duas verdades diferentes na primeira mudança.
+  const missing = [
+    fullName ? null : "name",
+    vesselName ? null : "vessel",
+    portId ? null : "home port",
+    whatsapp ? null : "telephone",
+  ].filter((v): v is string => Boolean(v));
+  const complete = missing.length === 0;
   const profileCompletedAt = complete
     ? (current?.profile_completed_at ?? new Date().toISOString())
     : null;
@@ -134,5 +146,5 @@ export async function saveProfile(input: ProfileInput): Promise<SaveProfileResul
   // mostrando o dado antigo (e barrando o pagamento) depois de corrigido.
   revalidatePath("/account");
   revalidatePath("/checkout");
-  return { ok: true, complete };
+  return { ok: true, complete, missing };
 }

@@ -159,7 +159,7 @@ function Fact({
   required?: boolean;
 }) {
   return (
-    <div className={`factrow${value ? "" : " missing"}`}>
+    <div className={`factrow${value ? "" : " missing"}${value || required ? "" : " soft"}`}>
       <dt>{label}</dt>
       <dd>{value || <Missing field={label} required={required} />}</dd>
     </div>
@@ -168,7 +168,9 @@ function Fact({
 
 /**
  * "Rank is required" seria mentira: o botão continua clicável sem ele.
- * O aviso muda de palavra, não de lugar nem de cor.
+ * Muda a palavra E a cor: quatro linhas vermelhas iguais fazem o
+ * cadastro parecer uma parede, e o que era recomendação vira bloqueio
+ * aos olhos de quem só quer pagar.
  */
 function Missing({ field, required = true }: { field: string; required?: boolean }) {
   return (
