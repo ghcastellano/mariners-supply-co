@@ -54,6 +54,13 @@ test("safeNext só aceita caminhos internos", () => {
   assert.equal(fmt.safeNext("https://evil.com"), "/shop");
   assert.equal(fmt.safeNext(null), "/shop");
   assert.equal(fmt.safeNext(undefined, "/"), "/");
+  // Vetores que a versao anterior deixava passar: barra invertida
+  // (o navegador le "/\\evil.com" como "//evil.com") e caracteres de
+  // controle que quebram a analise de URL.
+  assert.equal(fmt.safeNext("/\\evil.com"), "/shop");
+  assert.equal(fmt.safeNext("/\tevil"), "/shop");
+  assert.equal(fmt.safeNext("/\r\n//evil.com"), "/shop");
+  assert.equal(fmt.safeNext("/account?next=/orders"), "/account?next=/orders");
 });
 
 test("ETA ida-e-volta no fuso de Santos (UTC-3, sem DST)", () => {

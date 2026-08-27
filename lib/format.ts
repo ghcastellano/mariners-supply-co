@@ -20,8 +20,17 @@ export const shortShipName = (name: string) => name.trim().split(/\s+/).slice(-1
 export const PASSWORD_MIN = 8;
 
 /** Sanitiza o parâmetro ?next= — só caminhos internos. */
-export const safeNext = (v: string | null | undefined, fallback = "/shop") =>
-  v && v.startsWith("/") && !v.startsWith("//") ? v : fallback;
+export const safeNext = (v: string | null | undefined, fallback = "/shop") => {
+  // Redireciono pós-login só pode ser um caminho INTERNO. Barra dupla é
+  // URL protocol-relative (//evil.com → outro site), e barra invertida é
+  // a mesma coisa disfarçada: o navegador trata "/\evil.com" como
+  // "//evil.com". A versão anterior barrava a primeira e deixava a
+  // segunda passar. Recusa qualquer controle ou barra invertida no
+  // valor, e exige começo em "/" que não seja "//".
+  if (!v || !v.startsWith("/") || v.startsWith("//")) return fallback;
+  if (/[\\\t\r\n]/.test(v)) return fallback;
+  return v;
+};
 
 export const santosTime = (iso: string | Date) =>
   new Date(iso).toLocaleString("en-GB", {
