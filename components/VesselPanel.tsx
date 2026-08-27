@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { orderCloseAt, santosTime } from "@/lib/format";
+import { orderCloseAt, santosTime, usd } from "@/lib/format";
 
 /**
  * O navio da pessoa, com o que ela precisa saber antes de pedir.
@@ -45,10 +45,19 @@ function restante(ms: number): string {
   return `${Math.floor(horas / 24)}d ${horas % 24}h`;
 }
 
-export default function VesselPanel({ v }: { v: VesselFacts }) {
+export default function VesselPanel({ v, credit = 0 }: { v: VesselFacts; credit?: number }) {
   const fecha = orderCloseAt(v.eta, v.cutoffHours);
   const faltaMs = fecha.getTime() - Date.now();
   const aberto = faltaMs > 0;
+  /* O terceiro estado, que faltava: a escala ACABOU. Mesma régua da
+     rotação e do crédito de desvio no banco — o navio esteve e foi,
+     coalesce(ata, eta) + 48h. Sem este estado o painel mostrava a
+     escala morta como "Closed" para sempre: tripulante troca de casco a
+     cada contrato, e o perfil envelhecia junto com o navio. Havia até
+     um comentário na home dizendo que navio inativo some do join e a
+     tira vira convite — a RLS garante o CONTRÁRIO (o próprio navio é
+     sempre visível), então aquele ramo nunca rodava. */
+  const encerrada = new Date(v.ata ?? v.eta).getTime() + 48 * 3600e3 < Date.now();
   // Mesmo limiar do e-mail de última chamada: abaixo de 12h o bloco do
   // prazo esquenta. Um limiar só nos dois lugares — se o aviso chega às
   // 12h e o cartão só esquentasse às 6, os dois pareceriam desconexos.
@@ -68,8 +77,8 @@ export default function VesselPanel({ v }: { v: VesselFacts }) {
     <aside className={`vpanel${aberto ? "" : " fechado"}`} aria-label="Your vessel">
       <header>
         <span className="lb">Your vessel</span>
-        <span className={`dot${alongside ? " on" : ""}`} aria-hidden />
-        <span className="st">{alongside ? "Alongside" : "En route"}</span>
+        <span className={`dot${alongside && !encerrada ? " on" : ""}`} aria-hidden />
+        <span className="st">{encerrada ? "Sailed" : alongside ? "Alongside" : "En route"}</span>
       </header>
 
       <p className="nome">
@@ -109,20 +118,42 @@ export default function VesselPanel({ v }: { v: VesselFacts }) {
 
       {/* O bloco do prazo é o assunto do cartão: fundo próprio, número
           grande e barra. É o que decide se a pessoa compra hoje. */}
-      <div className={`corte${urgente ? " urgente" : ""}`}>
-        <span className="ct">Order cut-off</span>
-        <strong>{aberto ? restante(faltaMs) : "Closed"}</strong>
-        <span className="qd">
-          {aberto ? `closes ${santosTime(fecha)}` : `closed ${santosTime(fecha)}`}
-        </span>
-        <span className="barra" aria-hidden>
-          <i style={{ width: `${usado}%` }} />
-        </span>
-      </div>
+      {encerrada ? (
+        /* A escala acabou: o assunto do cartão vira a PRÓXIMA. Se há
+           crédito, ele é o número grande — é o motivo de voltar, e a
+           promessa do desvio diz que ele espera pela próxima escala.
+           Sem crédito, o convite direto. */
+        <div className="corte">
+          <span className="ct">This call is over</span>
+          <strong>{credit > 0 ? usd(credit) : "Sailed"}</strong>
+          <span className="qd">
+            {credit > 0
+              ? "in credit, waiting for your next call — it never expires"
+              : "pick your current vessel to keep ordering"}
+          </span>
+        </div>
+      ) : (
+        <div className={`corte${urgente ? " urgente" : ""}`}>
+          <span className="ct">Order cut-off</span>
+          <strong>{aberto ? restante(faltaMs) : "Closed"}</strong>
+          <span className="qd">
+            {aberto ? `closes ${santosTime(fecha)}` : `closed ${santosTime(fecha)}`}
+          </span>
+          <span className="barra" aria-hidden>
+            <i style={{ width: `${usado}%` }} />
+          </span>
+        </div>
+      )}
 
-      <Link href={aberto ? "/shop" : "/ports"} className="btn acao" prefetch={false}>
-        {aberto ? "Shop for this call" : "See the next call"}
-      </Link>
+      {encerrada ? (
+        <Link href="/account" className="btn acao" prefetch={false}>
+          I&apos;m on a new vessel
+        </Link>
+      ) : (
+        <Link href={aberto ? "/shop" : "/ports"} className="btn acao" prefetch={false}>
+          {aberto ? "Shop for this call" : "See the next call"}
+        </Link>
+      )}
     </aside>
   );
 }

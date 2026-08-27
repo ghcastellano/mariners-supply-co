@@ -101,7 +101,7 @@ const loadStorefront = unstable_cache(
 type Captain = { code: string; rate: number } | null;
 
 type Crew =
-  | { kind: "vessel"; v: VesselFacts; cap: Captain }
+  | { kind: "vessel"; v: VesselFacts; cap: Captain; credit: number }
   | { kind: "invite"; cap: Captain }
   | null;
 
@@ -146,18 +146,32 @@ async function loadCrew(): Promise<Crew> {
       const { data: rate } = await supabase.rpc("referral_rate", { p_user: user.id });
       cap = { code: row.referral_code, rate: Number(rate ?? 5) };
     }
-    // ship_id sem ships significa navio inativo — já zarpou. A tira vira
-    // convite para escolher a próxima escala, que é mais útil que um
-    // nome de escala vencida.
-    //
-    // Perfil SEM navio nenhum não chega mais aqui: o middleware barra
-    // cadastro incompleto antes da home. Então esta tira quer dizer uma
-    // coisa só, e o texto pode ser específico.
+    // ship_id sem ships é raro de verdade: a RLS devolve o próprio navio
+    // MESMO inativo (um comentário antigo aqui dizia o contrário, e por
+    // isso o caso "já zarpou" nunca caía neste ramo — o painel mostrava
+    // a escala morta como "Closed" para sempre). Quem trata a escala
+    // encerrada agora é o VesselPanel, com estado próprio; este ramo
+    // fica só para navio de fato apagado do banco.
     if (!row?.ship_id || !row.ships) return { kind: "invite", cap };
     const s = row.ships;
+
+    // O crédito só é buscado quando vai aparecer: com a escala
+    // encerrada, ele é o número grande do cartão — o motivo de voltar.
+    // Mesma régua do banco (rotação e crédito de desvio): o navio
+    // esteve e foi, coalesce(ata, eta) + 48h.
+    let credit = 0;
+    if (new Date(s.ata ?? s.eta).getTime() + 48 * 3600e3 < Date.now()) {
+      const { data: creditos } = await supabase
+        .from("credits")
+        .select("amount_usd")
+        .eq("user_id", user.id);
+      credit = (creditos ?? []).reduce((t, c) => t + Number(c.amount_usd), 0);
+    }
+
     return {
       kind: "vessel",
       cap,
+      credit,
       v: {
         name: s.name, berth: s.berth, eta: s.eta, ata: s.ata,
         imo: s.imo, voyage: s.voyage, flag: s.flag,
@@ -242,7 +256,7 @@ export default async function Home() {
           largura, e o CSS não precisa mais remendar posição. */}
       {!crew && <HeroSteps />}
 
-      {crew?.kind === "vessel" && <VesselPanel v={crew.v} />}
+      {crew?.kind === "vessel" && <VesselPanel v={crew.v} credit={crew.credit} />}
 
       {/* Logo abaixo do painel da escala, que é o bloco que a pessoa
           logada de fato olha ao entrar. Antes do catálogo de propósito:

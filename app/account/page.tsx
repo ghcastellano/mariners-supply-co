@@ -52,7 +52,7 @@ type ProfileRow = {
   vessel_imo: string | null;
   vessel_flag: string | null;
   role: string | null;
-  ships: { name: string; imo: string | null; flag: string | null } | null;
+  ships: { name: string; imo: string | null; flag: string | null; eta: string | null; ata: string | null } | null;
 };
 
 export default function AccountPage() {
@@ -61,6 +61,7 @@ export default function AccountPage() {
   const [loading, setLoading] = useState(true);
   const [email, setEmail] = useState("");
   const [isAdmin, setIsAdmin] = useState(false);
+  const [callOver, setCallOver] = useState(false);
 
   const [first, setFirst] = useState("");
   const [last, setLast] = useState("");
@@ -100,7 +101,7 @@ export default function AccountPage() {
           .select(
             `full_name, rank_slug, nationality, whatsapp, port_id, ship_id,
              vessel_name, vessel_imo, vessel_flag, role,
-             ships!profiles_ship_id_fkey(name, imo, flag)`
+             ships!profiles_ship_id_fkey(name, imo, flag, eta, ata)`
           )
           .eq("id", user.id)
           .maybeSingle(),
@@ -136,6 +137,9 @@ export default function AccountPage() {
       // os do line-up, e casco cadastrado pela tripulação nasce inativo.
       // Nome, IMO e bandeira desnormalizados no perfil sustentam a tela.
       const shipName = (p?.ships?.name ?? p?.vessel_name ?? "").trim();
+      // Mesma régua da rotação no banco: o navio esteve e foi.
+      const fim = p?.ships?.ata ?? p?.ships?.eta;
+      setCallOver(Boolean(fim && new Date(fim).getTime() + 48 * 3600e3 < Date.now()));
       setVessel(
         shipName
           ? {
@@ -292,7 +296,23 @@ export default function AccountPage() {
           countryHint={nationality}
         />
 
-        <VesselSearch value={vessel} onChange={setVessel} />
+        {/* A escala do navio salvo acabou: é AQUI que a pessoa conserta, e
+            o campo sozinho não conta que precisa. Aviso, não bloqueio —
+            quem embarca de novo no mesmo casco daqui a um mês não deve
+            brigar com o formulário. Some assim que outro navio é
+            escolhido, porque o convite já foi aceito. */}
+        {callOver && vessel?.id && (
+          <p className="finehint" style={{ color: "var(--amber-hi)" }}>
+            {vessel.name}&apos;s call at Santos is over — pick the vessel you&apos;re on now.
+          </p>
+        )}
+        <VesselSearch
+          value={vessel}
+          onChange={(v) => {
+            setVessel(v);
+            setCallOver(false);
+          }}
+        />
 
         {/* <select> nativo: são três portos, e no celular o nativo vira a
             roda do sistema — mais rápida que qualquer combobox nosso. */}
