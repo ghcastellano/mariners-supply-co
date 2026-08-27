@@ -7,7 +7,9 @@
     "build": "next build",
     "start": "next start",
     "test": "node --experimental-strip-types --test",
-    "test:responsivo": "node --experimental-strip-types --test tests/responsivo.test.mjs"
+    "test:responsivo": "node --experimental-strip-types --test tests/responsivo.test.mjs",
+    "fotos:colher": "node scripts/colher-fotos-off.mjs",
+    "fotos": "node scripts/normalizar-fotos.mjs"
   },
   "dependencies": {
     "@supabase/ssr": "^0.7.0",
