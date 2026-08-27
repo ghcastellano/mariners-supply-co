@@ -10,11 +10,25 @@
 import { SUPABASE_URL } from "./env.ts";
 
 export const PRODUCT_BUCKET = "product-images";
-/* 48 e não 24: com ~80 produtos, 24 escondia dois terços da loja atrás
-   de um botão discreto — e "não está mostrando todos os produtos" foi
-   exatamente a leitura de quem olhou. 48 mantém a keyset barata e põe a
-   maioria do catálogo na primeira dobra de rolagem. */
-export const PAGE_SIZE = 48;
+/* Voltou para 24, e o motivo de ter ido a 48 já não existe.
+   
+   Ele subiu porque com 24 a leitura era "não está mostrando todos os
+   produtos" — mas a causa disso não era o número, era não haver NENHUM
+   sinal de quantos produtos a loja tem. Esse sinal existe agora: a barra
+   da listagem diz "80 products", e a paginação por keyset diz "Next 24".
+   Quem vê o total sabe que há mais; quem não vê, supõe que acabou.
+
+   E os 48 custavam caro no celular. Medido no /shop: 213 KB de página,
+   dos quais 105 KB são o payload do React embutido em <script> — cada
+   card paga duas vezes, no HTML e na serialização. Num Pixel 7 com CPU
+   4x mais lenta em 4G, o clique da home até a listagem assentar levava
+   4,4 s, e 1,8 s disso era só analisar e hidratar antes de a tela reagir
+   a qualquer toque. Por card são 0,9 KB: o card não está gordo, são 48
+   deles. Metade dos itens é metade dos dois lados.
+
+   24 numa grade de 4 colunas são 6 linhas; em 2 colunas no celular, 12.
+   É mais do que cabe numa dobra em qualquer um dos dois. */
+export const PAGE_SIZE = 24;
 
 export type Category = {
   id: string;
