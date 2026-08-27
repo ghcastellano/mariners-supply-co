@@ -15,7 +15,7 @@
 
 import { santosTime, usd } from "./format.ts";
 
-export type EmailKind = "deposit_paid" | "at_gangway" | "delivered";
+export type EmailKind = "deposit_paid" | "at_gangway" | "delivered" | "credited";
 
 export type OrderEmailItem = {
   name: string;
@@ -259,6 +259,74 @@ export function buildOrderEmail(d: OrderEmailData, siteUrl: string): BuiltEmail 
         `Open order: ${href}`,
         ``,
         `Mariners Supply — by Mariner's Bar, Porto de Santos.`,
+      ]
+        .filter(Boolean)
+        .join("\n"),
+    };
+  }
+
+  if (d.kind === "credited") {
+    /* O e-mail que faltava — e o mais importante dos quatro.
+       
+       Os outros tres avisam quando algo deu CERTO. Este avisa quando
+       deu errado: o navio pulou a escala e a caixa nao foi entregue.
+       Era o unico momento em que o sistema ficava calado, e calar-se
+       justamente na ma noticia e o que ensina uma tripulacao a nao
+       confiar numa loja.
+       
+       Ambar, e nao vermelho: nada foi perdido. O tom e o de quem avisa,
+       nao o de quem se desculpa — desculpa longa faz parecer que houve
+       falha nossa, e desvio de navio nao e falha de ninguem. */
+    const rows =
+      money("Deposit you had paid", usd(n(d.deposit_usd))) +
+      money("Held as credit", usd(n(d.deposit_usd)), true, C.amber);
+
+    return {
+      subject: `${ship || "Your vessel"} skipped the call — your ${usd(
+        n(d.deposit_usd)
+      )} is credit now`,
+      html: shell({
+        kicker: "CREDIT HELD",
+        title: `No paperwork, ${who}.`,
+        lead: ship
+          ? `<b style="color:${C.ink}">${esc(
+              ship
+            )}</b> didn't make the call at Santos, so order #${esc(
+              d.code
+            )} never reached the gangway. Exactly as promised at checkout, your deposit is now credit — the full amount, on your account.`
+          : `Your vessel didn't make the call at Santos, so order #${esc(
+              d.code
+            )} never reached the gangway. Exactly as promised at checkout, your deposit is now credit — the full amount, on your account.`,
+        accent: C.amber,
+        body:
+          table +
+          totals(rows) +
+          `<p style="margin:16px 0 0;padding:12px 14px;background:#06121F;border:1px solid ${C.line};border-radius:12px;color:${C.faint};font-size:13px;line-height:1.55">
+             The credit never expires and works on any future call at Santos. It comes off your next deposit on its own — nothing to claim, nothing to send us.
+           </p>`,
+        ctaLabel: "Order for your next call",
+        ctaHref: `${site}/shop`,
+        siteUrl: site,
+      }),
+      text: [
+        `${ship || "Your vessel"} skipped the call — order #${d.code}`,
+        ``,
+        `No paperwork, ${who}.`,
+        ``,
+        ship
+          ? `${ship} didn't make the call at Santos, so order #${d.code} never reached the gangway.`
+          : `Your vessel didn't make the call at Santos, so order #${d.code} never reached the gangway.`,
+        `Exactly as promised at checkout, your deposit is now credit — the full amount.`,
+        ``,
+        textItems,
+        ``,
+        `  Deposit you had paid   ${usd(n(d.deposit_usd))}`,
+        `  Held as credit         ${usd(n(d.deposit_usd))}`,
+        ``,
+        `The credit never expires and works on any future call at Santos.`,
+        `It comes off your next deposit on its own — nothing to claim.`,
+        ``,
+        `${site}/shop`,
       ]
         .filter(Boolean)
         .join("\n"),

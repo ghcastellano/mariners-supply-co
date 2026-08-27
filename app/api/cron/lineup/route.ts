@@ -6,6 +6,7 @@ import {
   parseLineup,
   tableRows,
 } from "../../../../lib/lineup.ts";
+import { sendOrderEmail } from "../../../../lib/mailer.ts";
 
 export const maxDuration = 60;
 
@@ -132,6 +133,26 @@ export async function GET(request: Request) {
      decide sobre o dado mais fresco que existe. */
   const { data: giro } = await supabase.rpc("rotate_ship_calls", { p_secret: secret });
 
+  /* A outra consequencia de uma escala ir embora: o que fazer com quem
+     ja tinha pago.
+
+     Roda DEPOIS da rotacao e com a mesma regra de tempo, porque as duas
+     sao o mesmo fato — o navio esteve e foi. Deposito pago vira credito
+     integral, o pedido vai para `credited`, e sai o e-mail. E a promessa
+     que o checkout ja fazia por escrito e que ninguem cumpria. */
+  const { data: desvio } = await supabase.rpc("credit_skipped_calls", { p_secret: secret });
+  const creditados =
+    (desvio as { creditados?: { id: string; code: string }[] } | null)?.creditados ?? [];
+
+  /* Um e-mail por pedido creditado. O claim no banco garante que cada um
+     sai UMA vez, entao repetir a chamada de hora em hora e inofensivo —
+     se o SMTP falhar agora, a proxima passada tenta de novo. */
+  let avisados = 0;
+  for (const c of creditados) {
+    const r = await sendOrderEmail(supabase, c.id, "credited", secret);
+    if (r.sent) avisados++;
+  }
+
   return Response.json({
     ok: true,
     source: usedSource,
@@ -140,5 +161,6 @@ export async function GET(request: Request) {
     ...summary,
     changes,
     rotation: giro ?? null,
+    deviation: { credited: creditados.length, emailed: avisados, detail: desvio ?? null },
   });
 }

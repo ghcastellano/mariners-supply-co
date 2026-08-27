@@ -117,3 +117,53 @@ test("primeiro nome curto demais vira 'sailor'", () => {
   const c = buildOrderEmail({ ...base, kind: "delivered" }, "https://x.com");
   assert.ok(c.text.includes("Fair winds, Rafael."));
 });
+
+/* O e-mail do desvio — o quarto tipo, e o único que dá má notícia.
+ *
+ * O que se testa aqui é o que o dinheiro exige. Se o valor sair errado
+ * neste e-mail, a pessoa acredita num crédito que não tem (ou deixa de
+ * usar o que tem), e nenhuma das duas dá para consertar com pedido de
+ * desculpas depois. */
+test("desvio: credita o depósito INTEIRO, não só o dinheiro que entrou", () => {
+  // 44.55 de depósito, dos quais 20.00 vieram de crédito já acumulado.
+  // Devolver 24.55 seria confiscar o crédito gasto por tecnicalidade.
+  const mail = buildOrderEmail(
+    { ...base, kind: "credited", credit_applied_usd: "20.00" },
+    "https://marinerssupplyco.com"
+  );
+  assert.ok(mail.subject.includes("44.55"), "o valor no assunto é o depósito inteiro");
+  assert.ok(mail.text.includes("44.55"));
+  assert.ok(!mail.subject.includes("24.55"), "não desconta o crédito que a pessoa já tinha gasto");
+});
+
+test("desvio: nomeia o navio e o pedido, que é o que a pessoa procura", () => {
+  const mail = buildOrderEmail({ ...base, kind: "credited" }, "https://marinerssupplyco.com");
+  assert.ok(mail.subject.includes("MSC LORENA"));
+  assert.ok(mail.html.includes("MS7K2Q"));
+  assert.ok(mail.text.includes("MS7K2Q"));
+});
+
+test("desvio: navio hostil não vira HTML nem no assunto nem no corpo", () => {
+  const mail = buildOrderEmail(
+    { ...base, kind: "credited", ship_name: 'X" onerror="boom' },
+    "https://marinerssupplyco.com"
+  );
+  assert.ok(!mail.html.includes('onerror="boom'));
+  assert.ok(mail.html.includes("&quot; onerror=&quot;boom"));
+});
+
+test("desvio: sem navio no cadastro, o texto ainda fecha", () => {
+  const mail = buildOrderEmail(
+    { ...base, kind: "credited", ship_name: null },
+    "https://marinerssupplyco.com"
+  );
+  assert.ok(mail.subject.startsWith("Your vessel"));
+  assert.ok(mail.text.includes("Your vessel"));
+  assert.ok(!mail.html.includes("null"), "nada de 'null' vazando para o corpo");
+});
+
+test("desvio: manda para a loja, não para a página do pedido morto", () => {
+  const mail = buildOrderEmail({ ...base, kind: "credited" }, "https://marinerssupplyco.com");
+  assert.ok(mail.html.includes("https://marinerssupplyco.com/shop"));
+  assert.ok(mail.html.includes("Order for your next call"));
+});
