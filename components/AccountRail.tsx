@@ -1,16 +1,30 @@
 import Link from "next/link";
 import { IconCap, IconHeart, IconPackage, IconUser } from "./Icon";
 import CategoryIcon from "./CategoryIcon";
+import { CONTACT_EMAIL } from "@/lib/env";
+import { signOut } from "@/app/account/actions";
 
 /**
- * Navegação das telas de conta, à direita a partir de 1024px.
+ * Navegação das telas de conta. UMA lista, nas quatro telas e em todas
+ * as larguras.
  *
- * Não é componente inventado: é o mesmo `.catgrid` de `.catcard` que já
- * vivia dentro de app/account/page.tsx, recortado para servir as três
- * telas em vez de ser repetido em cada uma. Server Component, sem JS.
+ * Eram cinco menus diferentes para quatro telas, e dava para ver: em
+ * /account o menu trazia My Orders, My Wish List, Captain rewards,
+ * Staff panel, Sign Out e o contato; em /orders e /wishlist o Staff
+ * panel e o Sign Out sumiam; em /captain não havia menu nenhum; e a
+ * /wishlist ainda tinha um <select> com uma sexta combinação.
  *
- * Os dois blocos precisam vir juntos daqui porque `position: sticky`
- * não gruda dois irmãos: o Sign Out entra como filho, não como vizinho.
+ * A causa não foi descuido de quem escreveu cada página: era ESTE
+ * componente exigir que o chamador lembrasse de passar isAdmin e de
+ * enfiar o Sign Out como children. Três dos quatro esqueceram, e o
+ * default silencioso (isAdmin = false) escondeu — um admin deixava de
+ * ser admin ao clicar em "My Orders".
+ *
+ * Agora nada é opcional: isAdmin é obrigatório, então o compilador cobra
+ * de quem esquecer, e o Sign Out mora aqui dentro, então não há como uma
+ * tela ficar sem ele.
+ *
+ * Server Component, sem JavaScript no cliente.
  */
 
 type Item = { href: string; icon: React.ReactNode; nome: string; nota: string };
@@ -27,32 +41,47 @@ const ITENS: Item[] = [
 
 export default function AccountRail({
   current,
-  isAdmin = false,
-  children,
+  isAdmin,
 }: {
-  /** Rota da tela atual — sai da lista e marca aria-current nas outras. */
+  /** Rota da tela atual — recebe aria-current e deixa de ser link. */
   current: string;
-  isAdmin?: boolean;
-  /** O .stack do Sign Out, que só a tela de conta tem. */
-  children?: React.ReactNode;
+  /** Obrigatório de propósito: com default, três telas esqueceram. */
+  isAdmin: boolean;
 }) {
-  const itens = ITENS.filter((i) => i.href !== current);
-
   return (
     <nav className="acct-rail" aria-label="My account">
       <div className="catgrid">
-        {itens.map((i) => (
-          <Link key={i.href} href={i.href} className="catcard">
-            {i.icon}
-            <span className="tx">
-              <span className="nm">{i.nome}</span>
-              <span className="ct">{i.nota}</span>
-            </span>
-            <span className="chev" aria-hidden>
-              ›
-            </span>
-          </Link>
-        ))}
+        {ITENS.map((i) => {
+          /* A tela atual FICA na lista, marcada, em vez de sumir dela.
+             Sumindo, o menu mudava de tamanho a cada clique e a pessoa
+             perdia a referência de onde está — e o estilo de
+             aria-current que já existia no CSS nunca chegava a valer,
+             porque nada o recebia. <span> em vez de <Link>: link para a
+             página onde já se está é afordância mentirosa. */
+          if (i.href === current) {
+            return (
+              <span key={i.href} className="catcard" aria-current="page">
+                {i.icon}
+                <span className="tx">
+                  <span className="nm">{i.nome}</span>
+                  <span className="ct">{i.nota}</span>
+                </span>
+              </span>
+            );
+          }
+          return (
+            <Link key={i.href} href={i.href} className="catcard">
+              {i.icon}
+              <span className="tx">
+                <span className="nm">{i.nome}</span>
+                <span className="ct">{i.nota}</span>
+              </span>
+              <span className="chev" aria-hidden>
+                ›
+              </span>
+            </Link>
+          );
+        })}
         {isAdmin && (
           <Link href="/admin" className="catcard">
             {/* o traço de "tools" já existe no CategoryIcon — reúso, não desenho novo */}
@@ -67,7 +96,25 @@ export default function AccountRail({
           </Link>
         )}
       </div>
-      {children}
+
+      {/* Sign Out e contato vivem AQUI, não como children de quem chama:
+          era esse o motivo de /orders, /wishlist e /captain terminarem
+          sem saída de sessão. Como position:sticky não gruda dois
+          irmãos, o bloco segue sendo filho do <nav>. */}
+      <div className="stack">
+        <form action={signOut}>
+          <button className="btn danger" type="submit">
+            Sign Out
+          </button>
+        </form>
+        <p className="finehint">
+          Questions about an order? Write{" "}
+          <a className="alink" href={`mailto:${CONTACT_EMAIL}`}>
+            {CONTACT_EMAIL}
+          </a>{" "}
+          or find us at Mariner&apos;s Bar.
+        </p>
+      </div>
     </nav>
   );
 }

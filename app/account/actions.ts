@@ -11,18 +11,6 @@ export async function signOut() {
   redirect("/");
 }
 
-/**
- * Destinos do select "My Account". Lista fechada de propósito: o valor
- * chega de um <select> do cliente, e redirect() com caminho arbitrário é
- * um open redirect de graça.
- */
-const SECTIONS = ["/account", "/orders", "/wishlist", "/captain"];
-
-export async function goToAccountSection(formData: FormData) {
-  const to = String(formData.get("to") ?? "");
-  redirect(SECTIONS.includes(to) ? to : "/account");
-}
-
 export type ProfileInput = {
   firstName: string;
   lastName: string;

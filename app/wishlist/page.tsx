@@ -1,25 +1,17 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import AccountRail from "@/components/AccountRail";
+import { ehAdmin } from "@/lib/admin";
 import { IconHeart } from "@/components/Icon";
 import { redirect } from "next/navigation";
 import Breadcrumb from "@/components/Breadcrumb";
 import ProductCardView from "@/components/ProductCard";
 import { createClient } from "@/lib/supabase/server";
 import type { ProductCard } from "@/lib/catalog";
-import { goToAccountSection } from "@/app/account/actions";
 
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = { title: "My Wish List" };
-
-/** Seções que o select "My Account" alcança — os mesmos destinos do menu 👤. */
-const SECTIONS: { href: string; label: string }[] = [
-  { href: "/account", label: "My Account" },
-  { href: "/orders", label: "My Orders" },
-  { href: "/wishlist", label: "My Wish List" },
-  { href: "/captain", label: "Captain rewards" },
-];
 
 /** Só o que o card da grade consome — o embed não traz nada além disso. */
 type Row = {
@@ -73,6 +65,8 @@ export default async function WishlistPage() {
     .eq("products.active", true)
     .order("created_at", { ascending: false });
 
+  const isAdmin = await ehAdmin(supabase, user.id);
+
   const items: ProductCard[] = ((data ?? []) as unknown as Row[]).map((r) => {
     const { brands, ...p } = r.products;
     return {
@@ -90,30 +84,9 @@ export default async function WishlistPage() {
 
       <h1 className="secttl left">My Wish List</h1>
 
-      <AccountRail current="/wishlist" />
+      <AccountRail current="/wishlist" isAdmin={isAdmin} />
 
       <div className="acct-main">
-
-      {/* Navegação entre as seções da conta, como o select do Sunny.
-          [otim] O deles navega no próprio change, o que arranca a página
-          de baixo de quem percorre as opções pela seta do teclado. Aqui o
-          destino só vale no "Go" — mesmo gesto, mais um toque, e a tela
-          continua sendo Server Component (nenhum JavaScript vai junto). */}
-      <form action={goToAccountSection} className="listbar">
-        <label className="subhead" htmlFor="acctnav" style={{ padding: 0 }}>
-          My Account
-        </label>
-        <select id="acctnav" name="to" className="sortsel" defaultValue="/wishlist">
-          {SECTIONS.map((s) => (
-            <option key={s.href} value={s.href}>
-              {s.label}
-            </option>
-          ))}
-        </select>
-        <button className="btn small ghost" type="submit">
-          Go
-        </button>
-      </form>
 
       {items.length === 0 ? (
         /* Estado vazio com voz, não um aviso: aviso azul é para regra de

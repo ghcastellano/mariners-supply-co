@@ -1,5 +1,6 @@
 import Link from "next/link";
 import AccountRail from "@/components/AccountRail";
+import { ehAdmin } from "@/lib/admin";
 import { IconPackage } from "@/components/Icon";
 import { redirect } from "next/navigation";
 import Breadcrumb from "@/components/Breadcrumb";
@@ -36,6 +37,7 @@ export default async function OrdersPage() {
     .order("created_at", { ascending: false });
 
   const orders = (data ?? []) as unknown as Row[];
+  const isAdmin = await ehAdmin(supabase, user.id);
 
   return (
     <main className="pg-acct">
@@ -47,7 +49,7 @@ export default async function OrdersPage() {
         <p>Every kit rides with its ship&apos;s ETA — track each one here.</p>
       </div>
 
-      <AccountRail current="/orders" />
+      <AccountRail current="/orders" isAdmin={isAdmin} />
 
       <div className="acct-main">
       {orders.length === 0 ? (

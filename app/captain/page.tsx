@@ -2,6 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import QRCode from "qrcode";
 import Breadcrumb from "@/components/Breadcrumb";
+import AccountRail from "@/components/AccountRail";
 import ShareCode from "@/components/ShareCode";
 import { createClient } from "@/lib/supabase/server";
 import { SITE_URL } from "@/lib/env";
@@ -24,11 +25,15 @@ export default async function CaptainPage() {
 
   const { data: profile } = await supabase
     .from("profiles")
-    .select("referral_code, full_name")
+    .select("referral_code, full_name, role")
     .eq("id", user.id)
     .maybeSingle();
 
   const code = profile?.referral_code ?? "—";
+  /* Sai da consulta que já era feita: o menu precisa saber se mostra o
+     Staff panel, e abrir uma segunda ida ao banco para uma coluna que
+     já estava ao alcance seria desperdício numa página server-rendered. */
+  const isAdmin = profile?.role === "admin";
 
   const [{ data: countData }, { data: rateData }, { data: credits }] = await Promise.all([
     supabase.rpc("referral_order_count", { p_user: user.id }),
@@ -48,8 +53,14 @@ export default async function CaptainPage() {
   });
 
   return (
-    <main>
+    <main className="pg-acct">
       <Breadcrumb trail={[{ label: "Captain rewards" }]} />
+
+      {/* Esta tela era a única da área de conta sem menu nenhum: quem
+          entrava em Captain rewards só saía pelo cabeçalho. */}
+      <AccountRail current="/captain" isAdmin={isAdmin} />
+
+      <div className="acct-main">
 
       <div className="crew-hero">
         <div className="cap">🧢</div>
@@ -109,6 +120,8 @@ export default async function CaptainPage() {
           See my orders →
         </Link>
       </p>
+
+      </div>
     </main>
   );
 }

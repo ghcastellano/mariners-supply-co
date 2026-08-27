@@ -2197,8 +2197,22 @@ svg.ic { flex: none; color: var(--amber); }
 .hamb-label,
 .sunfoot-brand,
 .facets,
-.acct-rail,
 .wide-only      { display: none; }
+
+/* ---- rail da conta: o MESMO menu no celular e no desktop ----------
+   Ele era display:none abaixo de 1024 e a navegação da conta no celular
+   ficava por conta de um <select> que só a /wishlist tinha — /account,
+   /orders e /captain simplesmente não tinham como sair dali sem voltar
+   ao cabeçalho. Uma lista de quatro cartões cabe num celular sem
+   esforço; o que mudava com a largura era a POSIÇÃO (coluna fixa e
+   grudada, no desktop), nunca a existência. */
+.acct-rail { display: block; }
+.acct-rail .catgrid { grid-template-columns: 1fr; gap: 6px; padding: 0; }
+.acct-rail .catcard { border-radius: 10px; padding: 12px 13px; min-height: 44px; }
+.acct-rail .catcard .chev { margin-left: auto; }
+.acct-rail .catcard[aria-current="page"] { border-color: rgba(255,182,72,.55); background: var(--card-hi); }
+.acct-rail .catcard[aria-current="page"] .nm { color: var(--amber-hi); }
+.acct-rail > .stack { padding: 16px 0 0; margin-top: 14px; border-top: 1px solid var(--line); }
 .sumcur, .odate { display: none; }   /* ligados só a partir de 1024 */
 
 /* ============================================================
@@ -2922,13 +2936,10 @@ svg.ic { flex: none; color: var(--amber); }
   .pg-acct > .acct-rail { grid-column: 1; grid-row: 3; position: sticky; top: calc(var(--head-h) + 16px); }
   .pg-acct > .acct-main { grid-column: 2; grid-row: 3; min-width: 0; }
 
-  .acct-rail { display: block; }
-  .acct-rail .catgrid { grid-template-columns: 1fr; gap: 6px; padding: 0; }
-  .acct-rail .catcard { border-radius: 10px; padding: 12px 13px; min-height: 44px; }
+  /* No desktop a seta some: o rail é coluna fixa ao lado do conteúdo, e
+     chevron ali aponta para uma direção que não existe. No celular ela
+     fica, porque lá o cartão é uma linha de lista de verdade. */
   .acct-rail .catcard .chev { display: none; }
-  .acct-rail .catcard[aria-current="page"] { border-color: rgba(255,182,72,.55); background: var(--card-hi); }
-  .acct-rail .catcard[aria-current="page"] .nm { color: var(--amber-hi); }
-  .acct-rail > .stack { padding: 16px 0 0; margin-top: 14px; border-top: 1px solid var(--line); }
 
   .pg-acct .acct-main > .finehint { padding: 0 0 12px; margin: 0; }
   .pg-acct .acct-main form.stack  { padding: 0; max-width: 560px; }

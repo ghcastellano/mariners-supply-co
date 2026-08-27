@@ -8,11 +8,11 @@ import PhoneInput from "@/components/PhoneInput";
 import SearchSelect, { type SelectOption } from "@/components/SearchSelect";
 import VesselSearch, { type VesselValue } from "@/components/VesselSearch";
 import { COUNTRIES } from "@/lib/countries";
-import { CONTACT_EMAIL } from "@/lib/env";
+
 import { createClient } from "@/lib/supabase/client";
 import AccountRail from "@/components/AccountRail";
 import { missingProfileFields } from "@/lib/profile";
-import { saveProfile, signOut } from "./actions";
+import { saveProfile } from "./actions";
 
 /**
  * "My Account Information" na estrutura do Sunny: um formulário só, com
@@ -342,27 +342,12 @@ export default function AccountPage() {
       </form>
       </div>
 
-      {/* O .catgrid inline e o Sign Out viraram AccountRail: as três
-          telas de conta usam o mesmo, e position:sticky não gruda dois
-          irmãos — por isso o Sign Out entra como filho.
-          O style inline de paddingTop saiu junto: inline vence media
-          query e quebraria o rail no desktop. */}
-      <AccountRail current="/account" isAdmin={isAdmin}>
-      <div className="stack">
-        <form action={signOut}>
-          <button className="btn danger" type="submit">
-            Sign Out
-          </button>
-        </form>
-        <p className="finehint">
-          Questions about an order? Write{" "}
-          <a className="alink" href={`mailto:${CONTACT_EMAIL}`}>
-            {CONTACT_EMAIL}
-          </a>{" "}
-          or find us at Mariner&apos;s Bar.
-        </p>
-      </div>
-      </AccountRail>
+      {/* O Sign Out e o contato saíram daqui para dentro do AccountRail.
+          Passados como children, eles existiam só nesta tela — e por
+          isso /orders, /wishlist e /captain terminavam sem saída de
+          sessão. Menu igual nas quatro telas exige que o menu seja dono
+          das próprias partes. */}
+      <AccountRail current="/account" isAdmin={isAdmin} />
 
     </main>
   );
