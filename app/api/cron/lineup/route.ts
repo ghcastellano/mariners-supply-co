@@ -6,7 +6,9 @@ import {
   parseLineup,
   tableRows,
 } from "../../../../lib/lineup.ts";
-import { sendOrderEmail } from "../../../../lib/mailer.ts";
+import { sendMail, sendOrderEmail } from "../../../../lib/mailer.ts";
+import { buildLastCallEmail, type LastCallData } from "../../../../lib/emails.ts";
+import { SITE_URL } from "../../../../lib/env.ts";
 
 export const maxDuration = 60;
 
@@ -153,6 +155,29 @@ export async function GET(request: Request) {
     if (r.sent) avisados++;
   }
 
+  /* A última chamada: quem tem o navio no perfil e a janela fechando
+     nas próximas 12 horas recebe UM aviso — o claim no banco garante um
+     por pessoa por escala, então rodar isto de hora em hora é seguro.
+     Se o SMTP falhar, a reivindicação é devolvida e a próxima passada
+     tenta de novo, como no livro-razão dos e-mails de pedido. */
+  const { data: chamada } = await supabase.rpc("claim_call_reminders", { p_secret: secret });
+  const lembretes =
+    ((chamada as { reminders?: (LastCallData & { user_id: string; ship_id: string; call_date: string })[] } | null)
+      ?.reminders) ?? [];
+  let lembrados = 0;
+  for (const l of lembretes) {
+    const built = buildLastCallEmail(l, SITE_URL);
+    const r = await sendMail({ to: l.to_email, subject: built.subject, html: built.html, text: built.text });
+    if (r.sent) lembrados++;
+    else
+      await supabase.rpc("release_call_reminder", {
+        p_user: l.user_id,
+        p_ship: l.ship_id,
+        p_call_date: l.call_date,
+        p_secret: secret,
+      });
+  }
+
   return Response.json({
     ok: true,
     source: usedSource,
@@ -162,5 +187,6 @@ export async function GET(request: Request) {
     changes,
     rotation: giro ?? null,
     deviation: { credited: creditados.length, emailed: avisados, detail: desvio ?? null },
+    lastCall: { claimed: lembretes.length, emailed: lembrados },
   });
 }

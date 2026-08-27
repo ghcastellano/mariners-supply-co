@@ -157,6 +157,80 @@ function shell(opts: {
 </table>`;
 }
 
+/**
+ * A última chamada: a janela do navio da pessoa fecha em horas.
+ *
+ * Não é e-mail de pedido — não existe pedido ainda; é exatamente por
+ * isso que ele existe. O corte fechava em silêncio e quem estava
+ * montando a caixa descobria no empurrão do checkout. Nas 12 horas
+ * antes do corte está a compra do que FALTOU, não do que se planejou.
+ *
+ * Um por pessoa por escala, garantido pelo livro-razão call_reminders —
+ * este builder é puro e não sabe disso; quem garante é o claim no banco.
+ *
+ * A lista de desejos entra no texto quando existe: é o único "carrinho"
+ * que o servidor enxerga de verdade (o carrinho mesmo vive no
+ * localStorage do navegador), e "suas N coisas guardadas" é mais
+ * concreto que qualquer frase de urgência.
+ */
+export type LastCallData = {
+  to_email: string;
+  to_name?: string | null;
+  ship: string;
+  berth?: string | null;
+  eta: string;
+  closes_at: string;
+  wish_count?: number | null;
+};
+
+export function buildLastCallEmail(d: LastCallData, siteUrl: string): BuiltEmail {
+  const who = (d.to_name ?? "sailor").split(/\s+/)[0] || "sailor";
+  const site = siteUrl.replace(/\/$/, "");
+  const fecha = santosTime(d.closes_at);
+  const chega = santosTime(d.eta);
+  const wishes = Number(d.wish_count ?? 0);
+
+  const lead =
+    `The order window for <b style="color:${C.ink}">${esc(d.ship)}</b> closes at ` +
+    `<b style="color:${C.ink}">${esc(fecha)}</b> — after that we can\u2019t buy in time for the gangway.` +
+    (wishes > 0
+      ? ` Your wish list has <b style="color:${C.ink}">${wishes} item${wishes === 1 ? "" : "s"}</b> waiting to become an order.`
+      : "");
+
+  return {
+    subject: `Last call for ${d.ship} — ordering closes ${fecha}`,
+    html: shell({
+      kicker: "ORDER WINDOW CLOSING",
+      title: `Last call, ${who}.`,
+      lead,
+      accent: C.amber,
+      body: `<p style="margin:0;padding:12px 14px;background:#06121F;border:1px solid ${C.line};border-radius:12px;color:${C.faint};font-size:13px;line-height:1.55">
+          ${esc(d.ship)}${d.berth ? ` · berth ${esc(d.berth)}` : ""} · alongside ${esc(chega)}.<br>
+          30% deposit now, the rest at the gangway — and if the ship skips the call, the deposit becomes full credit.
+        </p>`,
+      ctaLabel: wishes > 0 ? "Turn my wish list into an order" : "Order before the cut-off",
+      ctaHref: wishes > 0 ? `${site}/wishlist` : `${site}/shop`,
+      siteUrl: site,
+    }),
+    text: [
+      `Last call for ${d.ship} — ordering closes ${fecha}`,
+      ``,
+      `Last call, ${who}.`,
+      ``,
+      `The order window for ${d.ship} closes at ${fecha}.`,
+      `After that we can't buy in time for the gangway.`,
+      wishes > 0 ? `Your wish list has ${wishes} item${wishes === 1 ? "" : "s"} waiting to become an order.` : "",
+      ``,
+      `${d.ship}${d.berth ? ` - berth ${d.berth}` : ""} - alongside ${chega}.`,
+      `30% deposit now, the rest at the gangway.`,
+      ``,
+      wishes > 0 ? `${site}/wishlist` : `${site}/shop`,
+    ]
+      .filter(Boolean)
+      .join("\n"),
+  };
+}
+
 /** Monta assunto, HTML e texto puro de um dos três e-mails do fluxo. */
 export function buildOrderEmail(d: OrderEmailData, siteUrl: string): BuiltEmail {
   const site = siteUrl.replace(/\/+$/, "");

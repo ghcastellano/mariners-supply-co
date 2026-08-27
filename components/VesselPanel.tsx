@@ -49,6 +49,10 @@ export default function VesselPanel({ v }: { v: VesselFacts }) {
   const fecha = orderCloseAt(v.eta, v.cutoffHours);
   const faltaMs = fecha.getTime() - Date.now();
   const aberto = faltaMs > 0;
+  // Mesmo limiar do e-mail de última chamada: abaixo de 12h o bloco do
+  // prazo esquenta. Um limiar só nos dois lugares — se o aviso chega às
+  // 12h e o cartão só esquentasse às 6, os dois pareceriam desconexos.
+  const urgente = aberto && faltaMs <= 12 * 3600e3;
   const alongside = Boolean(v.ata) || new Date(v.eta).getTime() <= Date.now();
 
   // A barra mede a janela inteira de pedidos, do momento em que o navio
@@ -105,7 +109,7 @@ export default function VesselPanel({ v }: { v: VesselFacts }) {
 
       {/* O bloco do prazo é o assunto do cartão: fundo próprio, número
           grande e barra. É o que decide se a pessoa compra hoje. */}
-      <div className="corte">
+      <div className={`corte${urgente ? " urgente" : ""}`}>
         <span className="ct">Order cut-off</span>
         <strong>{aberto ? restante(faltaMs) : "Closed"}</strong>
         <span className="qd">

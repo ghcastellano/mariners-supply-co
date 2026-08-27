@@ -2081,6 +2081,14 @@ input:-webkit-autofill:focus {
   color: var(--amber); font-variant-numeric: tabular-nums; letter-spacing: -.02em;
 }
 .vpanel.fechado .corte strong { color: var(--faint); }
+/* Últimas 12h da janela — o mesmo limiar do e-mail de última chamada.
+   O calor é o fio e o fundo, não um vermelho de erro: nada quebrou,
+   o relógio é que está baixo. Âmbar já é a cor de "atenção" da casa. */
+.vpanel .corte.urgente {
+  border-color: rgba(255,182,72,.55);
+  background: linear-gradient(0deg, rgba(255,182,72,.07), rgba(255,182,72,.07)), var(--night);
+}
+.vpanel .corte.urgente .ct { color: var(--amber-hi); }
 .vpanel .corte .qd { font-size: 11.5px; color: var(--muted); }
 .vpanel .corte .barra {
   height: 3px; border-radius: 2px; background: var(--line-hi);

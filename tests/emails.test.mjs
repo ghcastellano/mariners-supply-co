@@ -167,3 +167,50 @@ test("desvio: manda para a loja, não para a página do pedido morto", () => {
   assert.ok(mail.html.includes("https://marinerssupplyco.com/shop"));
   assert.ok(mail.html.includes("Order for your next call"));
 });
+
+/* A última chamada — o quinto e-mail, e o único que nasce sem pedido.
+ * O claim no banco garante um por pessoa por escala; aqui se testa o
+ * que o texto promete. */
+const chamada = {
+  to_email: "cook@example.com",
+  to_name: "Rafael Souza",
+  ship: "MAERSK LANCO",
+  berth: "35",
+  eta: "2026-08-30T15:00:00.000Z",
+  closes_at: "2026-08-27T15:00:00.000Z",
+  wish_count: 4,
+};
+
+const { buildLastCallEmail } = await import("../lib/emails.ts");
+
+test("última chamada: assunto carrega navio e hora do corte", () => {
+  const mail = buildLastCallEmail(chamada, "https://marinerssupplyco.com");
+  assert.ok(mail.subject.includes("MAERSK LANCO"));
+  assert.ok(/closes/i.test(mail.subject));
+});
+
+test("última chamada: com wishlist, o botão leva para ELA", () => {
+  const mail = buildLastCallEmail(chamada, "https://marinerssupplyco.com");
+  assert.ok(mail.html.includes("https://marinerssupplyco.com/wishlist"));
+  assert.ok(mail.html.includes("4 item"));
+});
+
+test("última chamada: sem wishlist, o botão leva para a loja", () => {
+  const mail = buildLastCallEmail({ ...chamada, wish_count: 0 }, "https://marinerssupplyco.com");
+  assert.ok(mail.html.includes("https://marinerssupplyco.com/shop"));
+  assert.ok(!mail.html.includes("/wishlist"));
+});
+
+test("última chamada: nome de navio hostil não vira HTML", () => {
+  const mail = buildLastCallEmail(
+    { ...chamada, ship: 'X" onerror="boom' },
+    "https://marinerssupplyco.com"
+  );
+  assert.ok(!mail.html.includes('onerror="boom'));
+});
+
+test("última chamada: um item usa o singular", () => {
+  const mail = buildLastCallEmail({ ...chamada, wish_count: 1 }, "https://x.com");
+  assert.ok(mail.html.includes("1 item</b>"));
+  assert.ok(!mail.html.includes("1 items"));
+});
