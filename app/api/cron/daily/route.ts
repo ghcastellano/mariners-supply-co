@@ -43,11 +43,34 @@ export async function GET(request: Request) {
     itens: { name: string; qty: number }[];
     escalas: { ship: string; berth: string | null; eta: string; window: "open" | "closed" }[];
     novidades_expiradas: string[];
+    /** Quantas escalas ACEITAM pedido agora. Zero = loja parada. */
+    janelas_abertas: number;
+    proxima_janela: string | null;
   };
   const r = data as Resumo;
   const d = (v: number) => `$${Number(v).toFixed(2)}`;
 
+  /* O alarme vem ANTES de tudo, e só quando existe.
+     
+     A lista de escalas dizia "janela fechada" linha a linha, cada uma
+     certa, e o conjunto ficava mudo sobre o fato que importa: se
+     nenhuma aceita pedido, a loja está parada. Foi o que aconteceu em
+     produção — quatro navios ativos, todos vencidos, e o e-mail das 6h
+     descrevia isso sem nomear. Número que só aparece somando linhas na
+     cabeça é número que ninguém soma de manhã. */
+  const alarme =
+    r.janelas_abertas === 0
+      ? [
+          "*** NO OPEN ORDER WINDOW — the store cannot take a single order right now. ***",
+          r.proxima_janela
+            ? `    Next call that would accept one: ${r.proxima_janela}.`
+            : "    No upcoming call has an open window either. Check the line-up sync.",
+          "",
+        ]
+      : [];
+
   const texto = [
+    ...alarme,
     `ORDERS · last 24h: ${r.totais.pedidos} · subtotal ${d(r.totais.subtotal)} · deposits ${d(r.totais.depositos)}`,
     ...r.pedidos.map((o) =>
       `  #${o.code}  ${o.at}  ${o.vessel ?? "—"}${o.berth ? ` · berth ${o.berth}` : ""}  ${d(o.subtotal)}  [${o.status}]`
@@ -56,7 +79,7 @@ export async function GET(request: Request) {
     r.itens.length ? "BUY LIST (top items):" : "BUY LIST: nothing sold.",
     ...r.itens.map((i) => `  ${String(i.qty).padStart(3)}x ${i.name}`),
     "",
-    `CALLS · next 48h: ${r.escalas.length}`,
+    `CALLS · next 48h: ${r.escalas.length} · open windows right now: ${r.janelas_abertas}`,
     ...r.escalas.map((s) =>
       `  ${s.eta}  ${s.ship}${s.berth ? ` · berth ${s.berth}` : ""}  [window ${s.window}]`
     ),
@@ -67,10 +90,22 @@ export async function GET(request: Request) {
 
   const enviado = await sendMail({
     to: CONTACT_EMAIL,
-    subject: `⚓ Daily — ${r.totais.pedidos} order${r.totais.pedidos === 1 ? "" : "s"} · ${d(r.totais.depositos)} in deposits · ${r.escalas.length} call${r.escalas.length === 1 ? "" : "s"} ahead`,
+    /* Assunto carrega o alarme porque é o que se lê na tela de bloqueio:
+       um digest que parece rotina não é aberto às 6h da manhã. */
+    subject:
+      (r.janelas_abertas === 0 ? "🔴 NO OPEN WINDOW — " : "⚓ Daily — ") +
+      `${r.totais.pedidos} order${r.totais.pedidos === 1 ? "" : "s"} · ` +
+      `${d(r.totais.depositos)} in deposits · ` +
+      `${r.escalas.length} call${r.escalas.length === 1 ? "" : "s"} ahead`,
     text: texto,
     html: "",
   });
 
-  return Response.json({ ok: true, sent: enviado.sent, totais: r.totais, escalas: r.escalas.length });
+  return Response.json({
+    ok: true,
+    sent: enviado.sent,
+    totais: r.totais,
+    escalas: r.escalas.length,
+    janelas_abertas: r.janelas_abertas,
+  });
 }

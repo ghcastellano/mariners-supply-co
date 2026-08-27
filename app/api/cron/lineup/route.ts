@@ -121,6 +121,17 @@ export async function GET(request: Request) {
     } else summary.unchanged++;
   }
 
+  /* Trazer as escalas era metade do trabalho: alguém tem de decidir
+     quais estão EM CENA. Sem esta chamada o campo `active` só sabia
+     envelhecer, e a loja chegou a ficar com os quatro navios ativos
+     todos vencidos — zero escalas compráveis, e nada avisando.
+
+     Roda aqui, e não no resumo das 6h, porque escala vira ao longo do
+     dia: um corte que fecha às 14h tem de sumir da cena às 14h, não na
+     manhã seguinte. O sync acima já atualizou as ETAs, então a rotação
+     decide sobre o dado mais fresco que existe. */
+  const { data: giro } = await supabase.rpc("rotate_ship_calls", { p_secret: secret });
+
   return Response.json({
     ok: true,
     source: usedSource,
@@ -128,5 +139,6 @@ export async function GET(request: Request) {
     inWindow: upcoming.length,
     ...summary,
     changes,
+    rotation: giro ?? null,
   });
 }
