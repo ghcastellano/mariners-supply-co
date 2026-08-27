@@ -2,6 +2,7 @@
 
 import { useEffect, useId, useRef, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
+import { imoChecksumOk, normalizeImo } from "@/lib/imo";
 
 export type VesselValue = {
   /** null enquanto o navio ainda não existe no banco (ver createVessel). */
@@ -76,6 +77,50 @@ export default function VesselSearch({
   const [newImo, setNewImo] = useState("");
   const [busy, setBusy] = useState(false);
 
+  // Acrescentar IMO a um navio que o line-up trouxe sem ele. Quem sabe o
+  // número é quem está a bordo — está pintado no casco. A escrita é
+  // estreita de propósito (a RPC só preenche nulo, nunca sobrescreve),
+  // então oferecer isso a qualquer tripulante é seguro.
+  const [imoOpen, setImoOpen] = useState(false);
+  const [imoDraft, setImoDraft] = useState("");
+  const [imoBusy, setImoBusy] = useState(false);
+
+  async function claimImo() {
+    if (!value?.id) return;
+    const imo = normalizeImo(imoDraft);
+    if (!imo || !imoChecksumOk(imo)) {
+      setErr("That IMO fails its check digit — copy the 7 digits from the hull.");
+      return;
+    }
+    setErr(null);
+    setImoBusy(true);
+    try {
+      const { data, error } = await createClient().rpc("claim_vessel_imo", {
+        p_ship: value.id,
+        p_imo: imo,
+      });
+      const r = data as { ok: boolean; reason?: string; ship?: string; imo?: string } | null;
+      if (error || !r) {
+        setErr("Couldn't save the IMO — try again.");
+      } else if (r.ok) {
+        onChange({ ...value, imo: r.imo ?? imo });
+        setImoOpen(false);
+        setImoDraft("");
+      } else if (r.reason === "imo_taken") {
+        // O cenário que o IMO existe para pegar: o número pertence a
+        // OUTRO casco — provavelmente a pessoa escolheu o navio errado.
+        setErr(`IMO ${imo} belongs to ${r.ship} — if that's your vessel, pick it from the list instead.`);
+      } else if (r.reason === "already_set") {
+        onChange({ ...value, imo: r.imo ?? null });
+        setImoOpen(false);
+      } else {
+        setErr("That IMO fails its check digit — copy the 7 digits from the hull.");
+      }
+    } finally {
+      setImoBusy(false);
+    }
+  }
+
   const short = q.trim().length < MIN_QUERY;
 
   useEffect(() => {
@@ -134,11 +179,18 @@ export default function VesselSearch({
 
   async function confirmCreate() {
     const name = newName.trim();
-    const imo = newImo.replace(/\D/g, "") || null;
+    const imo = normalizeImo(newImo);
     // Mesma regra da RPC: erro de servidor por nome curto é erro que dá
     // para evitar antes de gastar a viagem.
     if (name.length < 3) {
       setErr("Vessel name needs at least 3 characters.");
+      return;
+    }
+    // O IMO tem dígito verificador; um algarismo trocado quase sempre
+    // quebra a soma. Barrar aqui, com o campo na tela, é o que separa
+    // "corrige e segue" de descobrir o número errado na prancha.
+    if (imo && !imoChecksumOk(imo)) {
+      setErr("That IMO fails its check digit — copy the 7 digits from the hull, or leave it blank.");
       return;
     }
     const draft: VesselValue = { id: null, name: name.toUpperCase(), imo, flag: null };
@@ -314,10 +366,67 @@ export default function VesselSearch({
       {err && <p className="finehint" style={{ color: "var(--danger)" }}>{err}</p>}
       {value && !err && (
         <p className="finehint">
-          {value.id
-            ? `${value.imo ? `IMO ${value.imo}` : "No IMO on file"}${value.flag ? ` · ${value.flag}` : ""}`
-            : "New vessel — we'll add it to the fleet when your account is created."}
+          {value.id ? (
+            value.imo ? (
+              `IMO ${value.imo}${value.flag ? ` · ${value.flag}` : ""}`
+            ) : imoOpen ? null : (
+              <>
+                No IMO on file{value.flag ? ` · ${value.flag}` : ""} ·{" "}
+                {/* Botão-texto, não campo aberto: a maioria não sabe o
+                    número de cor, e um campo vazio permanente viraria
+                    cobrança. Quem sabe, clica. */}
+                <button
+                  type="button"
+                  className="alink"
+                  style={{ background: "none", border: 0, padding: 0, cursor: "pointer", font: "inherit" }}
+                  onClick={() => {
+                    setImoDraft("");
+                    setImoOpen(true);
+                  }}
+                >
+                  add it
+                </button>
+              </>
+            )
+          ) : (
+            "New vessel — we'll add it to the fleet when your account is created."
+          )}
         </p>
+      )}
+      {value?.id && !value.imo && imoOpen && !err && (
+        <div className="vs-create" style={{ display: "flex", gap: 8, alignItems: "center" }}>
+          <input
+            className="field"
+            style={{ maxWidth: 160 }}
+            inputMode="numeric"
+            maxLength={7}
+            placeholder="IMO — 7 digits"
+            value={imoDraft}
+            onChange={(e) => setImoDraft(e.target.value.replace(/\D/g, ""))}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                e.preventDefault();
+                claimImo();
+              }
+            }}
+            aria-label="IMO number"
+            autoFocus
+          />
+          <button type="button" className="btn small" onClick={claimImo} disabled={imoBusy || imoDraft.length < 7}>
+            {imoBusy ? "Saving…" : "Save"}
+          </button>
+          <button
+            type="button"
+            className="btn ghost small"
+            onClick={() => {
+              setImoOpen(false);
+              setImoDraft("");
+            }}
+            disabled={imoBusy}
+          >
+            Cancel
+          </button>
+        </div>
       )}
     </div>
   );
