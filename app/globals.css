@@ -1583,7 +1583,12 @@ input:-webkit-autofill:focus {
 .pbadge.promo  { background: var(--amber);  color: var(--amber-ink); }
 .pbadge.new    { background: var(--teal);   color: #04231E; }
 .pbadge.outlet { background: #C9D6E4;       color: #0B1B30; }
-.poff { background: var(--danger); color: #FFFFFF; letter-spacing: .04em; }
+/* O vermelho do --danger (#FF5964) dava 3.06:1 com o texto branco — o
+   Lighthouse reprovou o badge "-26%" por contraste. --danger continua
+   certo para ERRO sobre fundo escuro; aqui o badge fica sobre a foto
+   clara do produto e precisa de vermelho mais fechado. #C1121F dá
+   6.22:1, folgado no AA, e ainda lê como vermelho de promoção. */
+.poff { background: #C1121F; color: #FFFFFF; letter-spacing: .04em; }
 
 /* Esgotado cobre o painel inteiro. Era uma tarja preta no rodapé da
    foto, que some contra embalagem escura e ainda esconde o produto na
@@ -2387,10 +2392,13 @@ svg.ic { flex: none; color: var(--amber); }
   .catgroup { display: flex; align-items: stretch; }
   .catgroup > .catlink { padding-right: 5px; }
   .cchev {
-    display: flex; align-items: center;
-    padding: 0 11px 0 2px; min-height: 44px;
+    /* Alvo de toque: tinha 44px de altura mas so ~20px de largura, e o
+       Lighthouse reprovou (minimo 24x24). Centraliza a seta num alvo de
+       36px de largura — passa com folga sem alargar demais o catbar. */
+    display: flex; align-items: center; justify-content: center;
+    min-width: 36px; padding: 0 6px; min-height: 44px;
     background: none; border: 0; border-bottom: 2px solid transparent;
-    color: var(--faint); font-size: 10px; cursor: pointer;
+    color: var(--faint); font-size: 11px; cursor: pointer;
   }
   .catgroup:hover > .catlink, .catgroup:hover > .cchev,
   .catgroup.open > .catlink, .catgroup.open > .cchev {
