@@ -609,7 +609,13 @@ input:-webkit-autofill:focus {
    auto-fill: o número de colunas sai da largura disponível em vez de
    uma tabela de breakpoints que envelhece a cada monitor novo. */
 @media (min-width: 960px) {
-  .shell:has(.admin-wide) { max-width: var(--page-w, 1180px); }
+  /* O painel tem teto PROPRIO, e nao o da loja. --page-w para em 1520px
+     porque vitrine com linha longa demais cansa; retaguarda tem o
+     problema oposto — quanto mais pedido cabe na tela de uma vez, menos
+     rolagem entre atender um navio e o seguinte. min() em vez de valor
+     fixo: em 1920 preenche, em ultrawide para antes de virar campo de
+     futebol. */
+  .shell:has(.admin-wide) { max-width: min(96vw, 1800px); }
 
   /* Os KPIs são quatro números curtos: lado a lado sempre, e o mínimo de
      200px garante que o rótulo caiba numa linha só. */
@@ -2216,9 +2222,17 @@ svg.ic { flex: none; color: var(--amber); }
      engolia: main.stack caía na coluna de 500px e o admin virava uma
      tela de celular pendurada num monitor — fila de 200 navios num
      corredor de meio palmo. O :has(.admin-wide) já alarga a casca; o
-     main tem de acompanhar. 1180px e não none: linha de revisão de 1500px
-     separa o nome do botão além do alcance do olho. */
-  .shell:has(.admin-wide) > main { max-width: 1180px; }
+     main tem de acompanhar — literalmente, pelo mesmo token.
+
+     Estava travado em 1180px por medo de linha de revisão comprida,
+     separando o nome do botão além do alcance do olho. O medo era certo
+     e o remédio, errado: .cart-list já é auto-fill de minmax(340px, 1fr),
+     então largura sobrando NUNCA vira linha de 1500px — vira mais uma
+     coluna de 340. O cap só fazia a casca crescer até 1520px e o miolo
+     parar em 1180, deixando 39% de um monitor de 1920 vazio com um
+     degrau visível entre os dois. Num painel de operação, largura extra
+     é mais pedido na tela ao mesmo tempo. */
+  .shell:has(.admin-wide) > main { max-width: 100%; }
   /* as seis superfícies desenhadas saem do teto */
   .shell > main.pg-form,
   .shell > main.pg-home,
