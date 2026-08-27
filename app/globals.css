@@ -490,6 +490,13 @@ input:-webkit-autofill:focus {
   background: rgba(46,230,200,.07); border: 1px solid rgba(46,230,200,.3); color: #B8F5E9;
 }
 .finehint { font-size: 11.5px; color: var(--faint); line-height: 1.55; margin: 2px 2px 0; }
+/* Letra miúda logo abaixo de um botão precisa de ar. Eram 2px, contra
+   10px que o próprio botão tem acima: o texto encostava no amarelo e
+   lia como legenda presa à ação, não como observação sobre ela. Alvo de
+   toque também sofre — o dedo que mira o fim do botão pega o parágrafo.
+   Escopo no irmão adjacente porque .finehint também aparece na conta,
+   onde não segue botão nenhum e o espaçamento atual está certo. */
+.btn + .finehint { margin-top: var(--sp-3); }
 .linkline { text-align: center; font-size: 13px; color: var(--muted); padding: 4px 0; }
 .linkline a, .alink { color: var(--amber-hi); font-weight: 600; }
 .alink:hover, .linkline a:hover { text-decoration: underline; }
@@ -1793,6 +1800,14 @@ input:-webkit-autofill:focus {
 /* "Pay now" nunca quebra em "Pay / now": rótulo partido ao lado de um
    número grande lê como defeito — e é a linha mais olhada do resumo. */
 .sumrow.grand span { color: var(--ink); font-size: 15.5px; font-weight: 700; white-space: nowrap; }
+/* E o VALOR também não. O nowrap acima protegia só o rótulo, então quem
+   quebrava era o número: "USD" numa linha e "12.00" na outra, com o selo
+   "charged in USD" disputando a mesma linha. Valor partido é pior que
+   rótulo partido — é o número que a pessoa confere antes de pagar. O
+   min-width: 0 no selo deixa ELE ceder espaço primeiro, que é o papel
+   de um adorno. */
+.sumrow.grand b { white-space: nowrap; }
+.sumrow.grand .sumcur { min-width: 0; }
 .sumrow.grand b { font-size: 20px; font-weight: 700; }
 .sumcard .btn { margin: 10px 0 0; }
 .sumcard .btn.navy {
