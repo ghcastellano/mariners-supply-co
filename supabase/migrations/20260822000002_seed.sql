@@ -4,7 +4,8 @@
 
 -- Staff: emails aqui viram admin automaticamente no signup
 insert into public.admin_emails (email) values
-  ('ghcastellano@gmail.com')
+  ('ghcastellano@gmail.com'),
+  ('anscastellano@gmail.com')
 on conflict do nothing;
 
 -- Se a conta já existir quando o seed rodar, promove também
