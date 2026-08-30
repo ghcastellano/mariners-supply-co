@@ -1,5 +1,5 @@
 -- ============================================================
--- Mariners Supply — seed inicial (staff, line-up e catálogo)
+-- Vessel Supplier — seed inicial (staff, line-up e catálogo)
 -- ============================================================
 
 -- Staff: emails aqui viram admin automaticamente no signup

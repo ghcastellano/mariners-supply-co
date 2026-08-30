@@ -122,7 +122,7 @@ function shell(opts: {
     <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:520px;font-family:${FONT}">
 
       <tr><td style="padding:0 4px 16px">
-        <span style="color:${C.amber};font-size:11px;letter-spacing:2.4px;font-weight:700">⚓ MARINERS SUPPLY</span>
+        <span style="color:${C.amber};font-size:11px;letter-spacing:2.4px;font-weight:700">⚓ VESSEL SUPPLIER</span>
         <span style="color:${C.faint};font-size:11px;letter-spacing:1.4px"> · SANTOS</span>
       </td></tr>
 
@@ -145,7 +145,7 @@ function shell(opts: {
       </td></tr>
 
       <tr><td style="padding:18px 6px 0;color:${C.faint};font-size:12px;line-height:1.6">
-        Mariners Supply — by Mariner's Bar, Porto de Santos.<br>
+        Vessel Supplier — Porto de Santos.<br>
         Questions? Just reply to this e-mail.
         <a href="${opts.siteUrl}" style="color:${C.faint}">${esc(
           opts.siteUrl.replace(/^https?:\/\//, "")
@@ -293,7 +293,7 @@ export function buildOrderEmail(d: OrderEmailData, siteUrl: string): BuiltEmail 
         ``,
         `Track your order: ${href}`,
         ``,
-        `Mariners Supply — by Mariner's Bar, Porto de Santos.`,
+        `Vessel Supplier — Porto de Santos.`,
       ]
         .filter(Boolean)
         .join("\n"),
@@ -332,7 +332,7 @@ export function buildOrderEmail(d: OrderEmailData, siteUrl: string): BuiltEmail 
         `Show this code at the gangway: #${d.code}`,
         `Open order: ${href}`,
         ``,
-        `Mariners Supply — by Mariner's Bar, Porto de Santos.`,
+        `Vessel Supplier — Porto de Santos.`,
       ]
         .filter(Boolean)
         .join("\n"),
@@ -450,7 +450,7 @@ export function buildOrderEmail(d: OrderEmailData, siteUrl: string): BuiltEmail 
       `Order: ${href}`,
       `Captains earn: share your code with the next crew and get credit on their first order.`,
       ``,
-      `Mariners Supply — by Mariner's Bar, Porto de Santos.`,
+      `Vessel Supplier — Porto de Santos.`,
     ]
       .filter(Boolean)
       .join("\n"),

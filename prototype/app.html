@@ -649,7 +649,7 @@ function renderQR(){
   $('qrBox').innerHTML = cells;
 }
 function shareCode(){
-  const msg = 'Order from Mariners Supply with my code MS-ANDRES-39 — delivered at the gangway in Santos. app.marinerssupply.com/r/MS-ANDRES-39';
+  const msg = 'Order from Vessel Supplier with my code MS-ANDRES-39 — delivered at the gangway in Santos. app.marinerssupply.com/r/MS-ANDRES-39';
   if (navigator.clipboard) navigator.clipboard.writeText(msg).catch(()=>{});
   const btn = document.querySelector('.share');
   btn.textContent = 'Copied! ✓';

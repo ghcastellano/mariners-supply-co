@@ -8,32 +8,32 @@ import SiteChrome from "@/components/SiteChrome";
 import SiteFooter from "@/components/SiteFooter";
 
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? "https://mariners-supply.vercel.app"),
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? "https://vesselsupplier.vercel.app"),
   title: {
-    default: "Mariners Supply",
-    template: "%s · Mariners Supply",
+    default: "Vessel Supplier",
+    template: "%s · Vessel Supplier",
   },
   description:
-    "Pre-order supplies before docking — delivered at the gangway. Porto de Santos, by Mariner's Bar.",
+    "Pre-order supplies before docking — delivered at the gangway. Porto de Santos.",
   openGraph: {
-    siteName: "Mariners Supply",
-    title: "Mariners Supply — gangway delivery at Porto de Santos",
+    siteName: "Vessel Supplier",
+    title: "Vessel Supplier — gangway delivery at Porto de Santos",
     description:
       "Your order rides with your vessel's ETA. Pre-order before docking, pay a 30% deposit, receive at the gangway.",
     type: "website",
     // O cartão que o WhatsApp mostra. O link do Captain viaja colado em
     // grupo de tripulação, e link sem imagem lê como link suspeito —
     // justamente no canal que é o programa inteiro de indicação.
-    images: [{ url: "/og.png", width: 1200, height: 630, alt: "Mariners Supply — delivered to your gangway at Porto de Santos" }],
+    images: [{ url: "/og.png", width: 1200, height: 630, alt: "Vessel Supplier — delivered to your gangway at Porto de Santos" }],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Mariners Supply — gangway delivery at Porto de Santos",
+    title: "Vessel Supplier — gangway delivery at Porto de Santos",
     images: ["/og.png"],
   },
   appleWebApp: {
     capable: true,
-    title: "Mariners",
+    title: "Vessel",
     statusBarStyle: "black-translucent",
   },
 };

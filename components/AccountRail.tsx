@@ -112,7 +112,7 @@ export default function AccountRail({
           <a className="alink" href={`mailto:${CONTACT_EMAIL}`}>
             {CONTACT_EMAIL}
           </a>{" "}
-          or find us at Mariner&apos;s Bar.
+          or find us at our counter in Santos.
         </p>
       </div>
     </nav>

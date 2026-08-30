@@ -7,7 +7,7 @@ import { DEPOSIT_PCT } from "@/lib/money";
 export const metadata: Metadata = {
   title: "Terms & Conditions",
   description:
-    "How an order with Mariners Supply works — deposit, balance at the gangway, cancellation rights and credit for a diverted call.",
+    "How an order with Vessel Supplier works — deposit, balance at the gangway, cancellation rights and credit for a diverted call.",
 };
 
 /** Data da última revisão do texto. Termo sem data é termo que ninguém
@@ -49,15 +49,15 @@ export default function TermsPage() {
 
       <h1 className="pagettl">Terms &amp; Conditions</h1>
       <p className="pagelead">
-        Last updated {LAST_UPDATED}. These terms govern orders placed on
-        marinerssupplyco.com.
+        Last updated {LAST_UPDATED}. These terms govern orders placed with
+        Vessel Supplier.
       </p>
 
       <section className="pdp-block">
         <h3>1 · Who you are contracting with</h3>
         <p className="pdp-text">
-          Mariners Supply is the online store operated by Mariner&apos;s Bar, at
-          Porto de Santos, São Paulo, Brazil. Orders are handled by the same
+          Vessel Supplier is the online store at Porto de Santos, São Paulo,
+          Brazil. Orders are handled by the same
           people who run the counter — there is no marketplace between us and
           you.
         </p>
@@ -77,7 +77,7 @@ export default function TermsPage() {
           </li>
           <li>
             On-board delivery is for crew serving on a vessel calling at a port
-            we list. Counter pickup at Mariner&apos;s Bar is open to anyone who
+            we list. Counter pickup in Santos is open to anyone who
             can collect in person.
           </li>
           <li>
@@ -304,7 +304,7 @@ export default function TermsPage() {
           <a className="alink" href={`mailto:${CONTACT_EMAIL}`}>
             {CONTACT_EMAIL}
           </a>{" "}
-          · Mariner&apos;s Bar, Porto de Santos, São Paulo, Brazil. See also the{" "}
+          · Vessel Supplier, Porto de Santos, São Paulo, Brazil. See also the{" "}
           <Link className="alink" href="/faq">
             FAQ
           </Link>

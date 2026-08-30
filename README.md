@@ -1,6 +1,6 @@
-# Mariners Supply — app MVP
+# Vessel Supplier — app MVP
 
-**🟢 No ar: <https://mariners-supply.vercel.app>**
+**🟢 No ar: <https://vesselsupplier.vercel.app>**
 
 Loja de conveniência com **entrega na prancha de embarque** para tripulações em escala
 no **Porto de Santos**. Este repositório agora contém a **aplicação completa do MVP**
@@ -67,7 +67,7 @@ Sem as variáveis o app builda e abre normalmente, mostrando um aviso de
   com as 3 migrações de `supabase/migrations/` aplicadas (schema+RLS, seed, hardening).
   As chaves públicas estão commitadas em `.env.production` (a publishable key roda no
   navegador por design; a segurança vem da RLS).
-- **Vercel:** projeto `mariners-supply` linkado a este repositório — **push no `master`
+- **Vercel:** projeto `vesselsupplier` linkado a este repositório — **push no `master`
   faz deploy de produção automático**; branches geram preview.
 - Dashboard do banco: <https://supabase.com/dashboard/project/cuaocjxofaizefzcxlyc>
 
@@ -75,9 +75,9 @@ Sem as variáveis o app builda e abre normalmente, mostrando um aviso de
 
 Em [Authentication → URL Configuration](https://supabase.com/dashboard/project/cuaocjxofaizefzcxlyc/auth/url-configuration):
 
-- **Site URL:** `https://mariners-supply.vercel.app`
+- **Site URL:** `https://vesselsupplier.vercel.app`
 - **Redirect URLs:**
-  - `https://mariners-supply.vercel.app/**`
+  - `https://vesselsupplier.vercel.app/**`
   - `https://*-gustavos-projects-287c5dd3.vercel.app/**` (previews)
   - `http://localhost:3000/**`
 

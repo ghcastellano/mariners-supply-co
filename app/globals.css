@@ -1,5 +1,5 @@
 /* ============================================================
-   MARINERS SUPPLY — "Hull & Chart" design system (app real)
+   VESSEL SUPPLIER — "Hull & Chart" design system (app real)
    Portado do protótipo (prototype/app.html) com as correções
    de viewport mobile:
 
@@ -1154,7 +1154,7 @@ input:-webkit-autofill:focus {
 /* Logotipo compacto, em duas linhas.
    A conta que obriga: para o centro ser simétrico, cada lateral
    precisa caber os três ícones (120px). Isso deixa 118px para a
-   marca, e "Mariners Supply" numa linha ocupa 136px — não cabe sem
+   marca, e "Vessel Supplier" numa linha ocupa 136px — não cabe sem
    colidir com o ícone de conta, que era o que acontecia. Empilhado,
    o conjunto ocupa ~88px, fica centrado de verdade e ainda lê como
    logotipo em vez de mais um rótulo entre ícones. */
@@ -1174,7 +1174,7 @@ input:-webkit-autofill:focus {
 
    A conta do espaço em 390px: 40 do hambúrguer + 120 dos três ícones +
    32 de padding + 16 de folga = 208 usados, sobram 182 para a marca. Em
-   15px com esta entreletra, "MARINERS SUPPLY" mede cerca de 150 com a
+   15px com esta entreletra, "VESSEL SUPPLIER" mede cerca de 150 com a
    âncora — cabe com sobra, numa linha só. */
 .sunlogo .word {
   display: flex; flex-direction: row; align-items: baseline; gap: .34em;

@@ -128,11 +128,10 @@ export default function SiteFooter() {
           acordeão continua exatamente como está — ele foi validado. */}
       <div className="sunfoot-brand">
         <p className="bl">
-          Mariners <b>Supply</b>
+          Vessel <b>Supplier</b>
         </p>
         <p>
-          Pre-order before docking. 30% deposit now, the rest at the gangway. Porto de Santos, by
-          Mariner&apos;s Bar.
+          Pre-order before docking. 30% deposit now, the rest at the gangway. Porto de Santos.
         </p>
         <Link href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</Link>
       </div>
@@ -157,7 +156,7 @@ export default function SiteFooter() {
       <SelosPagamento />
 
       <div className="sunfoot-legal">
-        © {new Date().getFullYear()} Mariners Supply — by Mariner&apos;s Bar, Porto de Santos.
+        © {new Date().getFullYear()} Vessel Supplier — Porto de Santos.
         <br />
         <Link href="/terms">Terms &amp; Conditions</Link> ·{" "}
         <Link href="/privacy">Privacy Policy</Link> ·{" "}

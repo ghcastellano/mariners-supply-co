@@ -131,7 +131,7 @@ export default async function PortsPage() {
           </div>
           The schedule is not available right now.
           <br />
-          Try again shortly, or ask us at the Mariner&apos;s Bar counter.
+          Try again shortly, or ask us at our counter.
         </div>
       ) : (
         ports.map((p) => {

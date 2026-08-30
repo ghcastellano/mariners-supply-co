@@ -40,7 +40,7 @@ export default function TopBar({
         <h1>{title}</h1>
       ) : (
         <Link href="/" className="logo">
-          Mariners <b>Supply</b>
+          Vessel <b>Supplier</b>
         </Link>
       )}
       <div className="top-side">

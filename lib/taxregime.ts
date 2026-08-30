@@ -93,7 +93,7 @@ export const CHANNEL_REGIME: Record<Channel, RegimeCopy> = {
   },
   pickup: {
     label: "Counter sale · taxes included",
-    headline: "Collected at Mariner's Bar",
+    headline: "Collected at our counter",
     lines: [
       "A counter sale in Brazil. Brazilian taxes are in the price — this is not a duty-free purchase, and we would rather say so than let you find out from the receipt.",
       "In exchange: no customs window, no minimum, and you can walk out with it.",

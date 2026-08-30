@@ -46,8 +46,8 @@ const QA: { q: string; a: React.ReactNode }[] = [
         Porto de Santos (BRSSZ). Delivery at the gangway is carried out by an
         accredited ship chandler — that accreditation, not our stock, is what
         sets the schedule and the minimum time your vessel has to stay
-        alongside. If the window is too tight, you can collect at the Mariner&apos;s
-        Bar counter in Santos instead. The full grid is on{" "}
+        alongside. If the window is too tight, you can collect at our counter
+        in Santos instead. The full grid is on{" "}
         <Link className="alink" href="/ports">
           Ports &amp; delivery schedule
         </Link>

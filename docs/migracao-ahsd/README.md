@@ -1,4 +1,4 @@
-# Separar o AHSD do banco da Mariners Supply
+# Separar o AHSD do banco da Vessel Supplier
 
 O projeto Supabase `cuaocjxofaizefzcxlyc` ("mariners-supply") hospeda hoje
 **duas aplicações diferentes**. Além das tabelas da loja, existem:

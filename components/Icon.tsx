@@ -87,11 +87,13 @@ export function IconTrash({ size = 17, className }: Props) {
   );
 }
 
-/** Âncora da marca. Fica aqui para o logotipo ter uma casa só. */
+/** Casco da marca — o vessel do Vessel Supplier (mastro, casco e linha
+ *  d'água). Mantém o nome IconAnchor para não mexer nos imports; é só o
+ *  símbolo do logotipo, com uma casa só. */
 export function IconAnchor({ size = 21, className }: Props) {
   return (
     <svg {...base(size)} className={className} strokeWidth={1.9}>
-      <path d="M12 6.4v13.2M12 6.4a2.2 2.2 0 1 0 0-4.4 2.2 2.2 0 0 0 0 4.4ZM7.6 9.2h8.8M4 13.4c0 4 3.6 6.2 8 6.2s8-2.2 8-6.2M4 13.4H6.6M20 13.4h-2.6" />
+      <path d="M12 3.4V11 M4 11H20L17.4 16.6Q15 19 12 19 9 19 6.6 16.6Z M3 21.4H21" />
     </svg>
   );
 }

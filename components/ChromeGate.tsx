@@ -3,7 +3,7 @@
 import { usePathname } from "next/navigation";
 
 /**
- * O painel tem casca própria (Mariners Ops + abas). Sem esta porteira
+ * O painel tem casca própria (Vessel Ops + abas). Sem esta porteira
  * o cabeçalho da loja — hambúrguer, busca, carrinho — apareceria em
  * cima dele, oferecendo ao operador uma navegação que não é a dele.
  *

@@ -6,7 +6,7 @@ import { CONTACT_EMAIL } from "@/lib/env";
 export const metadata: Metadata = {
   title: "Privacy Policy",
   description:
-    "What Mariners Supply collects, why customs requires it, who processes it, and how to exercise your rights under Brazil's LGPD.",
+    "What Vessel Supplier collects, why customs requires it, who processes it, and how to exercise your rights under Brazil's LGPD.",
 };
 
 const LAST_UPDATED = "26 August 2026";
@@ -52,8 +52,8 @@ export default function PrivacyPage() {
       <section className="pdp-block">
         <h3>1 · Who controls your data</h3>
         <p className="pdp-text">
-          Mariner&apos;s Bar, at Porto de Santos, São Paulo, Brazil, trading as
-          Mariners Supply, is the controller. Contact for anything on this page:{" "}
+          Vessel Supplier, at Porto de Santos, São Paulo, Brazil, is the
+          controller. Contact for anything on this page:{" "}
           <a className="alink" href={`mailto:${CONTACT_EMAIL}`}>
             {CONTACT_EMAIL}
           </a>

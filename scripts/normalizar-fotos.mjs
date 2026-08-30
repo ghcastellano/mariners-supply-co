@@ -60,7 +60,7 @@ for (const it of itens) {
     if (existsSync(cache)) {
       bruto = readFileSync(cache);
     } else {
-      const r = await fetch(it.photo, { headers: { "User-Agent": "MarinersSupply/1.0 (ahoy@marinerssupplyco.com)" } });
+      const r = await fetch(it.photo, { headers: { "User-Agent": "VesselSupplier/1.0 (ahoy@marinerssupplyco.com)" } });
       if (!r.ok) { reprovadas.push(`${it.sku} HTTP ${r.status}`); continue; }
       bruto = Buffer.from(await r.arrayBuffer());
       writeFileSync(cache, bruto);

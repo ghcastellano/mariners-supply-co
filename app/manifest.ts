@@ -2,8 +2,8 @@ import type { MetadataRoute } from "next";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "Mariners Supply",
-    short_name: "Mariners",
+    name: "Vessel Supplier",
+    short_name: "Vessel",
     description:
       "Pre-order supplies before docking — delivered at the gangway. Porto de Santos.",
     start_url: "/",

@@ -11,7 +11,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   if (!supabaseConfigured) {
     return (
       <>
-        <TopBar title="Mariners Ops" backHref="/" chip={false} />
+        <TopBar title="Vessel Ops" backHref="/" chip={false} />
         <main className="stack" style={{ paddingTop: 20 }}>
           <p className="alert">Backend not configured yet — see README to provision Supabase.</p>
         </main>
@@ -64,7 +64,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
     <>
       {/* marcador p/ o CSS alargar o shell do painel em telas grandes */}
       <span className="admin-wide" hidden />
-      <TopBar title="Mariners Ops" backHref="/" chip={false} />
+      <TopBar title="Vessel Ops" backHref="/" chip={false} />
       <AdminTabs />
       {children}
     </>
